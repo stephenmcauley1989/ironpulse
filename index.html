@@ -154,7 +154,7 @@
     .hamburger {
       display: none;
       position: fixed;
-      top: 16px;
+      top: calc(env(safe-area-inset-top, 0px) + 16px);
       left: 16px;
       z-index: 200;
       background: var(--bg-card);
@@ -178,7 +178,7 @@
       .sidebar.open { transform: translateX(0); }
       .hamburger { display: block; }
       .overlay.open { display: block; }
-      .main { margin-left: 0; padding: 24px 16px; padding-top: 64px; }
+      .main { margin-left: 0; padding: 24px 16px; padding-top: calc(env(safe-area-inset-top, 0px) + 64px); }
     }
 
     /* ===== CARDS ===== */
