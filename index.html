@@ -948,6 +948,35 @@
     }
     .bw-current .bw-unit { font-size: 1rem; font-weight: 400; color: var(--text-muted); }
     .bw-current .bw-change { font-size: 0.85rem; margin-top: 4px; }
+
+    /* ===== UNIT SELECTOR ===== */
+    .unit-selector {
+      display: flex;
+      align-items: center;
+      gap: 8px;
+      padding: 8px 12px;
+      margin-bottom: 8px;
+    }
+    .unit-selector label {
+      font-size: 0.75rem;
+      color: var(--text-muted);
+      text-transform: uppercase;
+      letter-spacing: 0.5px;
+      white-space: nowrap;
+    }
+    .unit-selector select {
+      flex: 1;
+      padding: 5px 8px;
+      background: var(--bg-input);
+      border: 1px solid var(--border);
+      border-radius: 6px;
+      color: var(--text-primary);
+      font-family: inherit;
+      font-size: 0.8rem;
+      cursor: pointer;
+    }
+    .unit-selector select:focus { outline: none; border-color: var(--green-600); }
+    .unit-selector select option { background: var(--bg-secondary); }
   </style>
 </head>
 <body>
@@ -1011,6 +1040,14 @@
       </button>
 
       <div class="sidebar-footer">
+        <div class="unit-selector">
+          <label>Weight</label>
+          <select id="weight-unit-select" onchange="setWeightUnit(this.value)">
+            <option value="kg">Kilograms (kg)</option>
+            <option value="lbs">Pounds (lbs)</option>
+            <option value="st">Stone &amp; Pounds</option>
+          </select>
+        </div>
         <button class="nav-item" onclick="exportData()">
           <svg fill="none" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M21 15v4a2 2 0 01-2 2H5a2 2 0 01-2-2v-4M7 10l5 5 5-5M12 15V3"/></svg>
           Export Data
@@ -1641,7 +1678,7 @@
               <input type="date" class="form-input" id="bw-date">
             </div>
             <div class="form-group">
-              <label class="form-label">Weight (kg)</label>
+              <label class="form-label" id="bw-weight-label">Weight (kg)</label>
               <input type="number" class="form-input" id="bw-weight" placeholder="e.g. 82.5" step="0.1">
             </div>
           </div>
@@ -1692,6 +1729,96 @@
     // DATA LAYER
     // =====================================================================
     const STORAGE_KEY = 'ironpulse_workouts';
+
+    // =====================================================================
+    // WEIGHT UNIT SYSTEM
+    // =====================================================================
+    const UNIT_KEY = 'ironpulse_weight_unit';
+
+    function getWeightUnit() {
+      return localStorage.getItem(UNIT_KEY) || 'kg';
+    }
+
+    function setWeightUnit(unit) {
+      localStorage.setItem(UNIT_KEY, unit);
+      document.getElementById('weight-unit-select').value = unit;
+      // Update all weight-unit-header labels
+      const label = unitLabel();
+      document.querySelectorAll('.weight-unit-header').forEach(el => el.textContent = label.toUpperCase());
+      // Re-render current page to reflect new units
+      const page = currentPageName();
+      if (page) showPage(page);
+    }
+
+    function unitLabel() {
+      const u = getWeightUnit();
+      if (u === 'lbs') return 'lbs';
+      if (u === 'st') return 'st/lb';
+      return 'kg';
+    }
+
+    function unitLabelShort() {
+      const u = getWeightUnit();
+      if (u === 'lbs') return 'lbs';
+      if (u === 'st') return 'st';
+      return 'kg';
+    }
+
+    // Convert kg to display unit (returns a number for kg/lbs, or string for stone)
+    function fromKg(kg) {
+      if (!kg && kg !== 0) return 0;
+      const u = getWeightUnit();
+      if (u === 'lbs') return Math.round(kg * 2.20462 * 10) / 10;
+      if (u === 'st') {
+        const totalLbs = kg * 2.20462;
+        const stone = Math.floor(totalLbs / 14);
+        const lbs = Math.round((totalLbs % 14) * 10) / 10;
+        return { stone, lbs, display: `${stone}st ${lbs}lb` };
+      }
+      return kg;
+    }
+
+    // Format weight for display — always returns a string
+    function displayWeight(kg, decimals) {
+      if (!kg && kg !== 0) return '-';
+      const u = getWeightUnit();
+      if (u === 'st') {
+        const conv = fromKg(kg);
+        return conv.display;
+      }
+      const val = fromKg(kg);
+      if (decimals !== undefined) return val.toFixed(decimals);
+      // Smart decimals: show .1 if not whole
+      return Number.isInteger(val) ? val.toString() : val.toFixed(1);
+    }
+
+    // Convert from display unit back to kg for storage
+    function toKg(value) {
+      if (!value && value !== 0) return 0;
+      const u = getWeightUnit();
+      if (u === 'lbs') return Math.round(value / 2.20462 * 100) / 100;
+      if (u === 'st') return Math.round(value / 2.20462 * 100) / 100; // input in lbs for st mode
+      return value;
+    }
+
+    // For stone mode, convert stone+lbs input to kg
+    function stoneToKg(stone, lbs) {
+      const totalLbs = stone * 14 + lbs;
+      return Math.round(totalLbs / 2.20462 * 100) / 100;
+    }
+
+    // Get the right placeholder for weight inputs
+    function weightPlaceholder(defaultKg) {
+      const u = getWeightUnit();
+      if (u === 'lbs') return Math.round(defaultKg * 2.20462);
+      if (u === 'st') {
+        const totalLbs = defaultKg * 2.20462;
+        const st = Math.floor(totalLbs / 14);
+        const lb = Math.round(totalLbs % 14);
+        return `${st}st ${lb}lb`;
+      }
+      return defaultKg;
+    }
 
     function getWorkouts() {
       try {
@@ -1944,7 +2071,7 @@
         </div>
         <div class="set-row" style="margin-bottom:8px">
           <span class="set-num" style="font-size:0.7rem">SET</span>
-          <span class="set-num" style="font-size:0.7rem">KG</span>
+          <span class="set-num weight-unit-header" style="font-size:0.7rem">KG</span>
           <span class="set-num" style="font-size:0.7rem">REPS</span>
           <span></span>
         </div>
@@ -2030,7 +2157,8 @@
         if (!name) return;
         const sets = [];
         block.querySelectorAll('.sets-list .set-row').forEach(row => {
-          const weight = parseFloat(row.querySelector('[data-field="weight"]').value) || 0;
+          const rawWeight = parseFloat(row.querySelector('[data-field="weight"]').value) || 0;
+          const weight = Math.round(toKg(rawWeight) * 100) / 100;
           const reps = parseInt(row.querySelector('[data-field="reps"]').value) || 0;
           if (weight > 0 || reps > 0) sets.push({ weight, reps });
         });
@@ -2054,7 +2182,7 @@
       if (type !== 'cycling') {
         const exercises = gatherExercises();
         details += exercises.map(e =>
-          `<div style="margin-bottom:8px"><strong>${e.name}</strong>: ${e.sets.map(s => `${s.weight}kg x ${s.reps}`).join(', ')}</div>`
+          `<div style="margin-bottom:8px"><strong>${e.name}</strong>: ${e.sets.map(s => `${displayWeight(s.weight)} ${unitLabelShort()} x ${s.reps}`).join(', ')}</div>`
         ).join('');
       }
       if (type !== 'weights') {
@@ -2194,8 +2322,8 @@
         </div>
         <div class="card">
           <div class="card-header"><span class="card-title">Volume</span><div class="stat-icon green"><svg width="20" height="20" fill="none" stroke="currentColor" stroke-width="2"><rect x="2" y="7" width="20" height="10" rx="2"/><path d="M6 7V5M18 7V5"/></svg></div></div>
-          <div class="card-value">${totalVol > 0 ? (totalVol/1000).toFixed(1) + 'k' : '-'}</div>
-          <div class="card-sub">kg total volume</div>
+          <div class="card-value">${totalVol > 0 ? (fromKg(totalVol)/1000).toFixed(1) + 'k' : '-'}</div>
+          <div class="card-sub">${unitLabelShort()} total volume</div>
         </div>
         <div class="card">
           <div class="card-header"><span class="card-title">Avg Mood</span><div class="stat-icon green"><svg width="20" height="20" fill="none" stroke="currentColor" stroke-width="2"><circle cx="12" cy="12" r="10"/><path d="M8 14s1.5 2 4 2 4-2 4-2"/></svg></div></div>
@@ -2301,7 +2429,7 @@
         exerciseHtml = workout.exercises.map(e => `
           <div style="margin-bottom:16px">
             <div style="font-weight:600;margin-bottom:6px">${e.name}</div>
-            ${e.sets.map((s, i) => `<div class="text-sm text-muted">Set ${i+1}: ${s.weight}kg x ${s.reps} reps</div>`).join('')}
+            ${e.sets.map((s, i) => `<div class="text-sm text-muted">Set ${i+1}: ${displayWeight(s.weight)} ${unitLabelShort()} x ${s.reps} reps</div>`).join('')}
           </div>
         `).join('');
       }
@@ -2835,7 +2963,7 @@
         data: {
           labels: days,
           datasets: [{
-            label: 'Volume (kg)',
+            label: 'Volume (' + unitLabelShort() + ')',
             data: data.map(d => d.volume),
             backgroundColor: 'rgba(34, 197, 94, 0.3)',
             borderColor: 'rgba(34, 197, 94, 0.8)',
@@ -2862,7 +2990,7 @@
             y: {
               beginAtZero: true,
               grid: { color: 'rgba(30,58,30,0.5)' },
-              title: { display: true, text: 'Volume (kg)' }
+              title: { display: true, text: 'Volume (' + unitLabelShort() + ')' }
             },
             y1: {
               position: 'right',
@@ -2909,7 +3037,7 @@
         data: {
           labels: filtered.map(w => new Date(w.date).toLocaleDateString('en-GB', { day: 'numeric', month: 'short' })),
           datasets: [{
-            label: 'Volume (kg)',
+            label: 'Volume (' + unitLabelShort() + ')',
             data: filtered.map(w => w.totalVolume || 0),
             backgroundColor: 'rgba(34, 197, 94, 0.3)',
             borderColor: 'rgba(34, 197, 94, 0.8)',
@@ -2931,7 +3059,7 @@
           maintainAspectRatio: false,
           interaction: { mode: 'index', intersect: false },
           scales: {
-            y: { beginAtZero: true, grid: { color: 'rgba(30,58,30,0.5)' }, title: { display: true, text: 'Volume (kg)' } },
+            y: { beginAtZero: true, grid: { color: 'rgba(30,58,30,0.5)' }, title: { display: true, text: 'Volume (' + unitLabelShort() + ')' } },
             y1: { position: 'right', beginAtZero: true, max: 10, grid: { display: false }, title: { display: true, text: 'RPE' } },
             x: { grid: { display: false } }
           },
@@ -3050,7 +3178,7 @@
           maintainAspectRatio: false,
           scales: {
             x: { min: 0, max: 10, title: { display: true, text: 'RPE' }, grid: { color: 'rgba(30,58,30,0.5)' } },
-            y: { beginAtZero: true, title: { display: true, text: 'Volume (kg)' }, grid: { color: 'rgba(30,58,30,0.5)' } }
+            y: { beginAtZero: true, title: { display: true, text: 'Volume (' + unitLabelShort() + ')' }, grid: { color: 'rgba(30,58,30,0.5)' } }
           },
           plugins: { legend: { display: false } }
         }
@@ -3184,13 +3312,13 @@
       document.getElementById('strength-stats').innerHTML = `
         <div class="card">
           <div class="card-header"><span class="card-title">Max Weight</span></div>
-          <div class="card-value">${maxWeightEver}<span style="font-size:0.9rem;font-weight:400">kg</span></div>
-          <div class="card-sub ${weightChange >= 0 ? 'trend-up' : 'trend-down'}">${weightChange >= 0 ? '↑' : '↓'} ${Math.abs(weightChange)}kg (${weightChange >= 0 ? '+' : ''}${weightPct}%) since first logged</div>
+          <div class="card-value">${displayWeight(maxWeightEver)}<span style="font-size:0.9rem;font-weight:400">${unitLabelShort()}</span></div>
+          <div class="card-sub ${weightChange >= 0 ? 'trend-up' : 'trend-down'}">${weightChange >= 0 ? '↑' : '↓'} ${displayWeight(Math.abs(weightChange))} ${unitLabelShort()} (${weightChange >= 0 ? '+' : ''}${weightPct}%) since first logged</div>
         </div>
         <div class="card">
           <div class="card-header"><span class="card-title">Best Est. 1RM</span></div>
-          <div class="card-value">${best1RMEver}<span style="font-size:0.9rem;font-weight:400">kg</span></div>
-          <div class="card-sub ${oneRMChange >= 0 ? 'trend-up' : 'trend-down'}">${oneRMChange >= 0 ? '↑' : '↓'} ${Math.abs(oneRMChange).toFixed(1)}kg (${oneRMChange >= 0 ? '+' : ''}${oneRMPct}%) since first logged</div>
+          <div class="card-value">${displayWeight(best1RMEver)}<span style="font-size:0.9rem;font-weight:400">${unitLabelShort()}</span></div>
+          <div class="card-sub ${oneRMChange >= 0 ? 'trend-up' : 'trend-down'}">${oneRMChange >= 0 ? '↑' : '↓'} ${displayWeight(Math.abs(oneRMChange))} ${unitLabelShort()} (${oneRMChange >= 0 ? '+' : ''}${oneRMPct}%) since first logged</div>
         </div>
         <div class="card">
           <div class="card-header"><span class="card-title">Sessions Logged</span></div>
@@ -3208,7 +3336,7 @@
         data: {
           labels,
           datasets: [{
-            label: 'Max Weight (kg)',
+            label: 'Max Weight (' + unitLabelShort() + ')',
             data: data.map(d => d.maxWeight),
             borderColor: '#22c55e',
             backgroundColor: 'rgba(34, 197, 94, 0.1)',
@@ -3223,7 +3351,7 @@
           responsive: true,
           maintainAspectRatio: false,
           scales: {
-            y: { grid: { color: 'rgba(30,58,30,0.5)' }, title: { display: true, text: 'kg' } },
+            y: { grid: { color: 'rgba(30,58,30,0.5)' }, title: { display: true, text: unitLabelShort() } },
             x: { grid: { display: false } }
           },
           plugins: { legend: { display: false } }
@@ -3239,7 +3367,7 @@
         data: {
           labels,
           datasets: [{
-            label: 'Estimated 1RM (kg)',
+            label: 'Estimated 1RM (' + unitLabelShort() + ')',
             data: data.map(d => d.best1RM),
             borderColor: '#f59e0b',
             backgroundColor: 'rgba(245, 158, 11, 0.1)',
@@ -3254,7 +3382,7 @@
           responsive: true,
           maintainAspectRatio: false,
           scales: {
-            y: { grid: { color: 'rgba(30,58,30,0.5)' }, title: { display: true, text: 'kg (est.)' } },
+            y: { grid: { color: 'rgba(30,58,30,0.5)' }, title: { display: true, text: unitLabelShort() + ' (est.)' } },
             x: { grid: { display: false } }
           },
           plugins: { legend: { display: false } }
@@ -3270,7 +3398,7 @@
         data: {
           labels,
           datasets: [{
-            label: 'Volume (kg)',
+            label: 'Volume (' + unitLabelShort() + ')',
             data: data.map(d => d.totalVolume),
             backgroundColor: 'rgba(34, 197, 94, 0.3)',
             borderColor: 'rgba(34, 197, 94, 0.8)',
@@ -3282,7 +3410,7 @@
           responsive: true,
           maintainAspectRatio: false,
           scales: {
-            y: { beginAtZero: true, grid: { color: 'rgba(30,58,30,0.5)' }, title: { display: true, text: 'Total kg (weight × reps)' } },
+            y: { beginAtZero: true, grid: { color: 'rgba(30,58,30,0.5)' }, title: { display: true, text: 'Total ' + unitLabelShort() + ' (weight × reps)' } },
             x: { grid: { display: false } }
           },
           plugins: { legend: { display: false } }
@@ -3319,14 +3447,14 @@
         data: {
           labels: bestData.map(d => d.name),
           datasets: [{
-            label: 'Est. 1RM (kg)',
+            label: 'Est. 1RM (' + unitLabelShort() + ')',
             data: bestData.map(d => d.best1RM),
             backgroundColor: 'rgba(34, 197, 94, 0.4)',
             borderColor: 'rgba(34, 197, 94, 0.8)',
             borderWidth: 1,
             borderRadius: 4,
           }, {
-            label: 'Max Weight (kg)',
+            label: 'Max Weight (' + unitLabelShort() + ')',
             data: bestData.map(d => d.maxWeight),
             backgroundColor: 'rgba(96, 165, 250, 0.4)',
             borderColor: 'rgba(96, 165, 250, 0.8)',
@@ -3339,7 +3467,7 @@
           responsive: true,
           maintainAspectRatio: false,
           scales: {
-            x: { beginAtZero: true, grid: { color: 'rgba(30,58,30,0.5)' }, title: { display: true, text: 'kg' } },
+            x: { beginAtZero: true, grid: { color: 'rgba(30,58,30,0.5)' }, title: { display: true, text: unitLabelShort() } },
             y: { grid: { display: false } }
           },
           plugins: { legend: { labels: { usePointStyle: true, pointStyle: 'circle' } } }
@@ -3982,7 +4110,7 @@
           </div>
           <div class="set-row" style="margin-bottom:8px">
             <span class="set-num" style="font-size:0.7rem">SET</span>
-            <span class="set-num" style="font-size:0.7rem">KG</span>
+            <span class="set-num weight-unit-header" style="font-size:0.7rem">KG</span>
             <span class="set-num" style="font-size:0.7rem">REPS</span>
             <span></span>
           </div>
@@ -4542,11 +4670,14 @@
 
     function saveBodyWeight() {
       const dateVal = document.getElementById('bw-date').value;
-      const weight = parseFloat(document.getElementById('bw-weight').value);
+      const rawWeight = parseFloat(document.getElementById('bw-weight').value);
       const notes = document.getElementById('bw-notes').value;
 
       if (!dateVal) { showToast('Please select a date'); return; }
-      if (!weight || weight <= 0) { showToast('Please enter your weight'); return; }
+      if (!rawWeight || rawWeight <= 0) { showToast('Please enter your weight'); return; }
+
+      // Convert from display unit to kg for storage
+      const weight = Math.round(toKg(rawWeight) * 100) / 100;
 
       const entries = getBodyWeights();
       const existingIdx = entries.findIndex(e => e.date === dateVal);
@@ -4596,6 +4727,10 @@
       if (!document.getElementById('bw-date').value) {
         document.getElementById('bw-date').value = new Date().toISOString().split('T')[0];
       }
+      // Update form label to match current unit
+      const u = getWeightUnit();
+      const bwLabel = document.getElementById('bw-weight-label');
+      if (bwLabel) bwLabel.textContent = `Weight (${unitLabelShort()})`;
 
       const entries = getBodyWeights();
       renderBwCurrent(entries);
@@ -4606,12 +4741,16 @@
 
     function renderBwCurrent(entries) {
       const current = entries.length > 0 ? entries[0] : null;
-      document.getElementById('bw-current-value').textContent = current ? current.weight.toFixed(1) : '--';
+      document.getElementById('bw-current-value').textContent = current ? displayWeight(current.weight) : '--';
+
+      // Update unit label under the big number
+      const unitEl = document.querySelector('.bw-unit');
+      if (unitEl) unitEl.textContent = unitLabelShort();
 
       if (entries.length >= 2) {
         const diff = entries[0].weight - entries[1].weight;
         const changeEl = document.getElementById('bw-change-text');
-        changeEl.textContent = `${diff >= 0 ? '+' : ''}${diff.toFixed(1)}kg since last weigh-in`;
+        changeEl.textContent = `${diff >= 0 ? '+' : ''}${displayWeight(Math.abs(diff))} ${unitLabelShort()} since last weigh-in`;
         changeEl.className = `bw-change ${diff > 0 ? 'trend-up' : diff < 0 ? 'trend-down' : 'trend-flat'}`;
       }
     }
@@ -4623,27 +4762,28 @@
       }
       const now = new Date();
       const last30 = entries.filter(e => (now - new Date(e.date)) / (1000*60*60*24) <= 30);
-      const avg30 = last30.length > 0 ? (last30.reduce((s, e) => s + e.weight, 0) / last30.length).toFixed(1) : '-';
-      const minWeight = Math.min(...entries.map(e => e.weight)).toFixed(1);
-      const maxWeight = Math.max(...entries.map(e => e.weight)).toFixed(1);
-      const totalChange = entries.length >= 2 ? (entries[0].weight - entries[entries.length - 1].weight).toFixed(1) : '-';
+      const avg30raw = last30.length > 0 ? last30.reduce((s, e) => s + e.weight, 0) / last30.length : null;
+      const avg30 = avg30raw !== null ? displayWeight(avg30raw) : '-';
+      const minWeightRaw = Math.min(...entries.map(e => e.weight));
+      const maxWeightRaw = Math.max(...entries.map(e => e.weight));
+      const totalChangeRaw = entries.length >= 2 ? entries[0].weight - entries[entries.length - 1].weight : null;
 
       document.getElementById('bw-stats').innerHTML = `
         <div class="card">
           <div class="card-header"><span class="card-title">30-Day Avg</span></div>
-          <div class="card-value">${avg30}<span style="font-size:0.9rem;font-weight:400">kg</span></div>
+          <div class="card-value">${avg30}<span style="font-size:0.9rem;font-weight:400">${unitLabelShort()}</span></div>
         </div>
         <div class="card">
           <div class="card-header"><span class="card-title">Lightest</span></div>
-          <div class="card-value">${minWeight}<span style="font-size:0.9rem;font-weight:400">kg</span></div>
+          <div class="card-value">${displayWeight(minWeightRaw)}<span style="font-size:0.9rem;font-weight:400">${unitLabelShort()}</span></div>
         </div>
         <div class="card">
           <div class="card-header"><span class="card-title">Heaviest</span></div>
-          <div class="card-value">${maxWeight}<span style="font-size:0.9rem;font-weight:400">kg</span></div>
+          <div class="card-value">${displayWeight(maxWeightRaw)}<span style="font-size:0.9rem;font-weight:400">${unitLabelShort()}</span></div>
         </div>
         <div class="card">
           <div class="card-header"><span class="card-title">Total Change</span></div>
-          <div class="card-value ${parseFloat(totalChange) > 0 ? 'trend-up' : parseFloat(totalChange) < 0 ? 'trend-down' : ''}">${totalChange !== '-' ? (parseFloat(totalChange) >= 0 ? '+' : '') + totalChange : '-'}<span style="font-size:0.9rem;font-weight:400">kg</span></div>
+          <div class="card-value ${totalChangeRaw > 0 ? 'trend-up' : totalChangeRaw < 0 ? 'trend-down' : ''}">${totalChangeRaw !== null ? (totalChangeRaw >= 0 ? '+' : '-') + displayWeight(Math.abs(totalChangeRaw)) : '-'}<span style="font-size:0.9rem;font-weight:400">${unitLabelShort()}</span></div>
           <div class="card-sub">since first logged</div>
         </div>
       `;
@@ -4676,10 +4816,16 @@
         return;
       }
 
-      // Calculate 7-entry rolling average
-      const rollingAvg = filtered.map((e, i) => {
-        const window = filtered.slice(Math.max(0, i - 6), i + 1);
-        return Math.round(window.reduce((s, x) => s + x.weight, 0) / window.length * 10) / 10;
+      // Convert data points to display unit
+      const chartData = filtered.map(e => {
+        const v = fromKg(e.weight);
+        return typeof v === 'object' ? v.stone + v.lbs / 14 : v; // for stone, approximate for charting
+      });
+
+      // Calculate 7-entry rolling average (in display units)
+      const rollingAvg = chartData.map((val, i) => {
+        const window = chartData.slice(Math.max(0, i - 6), i + 1);
+        return Math.round(window.reduce((s, x) => s + x, 0) / window.length * 10) / 10;
       });
 
       bwChartInstance = new Chart(ctx, {
@@ -4687,8 +4833,8 @@
         data: {
           labels: filtered.map(e => new Date(e.date).toLocaleDateString('en-GB', { day: 'numeric', month: 'short' })),
           datasets: [{
-            label: 'Weight (kg)',
-            data: filtered.map(e => e.weight),
+            label: 'Weight (' + unitLabelShort() + ')',
+            data: chartData,
             borderColor: '#22c55e',
             backgroundColor: 'rgba(34, 197, 94, 0.1)',
             tension: 0.3,
@@ -4711,7 +4857,7 @@
           maintainAspectRatio: false,
           interaction: { mode: 'index', intersect: false },
           scales: {
-            y: { grid: { color: 'rgba(30,58,30,0.5)' }, title: { display: true, text: 'kg' } },
+            y: { grid: { color: 'rgba(30,58,30,0.5)' }, title: { display: true, text: unitLabelShort() } },
             x: { grid: { display: false } }
           },
           plugins: { legend: { labels: { usePointStyle: true, pointStyle: 'circle' } } }
@@ -4730,7 +4876,7 @@
         const day = d.getDate();
         const month = d.toLocaleString('en', { month: 'short' }).toUpperCase();
         const diff = i < entries.length - 1 ? (e.weight - entries[i + 1].weight) : 0;
-        const diffStr = diff !== 0 ? `${diff > 0 ? '+' : ''}${diff.toFixed(1)}kg` : '';
+        const diffStr = diff !== 0 ? `${diff > 0 ? '+' : '-'}${displayWeight(Math.abs(diff))} ${unitLabelShort()}` : '';
         const diffClass = diff > 0 ? 'trend-up' : diff < 0 ? 'trend-down' : '';
 
         return `
@@ -4740,10 +4886,10 @@
               <div class="month">${month}</div>
             </div>
             <div class="history-info">
-              <h3>${e.weight.toFixed(1)} kg</h3>
+              <h3>${displayWeight(e.weight)} ${unitLabelShort()}</h3>
               <p>${e.notes || d.toLocaleDateString('en', { weekday: 'long' })}${diffStr ? ` — <span class="${diffClass}">${diffStr}</span>` : ''}</p>
             </div>
-            <div class="rpe-badge rpe-low" style="font-size:0.75rem;width:auto;height:auto;padding:6px 10px;border-radius:8px">${e.weight.toFixed(1)}</div>
+            <div class="rpe-badge rpe-low" style="font-size:0.75rem;width:auto;height:auto;padding:6px 10px;border-radius:8px">${displayWeight(e.weight)}</div>
             <button class="btn-icon" onclick="deleteBodyWeight('${e.date}')" title="Delete entry" style="color:var(--danger)">
               <svg width="16" height="16" fill="none" stroke="currentColor" stroke-width="2"><path d="M3 6h10M5 6V4a1 1 0 011-1h4a1 1 0 011 1v2M7 9v4M9 9v4"/><path d="M4 6l.7 8.4a1 1 0 001 .6h4.6a1 1 0 001-.6L12 6"/></svg>
             </button>
@@ -4868,6 +5014,13 @@
     // INIT
     // =====================================================================
     document.addEventListener('DOMContentLoaded', () => {
+      // Restore weight unit preference
+      const savedUnit = getWeightUnit();
+      document.getElementById('weight-unit-select').value = savedUnit;
+      // Update all weight-unit-header labels
+      const uLabel = unitLabel();
+      document.querySelectorAll('.weight-unit-header').forEach(el => el.textContent = uLabel.toUpperCase());
+
       // Seed PR database from existing workout history if empty
       const prs = getPRs();
       if (Object.keys(prs).length === 0 && getWorkouts().length > 0) {
