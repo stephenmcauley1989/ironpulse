@@ -1,0 +1,3709 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0, viewport-fit=cover">
+  <title>IronPulse — Workout Tracker</title>
+
+  <!-- PWA -->
+  <link rel="manifest" href="manifest.json">
+  <meta name="theme-color" content="#166534">
+  <meta name="apple-mobile-web-app-capable" content="yes">
+  <meta name="apple-mobile-web-app-status-bar-style" content="black-translucent">
+  <meta name="apple-mobile-web-app-title" content="IronPulse">
+  <link rel="apple-touch-icon" href="icon-192.svg">
+
+  <script src="https://cdn.jsdelivr.net/npm/chart.js@4.4.4/dist/chart.umd.min.js"></script>
+  <link rel="preconnect" href="https://fonts.googleapis.com">
+  <link href="https://fonts.googleapis.com/css2?family=Inter:wght@300;400;500;600;700;800;900&display=swap" rel="stylesheet">
+  <style>
+    /* ===== RESET & BASE ===== */
+    *, *::before, *::after { box-sizing: border-box; margin: 0; padding: 0; }
+
+    :root {
+      --bg-primary: #0a0f0a;
+      --bg-secondary: #111a11;
+      --bg-card: #151f15;
+      --bg-card-hover: #1a2a1a;
+      --bg-input: #0d160d;
+      --border: #1e3a1e;
+      --border-light: #2a4a2a;
+      --green-50: #f0fdf4;
+      --green-100: #dcfce7;
+      --green-200: #bbf7d0;
+      --green-300: #86efac;
+      --green-400: #4ade80;
+      --green-500: #22c55e;
+      --green-600: #16a34a;
+      --green-700: #15803d;
+      --green-800: #166534;
+      --green-900: #14532d;
+      --text-primary: #e8f5e8;
+      --text-secondary: #9ab89a;
+      --text-muted: #5a7a5a;
+      --danger: #ef4444;
+      --danger-bg: #1a0a0a;
+      --warning: #f59e0b;
+      --warning-bg: #1a1500;
+      --accent: #22c55e;
+      --accent-glow: rgba(34, 197, 94, 0.15);
+      --radius: 12px;
+      --radius-sm: 8px;
+      --radius-lg: 16px;
+      --shadow: 0 4px 24px rgba(0, 0, 0, 0.4);
+      --transition: 0.2s ease;
+    }
+
+    body {
+      font-family: 'Inter', -apple-system, BlinkMacSystemFont, sans-serif;
+      background: var(--bg-primary);
+      color: var(--text-primary);
+      min-height: 100vh;
+      line-height: 1.5;
+      overflow-x: hidden;
+      padding-top: env(safe-area-inset-top);
+      padding-bottom: env(safe-area-inset-bottom);
+    }
+
+    /* ===== LAYOUT ===== */
+    .app {
+      display: flex;
+      min-height: 100vh;
+    }
+
+    .sidebar {
+      width: 240px;
+      background: var(--bg-secondary);
+      border-right: 1px solid var(--border);
+      padding: 24px 16px;
+      display: flex;
+      flex-direction: column;
+      position: fixed;
+      top: 0;
+      left: 0;
+      bottom: 0;
+      z-index: 100;
+      transition: transform 0.3s ease;
+    }
+
+    .sidebar-brand {
+      display: flex;
+      align-items: center;
+      gap: 10px;
+      padding: 0 8px 24px;
+      border-bottom: 1px solid var(--border);
+      margin-bottom: 24px;
+    }
+
+    .sidebar-brand svg { flex-shrink: 0; }
+
+    .sidebar-brand h1 {
+      font-size: 1.2rem;
+      font-weight: 800;
+      letter-spacing: -0.5px;
+      background: linear-gradient(135deg, var(--green-400), var(--green-300));
+      -webkit-background-clip: text;
+      -webkit-text-fill-color: transparent;
+    }
+
+    .sidebar-brand small {
+      display: block;
+      font-size: 0.65rem;
+      font-weight: 400;
+      letter-spacing: 1.5px;
+      text-transform: uppercase;
+      -webkit-text-fill-color: var(--text-muted);
+    }
+
+    .nav-item {
+      display: flex;
+      align-items: center;
+      gap: 12px;
+      padding: 10px 12px;
+      border-radius: var(--radius-sm);
+      color: var(--text-secondary);
+      cursor: pointer;
+      transition: all var(--transition);
+      font-size: 0.9rem;
+      font-weight: 500;
+      border: none;
+      background: none;
+      width: 100%;
+      text-align: left;
+    }
+
+    .nav-item:hover { background: var(--bg-card); color: var(--text-primary); }
+    .nav-item.active { background: var(--accent-glow); color: var(--green-400); }
+    .nav-item.active svg { stroke: var(--green-400); }
+    .nav-item svg { width: 20px; height: 20px; stroke: currentColor; flex-shrink: 0; }
+
+    .sidebar-footer {
+      margin-top: auto;
+      padding-top: 16px;
+      border-top: 1px solid var(--border);
+    }
+
+    .main {
+      flex: 1;
+      margin-left: 240px;
+      padding: 32px;
+      max-width: 1100px;
+    }
+
+    /* Mobile hamburger */
+    .hamburger {
+      display: none;
+      position: fixed;
+      top: 16px;
+      left: 16px;
+      z-index: 200;
+      background: var(--bg-card);
+      border: 1px solid var(--border);
+      border-radius: var(--radius-sm);
+      padding: 8px;
+      cursor: pointer;
+      color: var(--text-primary);
+    }
+
+    .overlay {
+      display: none;
+      position: fixed;
+      inset: 0;
+      background: rgba(0,0,0,0.6);
+      z-index: 50;
+    }
+
+    @media (max-width: 768px) {
+      .sidebar { transform: translateX(-100%); }
+      .sidebar.open { transform: translateX(0); }
+      .hamburger { display: block; }
+      .overlay.open { display: block; }
+      .main { margin-left: 0; padding: 24px 16px; padding-top: 64px; }
+    }
+
+    /* ===== CARDS ===== */
+    .card {
+      background: var(--bg-card);
+      border: 1px solid var(--border);
+      border-radius: var(--radius);
+      padding: 24px;
+      transition: border-color var(--transition);
+    }
+
+    .card:hover { border-color: var(--border-light); }
+
+    .card-header {
+      display: flex;
+      align-items: center;
+      justify-content: space-between;
+      margin-bottom: 16px;
+    }
+
+    .card-title {
+      font-size: 0.85rem;
+      font-weight: 600;
+      text-transform: uppercase;
+      letter-spacing: 1px;
+      color: var(--text-muted);
+    }
+
+    .card-value {
+      font-size: 2rem;
+      font-weight: 800;
+      letter-spacing: -1px;
+    }
+
+    .card-sub {
+      font-size: 0.8rem;
+      color: var(--text-secondary);
+      margin-top: 4px;
+    }
+
+    /* ===== STAT GRID ===== */
+    .stat-grid {
+      display: grid;
+      grid-template-columns: repeat(auto-fit, minmax(200px, 1fr));
+      gap: 16px;
+      margin-bottom: 24px;
+    }
+
+    .stat-icon {
+      width: 40px;
+      height: 40px;
+      border-radius: 10px;
+      display: flex;
+      align-items: center;
+      justify-content: center;
+    }
+
+    .stat-icon.green { background: rgba(34, 197, 94, 0.1); color: var(--green-400); }
+    .stat-icon.yellow { background: rgba(245, 158, 11, 0.1); color: var(--warning); }
+    .stat-icon.red { background: rgba(239, 68, 68, 0.1); color: var(--danger); }
+
+    /* ===== BUTTONS ===== */
+    .btn {
+      display: inline-flex;
+      align-items: center;
+      gap: 8px;
+      padding: 10px 20px;
+      border-radius: var(--radius-sm);
+      font-size: 0.875rem;
+      font-weight: 600;
+      cursor: pointer;
+      transition: all var(--transition);
+      border: none;
+      font-family: inherit;
+    }
+
+    .btn-primary {
+      background: var(--green-600);
+      color: white;
+    }
+    .btn-primary:hover { background: var(--green-500); box-shadow: 0 0 20px var(--accent-glow); }
+
+    .btn-secondary {
+      background: var(--bg-card);
+      color: var(--text-primary);
+      border: 1px solid var(--border);
+    }
+    .btn-secondary:hover { border-color: var(--border-light); background: var(--bg-card-hover); }
+
+    .btn-danger {
+      background: var(--danger-bg);
+      color: var(--danger);
+      border: 1px solid rgba(239,68,68,0.2);
+    }
+    .btn-danger:hover { background: rgba(239,68,68,0.15); }
+
+    .btn-sm { padding: 6px 14px; font-size: 0.8rem; }
+    .btn-icon {
+      width: 36px;
+      height: 36px;
+      padding: 0;
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      border-radius: var(--radius-sm);
+      background: var(--bg-card);
+      border: 1px solid var(--border);
+      color: var(--text-secondary);
+      cursor: pointer;
+      transition: all var(--transition);
+    }
+    .btn-icon:hover { border-color: var(--border-light); color: var(--text-primary); }
+
+    /* ===== FORMS ===== */
+    .form-group { margin-bottom: 20px; }
+
+    .form-label {
+      display: block;
+      font-size: 0.8rem;
+      font-weight: 600;
+      text-transform: uppercase;
+      letter-spacing: 0.8px;
+      color: var(--text-secondary);
+      margin-bottom: 8px;
+    }
+
+    .form-input, .form-select, .form-textarea {
+      width: 100%;
+      padding: 10px 14px;
+      background: var(--bg-input);
+      border: 1px solid var(--border);
+      border-radius: var(--radius-sm);
+      color: var(--text-primary);
+      font-family: inherit;
+      font-size: 0.9rem;
+      transition: border-color var(--transition);
+    }
+
+    .form-input:focus, .form-select:focus, .form-textarea:focus {
+      outline: none;
+      border-color: var(--green-600);
+      box-shadow: 0 0 0 3px var(--accent-glow);
+    }
+
+    .form-textarea { resize: vertical; min-height: 80px; }
+    .form-select { cursor: pointer; }
+    .form-select option { background: var(--bg-secondary); }
+
+    .form-row {
+      display: grid;
+      grid-template-columns: 1fr 1fr;
+      gap: 16px;
+    }
+
+    @media (max-width: 768px) {
+      .form-row { grid-template-columns: 1fr; }
+    }
+
+    /* ===== SLIDER ===== */
+    .slider-container {
+      display: flex;
+      align-items: center;
+      gap: 16px;
+    }
+
+    .slider-track {
+      flex: 1;
+      position: relative;
+    }
+
+    input[type="range"] {
+      -webkit-appearance: none;
+      width: 100%;
+      height: 6px;
+      border-radius: 3px;
+      background: var(--border);
+      outline: none;
+    }
+
+    input[type="range"]::-webkit-slider-thumb {
+      -webkit-appearance: none;
+      width: 22px;
+      height: 22px;
+      border-radius: 50%;
+      background: var(--green-500);
+      cursor: pointer;
+      box-shadow: 0 0 10px rgba(34, 197, 94, 0.3);
+    }
+
+    .slider-value {
+      min-width: 40px;
+      text-align: center;
+      font-size: 1.4rem;
+      font-weight: 700;
+      color: var(--green-400);
+    }
+
+    .slider-labels {
+      display: flex;
+      justify-content: space-between;
+      margin-top: 4px;
+      font-size: 0.7rem;
+      color: var(--text-muted);
+    }
+
+    /* ===== EXERCISE LIST ===== */
+    .exercise-block {
+      background: var(--bg-secondary);
+      border: 1px solid var(--border);
+      border-radius: var(--radius);
+      padding: 16px;
+      margin-bottom: 12px;
+    }
+
+    .exercise-header {
+      display: flex;
+      align-items: center;
+      justify-content: space-between;
+      margin-bottom: 12px;
+    }
+
+    .exercise-name-input {
+      background: transparent;
+      border: none;
+      color: var(--text-primary);
+      font-size: 1rem;
+      font-weight: 600;
+      font-family: inherit;
+      flex: 1;
+      padding: 4px 0;
+    }
+
+    .exercise-name-input:focus { outline: none; }
+    .exercise-name-input::placeholder { color: var(--text-muted); }
+
+    .exercise-name-select {
+      background: transparent;
+      border: none;
+      color: var(--text-primary);
+      font-family: inherit;
+      cursor: pointer;
+    }
+    .exercise-name-select:focus { outline: none; }
+    .exercise-name-select option { background: var(--bg-secondary); color: var(--text-primary); }
+
+    .set-row {
+      display: grid;
+      grid-template-columns: 40px 1fr 1fr 40px;
+      gap: 8px;
+      align-items: center;
+      margin-bottom: 6px;
+    }
+
+    .set-num {
+      font-size: 0.8rem;
+      font-weight: 600;
+      color: var(--text-muted);
+      text-align: center;
+    }
+
+    .set-input {
+      padding: 8px 10px;
+      background: var(--bg-input);
+      border: 1px solid var(--border);
+      border-radius: 6px;
+      color: var(--text-primary);
+      font-family: inherit;
+      font-size: 0.85rem;
+      text-align: center;
+    }
+
+    .set-input:focus {
+      outline: none;
+      border-color: var(--green-600);
+    }
+
+    /* ===== INSIGHTS ===== */
+    .insight-card {
+      background: var(--bg-card);
+      border: 1px solid var(--border);
+      border-radius: var(--radius);
+      padding: 20px;
+      margin-bottom: 12px;
+      display: flex;
+      gap: 16px;
+      align-items: flex-start;
+    }
+
+    .insight-icon {
+      width: 44px;
+      height: 44px;
+      border-radius: 10px;
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      flex-shrink: 0;
+      font-size: 1.3rem;
+    }
+
+    .insight-icon.recovery { background: rgba(96, 165, 250, 0.1); }
+    .insight-icon.nutrition { background: rgba(34, 197, 94, 0.1); }
+    .insight-icon.fatigue { background: rgba(245, 158, 11, 0.1); }
+    .insight-icon.pattern { background: rgba(168, 85, 247, 0.1); }
+    .insight-icon.progress { background: rgba(34, 197, 94, 0.1); }
+
+    .insight-title {
+      font-weight: 600;
+      font-size: 0.95rem;
+      margin-bottom: 4px;
+    }
+
+    .insight-body {
+      font-size: 0.85rem;
+      color: var(--text-secondary);
+      line-height: 1.6;
+    }
+
+    /* ===== HISTORY TABLE ===== */
+    .history-item {
+      display: grid;
+      grid-template-columns: 60px 1fr auto auto auto;
+      gap: 16px;
+      align-items: center;
+      padding: 16px;
+      background: var(--bg-card);
+      border: 1px solid var(--border);
+      border-radius: var(--radius);
+      margin-bottom: 8px;
+      cursor: pointer;
+      transition: all var(--transition);
+    }
+
+    .history-item:hover { border-color: var(--border-light); background: var(--bg-card-hover); }
+
+    .history-date {
+      text-align: center;
+    }
+
+    .history-date .day {
+      font-size: 1.5rem;
+      font-weight: 800;
+      line-height: 1;
+    }
+
+    .history-date .month {
+      font-size: 0.7rem;
+      text-transform: uppercase;
+      letter-spacing: 1px;
+      color: var(--text-muted);
+    }
+
+    .history-info h3 {
+      font-size: 0.95rem;
+      font-weight: 600;
+      margin-bottom: 4px;
+    }
+
+    .history-info p {
+      font-size: 0.8rem;
+      color: var(--text-secondary);
+    }
+
+    .history-badge {
+      padding: 4px 12px;
+      border-radius: 20px;
+      font-size: 0.75rem;
+      font-weight: 600;
+    }
+
+    .badge-weights { background: rgba(34, 197, 94, 0.1); color: var(--green-400); }
+    .badge-cycling { background: rgba(96, 165, 250, 0.1); color: #60a5fa; }
+    .badge-mixed { background: rgba(168, 85, 247, 0.1); color: #a855f7; }
+
+    .rpe-badge {
+      width: 40px;
+      height: 40px;
+      border-radius: 50%;
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      font-weight: 800;
+      font-size: 0.9rem;
+    }
+
+    .rpe-low { background: rgba(34, 197, 94, 0.15); color: var(--green-400); }
+    .rpe-med { background: rgba(245, 158, 11, 0.15); color: var(--warning); }
+    .rpe-high { background: rgba(239, 68, 68, 0.15); color: var(--danger); }
+
+    /* ===== CHARTS ===== */
+    .chart-container {
+      position: relative;
+      height: 280px;
+      margin-top: 16px;
+    }
+
+    .chart-tabs {
+      display: flex;
+      gap: 4px;
+      margin-bottom: 16px;
+    }
+
+    .chart-tab {
+      padding: 6px 16px;
+      border-radius: 20px;
+      font-size: 0.8rem;
+      font-weight: 500;
+      cursor: pointer;
+      border: 1px solid var(--border);
+      background: transparent;
+      color: var(--text-secondary);
+      font-family: inherit;
+      transition: all var(--transition);
+    }
+
+    .chart-tab.active {
+      background: var(--green-600);
+      color: white;
+      border-color: var(--green-600);
+    }
+
+    .chart-tab:hover:not(.active) { border-color: var(--border-light); }
+
+    /* ===== WORKOUT DETAIL MODAL ===== */
+    .modal-overlay {
+      display: none;
+      position: fixed;
+      inset: 0;
+      background: rgba(0,0,0,0.7);
+      z-index: 300;
+      justify-content: center;
+      align-items: flex-start;
+      padding: 40px 16px;
+      overflow-y: auto;
+    }
+
+    .modal-overlay.open { display: flex; }
+
+    .modal {
+      background: var(--bg-secondary);
+      border: 1px solid var(--border);
+      border-radius: var(--radius-lg);
+      padding: 32px;
+      width: 100%;
+      max-width: 600px;
+      position: relative;
+    }
+
+    .modal-close {
+      position: absolute;
+      top: 16px;
+      right: 16px;
+      background: none;
+      border: none;
+      color: var(--text-muted);
+      cursor: pointer;
+      font-size: 1.5rem;
+    }
+
+    .modal-close:hover { color: var(--text-primary); }
+
+    /* ===== PAGE HEADERS ===== */
+    .page-header {
+      margin-bottom: 32px;
+    }
+
+    .page-header h2 {
+      font-size: 1.8rem;
+      font-weight: 800;
+      letter-spacing: -0.5px;
+      margin-bottom: 4px;
+    }
+
+    .page-header p {
+      color: var(--text-secondary);
+      font-size: 0.9rem;
+    }
+
+    /* ===== SECTION DIVIDER ===== */
+    .section-title {
+      font-size: 0.8rem;
+      font-weight: 600;
+      text-transform: uppercase;
+      letter-spacing: 1.2px;
+      color: var(--text-muted);
+      margin: 32px 0 16px;
+      display: flex;
+      align-items: center;
+      gap: 12px;
+    }
+
+    .section-title::after {
+      content: '';
+      flex: 1;
+      height: 1px;
+      background: var(--border);
+    }
+
+    /* ===== STEP WIZARD ===== */
+    .wizard-steps {
+      display: flex;
+      gap: 4px;
+      margin-bottom: 32px;
+    }
+
+    .wizard-step {
+      flex: 1;
+      height: 4px;
+      border-radius: 2px;
+      background: var(--border);
+      transition: background var(--transition);
+    }
+
+    .wizard-step.active { background: var(--green-500); }
+    .wizard-step.done { background: var(--green-700); }
+
+    .wizard-content { display: none; }
+    .wizard-content.active { display: block; }
+
+    .wizard-nav {
+      display: flex;
+      justify-content: space-between;
+      margin-top: 24px;
+      padding-top: 24px;
+      border-top: 1px solid var(--border);
+    }
+
+    /* ===== EMPTY STATE ===== */
+    .empty-state {
+      text-align: center;
+      padding: 60px 20px;
+      color: var(--text-muted);
+    }
+
+    .empty-state svg {
+      width: 64px;
+      height: 64px;
+      margin-bottom: 16px;
+      opacity: 0.3;
+    }
+
+    .empty-state h3 {
+      font-size: 1.1rem;
+      color: var(--text-secondary);
+      margin-bottom: 8px;
+    }
+
+    .empty-state p {
+      font-size: 0.85rem;
+      margin-bottom: 24px;
+    }
+
+    /* ===== UTILITY ===== */
+    .hidden { display: none !important; }
+    .mt-4 { margin-top: 16px; }
+    .mb-4 { margin-bottom: 16px; }
+    .text-green { color: var(--green-400); }
+    .text-muted { color: var(--text-muted); }
+    .text-sm { font-size: 0.8rem; }
+    .flex { display: flex; }
+    .gap-2 { gap: 8px; }
+    .gap-3 { gap: 12px; }
+    .items-center { align-items: center; }
+    .justify-between { justify-content: space-between; }
+
+    /* ===== SCROLLBAR ===== */
+    ::-webkit-scrollbar { width: 6px; }
+    ::-webkit-scrollbar-track { background: transparent; }
+    ::-webkit-scrollbar-thumb { background: var(--border); border-radius: 3px; }
+    ::-webkit-scrollbar-thumb:hover { background: var(--border-light); }
+
+    /* ===== ANIMATIONS ===== */
+    @keyframes fadeIn {
+      from { opacity: 0; transform: translateY(10px); }
+      to { opacity: 1; transform: translateY(0); }
+    }
+
+    .animate-in { animation: fadeIn 0.3s ease forwards; }
+
+    /* ===== TREND TAGS ===== */
+    .trend-up { color: var(--green-400); }
+    .trend-down { color: var(--danger); }
+    .trend-flat { color: var(--text-muted); }
+
+    /* ===== FILTER BAR ===== */
+    .filter-bar {
+      display: flex;
+      gap: 8px;
+      flex-wrap: wrap;
+      margin-bottom: 16px;
+    }
+
+    .filter-chip {
+      padding: 6px 14px;
+      border-radius: 20px;
+      font-size: 0.8rem;
+      font-weight: 500;
+      cursor: pointer;
+      border: 1px solid var(--border);
+      background: transparent;
+      color: var(--text-secondary);
+      font-family: inherit;
+      transition: all var(--transition);
+    }
+
+    .filter-chip.active {
+      background: var(--accent-glow);
+      color: var(--green-400);
+      border-color: var(--green-700);
+    }
+
+    .filter-chip:hover:not(.active) { border-color: var(--border-light); }
+
+    /* ===== TOAST ===== */
+    .toast-container {
+      position: fixed;
+      bottom: 24px;
+      right: 24px;
+      z-index: 500;
+    }
+
+    .toast {
+      background: var(--bg-card);
+      border: 1px solid var(--green-700);
+      border-radius: var(--radius-sm);
+      padding: 14px 20px;
+      color: var(--text-primary);
+      font-size: 0.85rem;
+      box-shadow: var(--shadow);
+      animation: fadeIn 0.3s ease;
+      display: flex;
+      align-items: center;
+      gap: 10px;
+    }
+
+    .toast svg { flex-shrink: 0; }
+  </style>
+</head>
+<body>
+  <div class="app">
+    <!-- Hamburger -->
+    <button class="hamburger" onclick="toggleSidebar()">
+      <svg width="24" height="24" fill="none" stroke="currentColor" stroke-width="2"><path d="M3 12h18M3 6h18M3 18h18"/></svg>
+    </button>
+    <div class="overlay" id="overlay" onclick="toggleSidebar()"></div>
+
+    <!-- Sidebar -->
+    <aside class="sidebar" id="sidebar">
+      <div class="sidebar-brand">
+        <svg width="32" height="32" viewBox="0 0 32 32" fill="none">
+          <rect width="32" height="32" rx="8" fill="#166534"/>
+          <path d="M10 22V14l6-6 6 6v8" stroke="#4ade80" stroke-width="2.5" stroke-linecap="round" stroke-linejoin="round"/>
+          <path d="M16 8v14" stroke="#4ade80" stroke-width="2" stroke-linecap="round" opacity="0.5"/>
+          <circle cx="16" cy="18" r="2" fill="#4ade80"/>
+        </svg>
+        <div>
+          <h1>IronPulse</h1>
+          <small>Workout Tracker</small>
+        </div>
+      </div>
+
+      <button class="nav-item active" data-page="dashboard" onclick="showPage('dashboard')">
+        <svg fill="none" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><rect x="3" y="3" width="7" height="7" rx="1"/><rect x="14" y="3" width="7" height="7" rx="1"/><rect x="3" y="14" width="7" height="7" rx="1"/><rect x="14" y="14" width="7" height="7" rx="1"/></svg>
+        Dashboard
+      </button>
+      <button class="nav-item" data-page="checkin" onclick="showPage('checkin')">
+        <svg fill="none" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M20 21v-2a4 4 0 00-4-4H8a4 4 0 00-4 4v2"/><circle cx="12" cy="7" r="4"/></svg>
+        Check In
+      </button>
+      <button class="nav-item" data-page="log" onclick="showPage('log')">
+        <svg fill="none" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M12 5v14M5 12h14"/></svg>
+        Log Workout
+      </button>
+      <button class="nav-item" data-page="history" onclick="showPage('history')">
+        <svg fill="none" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M12 8v4l3 3"/><circle cx="12" cy="12" r="9"/></svg>
+        History
+      </button>
+      <button class="nav-item" data-page="trends" onclick="showPage('trends')">
+        <svg fill="none" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><polyline points="22 12 18 12 15 21 9 3 6 12 2 12"/></svg>
+        Trends
+      </button>
+      <button class="nav-item" data-page="insights" onclick="showPage('insights')">
+        <svg fill="none" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><circle cx="12" cy="12" r="10"/><path d="M12 16v-4M12 8h.01"/></svg>
+        Insights
+      </button>
+      <button class="nav-item" data-page="macros" onclick="showPage('macros')">
+        <svg fill="none" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M18 8h1a4 4 0 010 8h-1M2 8h16v9a4 4 0 01-4 4H6a4 4 0 01-4-4V8zM6 1v3M10 1v3M14 1v3"/></svg>
+        Macros
+      </button>
+
+      <div class="sidebar-footer">
+        <button class="nav-item" onclick="exportData()">
+          <svg fill="none" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M21 15v4a2 2 0 01-2 2H5a2 2 0 01-2-2v-4M7 10l5 5 5-5M12 15V3"/></svg>
+          Export Data
+        </button>
+        <button class="nav-item" onclick="document.getElementById('importFile').click()">
+          <svg fill="none" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M21 15v4a2 2 0 01-2 2H5a2 2 0 01-2-2v-4M17 8l-5-5-5 5M12 3v12"/></svg>
+          Import Data
+        </button>
+        <input type="file" id="importFile" accept=".json" style="display:none" onchange="importData(event)">
+      </div>
+    </aside>
+
+    <!-- Main Content -->
+    <main class="main">
+
+      <!-- ==================== DASHBOARD ==================== -->
+      <div id="page-dashboard" class="page">
+        <div class="page-header">
+          <h2>Dashboard</h2>
+          <p id="dashboard-greeting"></p>
+        </div>
+
+        <div class="stat-grid" id="dashboard-stats"></div>
+
+        <div class="section-title">Recent Insights</div>
+        <div id="dashboard-insights"></div>
+
+        <div class="section-title">This Week</div>
+        <div class="card">
+          <div class="chart-container">
+            <canvas id="weekChart"></canvas>
+          </div>
+        </div>
+
+        <div class="section-title">Recent Workouts</div>
+        <div id="dashboard-recent"></div>
+      </div>
+
+      <!-- ==================== CHECK IN ==================== -->
+      <div id="page-checkin" class="page hidden">
+        <div class="page-header">
+          <h2>Check In</h2>
+          <p>How are you feeling today?</p>
+        </div>
+
+        <div class="card mb-4">
+          <h3 style="margin-bottom: 20px; font-size: 1.1rem;">Daily Check-in</h3>
+
+          <div class="form-group">
+            <label class="form-label">Date</label>
+            <input type="date" class="form-input" id="checkin-date">
+          </div>
+
+          <div class="form-group">
+            <label class="form-label">Mood</label>
+            <div class="slider-container">
+              <div class="slider-track">
+                <input type="range" id="checkin-mood" min="1" max="10" value="5" oninput="updateSlider(this)">
+                <div class="slider-labels"><span>Low</span><span>Great</span></div>
+              </div>
+              <div class="slider-value">5</div>
+            </div>
+          </div>
+
+          <div class="form-group">
+            <label class="form-label">Energy Level</label>
+            <div class="slider-container">
+              <div class="slider-track">
+                <input type="range" id="checkin-energy" min="1" max="10" value="5" oninput="updateSlider(this)">
+                <div class="slider-labels"><span>Drained</span><span>Wired</span></div>
+              </div>
+              <div class="slider-value">5</div>
+            </div>
+          </div>
+
+          <div class="form-group">
+            <label class="form-label">Sleep Quality</label>
+            <div class="slider-container">
+              <div class="slider-track">
+                <input type="range" id="checkin-sleep-quality" min="1" max="10" value="5" oninput="updateSlider(this)">
+                <div class="slider-labels"><span>Awful</span><span>Perfect</span></div>
+              </div>
+              <div class="slider-value">5</div>
+            </div>
+          </div>
+
+          <div class="form-group">
+            <label class="form-label">Hours of Sleep</label>
+            <input type="number" class="form-input" id="checkin-sleep-hours" placeholder="e.g. 7.5" step="0.5" min="0" max="14">
+          </div>
+
+          <div class="form-group">
+            <label class="form-label">Notes (optional)</label>
+            <input type="text" class="form-input" id="checkin-notes" placeholder="e.g. Feeling a bit run down, stressed at work...">
+          </div>
+
+          <button class="btn btn-primary" onclick="saveCheckin()" style="margin-top:8px">Save Check-in</button>
+        </div>
+
+        <!-- Check-in Stats -->
+        <div class="stat-grid" id="checkin-stats"></div>
+
+        <!-- Check-in Trend -->
+        <div class="section-title">Trend</div>
+        <div class="card mb-4">
+          <div class="card-header">
+            <span class="card-title">Mood, Energy & Sleep</span>
+            <div class="chart-tabs" id="checkin-range-tabs">
+              <button class="chart-tab active" onclick="setCheckinRange('7d', this)">7D</button>
+              <button class="chart-tab" onclick="setCheckinRange('14d', this)">14D</button>
+              <button class="chart-tab" onclick="setCheckinRange('30d', this)">30D</button>
+              <button class="chart-tab" onclick="setCheckinRange('all', this)">All</button>
+            </div>
+          </div>
+          <div class="chart-container">
+            <canvas id="checkinTrendChart"></canvas>
+          </div>
+        </div>
+
+        <!-- Check-in History -->
+        <div class="section-title">History</div>
+        <div id="checkin-history"></div>
+      </div>
+
+      <!-- ==================== LOG WORKOUT ==================== -->
+      <div id="page-log" class="page hidden">
+        <div class="page-header">
+          <h2>Log Workout</h2>
+          <p>How did today go?</p>
+        </div>
+
+        <div class="wizard-steps">
+          <div class="wizard-step active" data-step="0"></div>
+          <div class="wizard-step" data-step="1"></div>
+          <div class="wizard-step" data-step="2"></div>
+        </div>
+
+        <!-- Step 1: Workout Type & Details -->
+        <div class="wizard-content active" data-step="0">
+          <div class="card">
+            <h3 style="margin-bottom: 20px; font-size: 1.1rem;">Workout Details</h3>
+
+            <div class="form-group">
+              <label class="form-label">Date</label>
+              <input type="date" class="form-input" id="log-date">
+            </div>
+
+            <div class="form-group">
+              <label class="form-label">Workout Type</label>
+              <select class="form-select" id="log-type" onchange="toggleWorkoutFields()">
+                <option value="weights">Weights</option>
+                <option value="cycling">Cycling</option>
+                <option value="mixed">Mixed (Weights + Cycling)</option>
+              </select>
+            </div>
+
+            <div class="form-group">
+              <label class="form-label">Workout Category</label>
+              <select class="form-select" id="log-category" onchange="onCategoryChange()">
+                <option value="">None (custom)</option>
+                <option value="legs">Legs</option>
+                <option value="push">Push</option>
+                <option value="pull">Pull</option>
+                <option value="upper">Upper Body</option>
+                <option value="chest">Chest</option>
+                <option value="back">Back</option>
+                <option value="shoulders">Shoulders</option>
+                <option value="arms">Arms</option>
+                <option value="core">Core</option>
+                <option value="fullbody">Full Body</option>
+              </select>
+            </div>
+
+            <div class="form-group">
+              <label class="form-label">Workout Name (Optional)</label>
+              <input type="text" class="form-input" id="log-name" placeholder="e.g. Push Day, Morning Ride, Leg Day...">
+            </div>
+
+            <!-- Weights Section -->
+            <div id="weights-section">
+              <div class="section-title">Exercises</div>
+              <div id="exercises-list"></div>
+              <div class="flex gap-2 mt-4">
+                <button class="btn btn-secondary btn-sm" onclick="addExercise()" style="flex:1">
+                  <svg width="16" height="16" fill="none" stroke="currentColor" stroke-width="2"><path d="M8 2v12M2 8h12"/></svg>
+                  Add Exercise
+                </button>
+              </div>
+            </div>
+
+            <!-- Cycling Section -->
+            <div id="cycling-section" class="hidden">
+              <div class="section-title">Cycling Details</div>
+              <div class="form-row">
+                <div class="form-group">
+                  <label class="form-label">Distance (km)</label>
+                  <input type="number" class="form-input" id="log-distance" placeholder="0" step="0.1">
+                </div>
+                <div class="form-group">
+                  <label class="form-label">Duration (minutes)</label>
+                  <input type="number" class="form-input" id="log-duration" placeholder="0">
+                </div>
+              </div>
+              <div class="form-row">
+                <div class="form-group">
+                  <label class="form-label">Avg Heart Rate (optional)</label>
+                  <input type="number" class="form-input" id="log-hr" placeholder="e.g. 145">
+                </div>
+                <div class="form-group">
+                  <label class="form-label">Avg Speed (km/h, optional)</label>
+                  <input type="number" class="form-input" id="log-speed" placeholder="e.g. 25" step="0.1">
+                </div>
+              </div>
+            </div>
+          </div>
+        </div>
+
+        <!-- Step 2: Post-Workout -->
+        <div class="wizard-content" data-step="1">
+          <div class="card">
+            <h3 style="margin-bottom: 20px; font-size: 1.1rem;">Post-Workout</h3>
+
+            <div class="form-group">
+              <label class="form-label">Rate of Perceived Exertion (RPE)</label>
+              <div class="slider-container">
+                <div class="slider-track">
+                  <input type="range" id="log-rpe" min="1" max="10" value="5" oninput="updateSlider(this)">
+                  <div class="slider-labels"><span>Easy</span><span>Max effort</span></div>
+                </div>
+                <div class="slider-value">5</div>
+              </div>
+            </div>
+
+            <div class="form-group">
+              <label class="form-label">Calories Burned (Apple Watch)</label>
+              <div style="position:relative">
+                <input type="number" class="form-input" id="log-calories-burned" placeholder="e.g. 450" style="padding-left:36px">
+                <span style="position:absolute;left:12px;top:50%;transform:translateY(-50%);font-size:1.1rem;">🔥</span>
+              </div>
+              <div class="text-muted text-sm" style="margin-top:4px">From your Apple Watch active calories</div>
+            </div>
+
+            <div class="form-group">
+              <label class="form-label">How did it feel?</label>
+              <textarea class="form-textarea" id="log-feeling" placeholder="Great session, felt strong on squats but shoulders were tight..."></textarea>
+            </div>
+
+            <div class="form-group">
+              <label class="form-label">Any notes?</label>
+              <textarea class="form-textarea" id="log-notes" placeholder="Anything else worth remembering..."></textarea>
+            </div>
+          </div>
+        </div>
+
+        <!-- Step 3: Review & Save -->
+        <div class="wizard-content" data-step="2">
+          <div class="card">
+            <h3 style="margin-bottom: 20px; font-size: 1.1rem;">Review & Save</h3>
+            <div id="review-summary"></div>
+          </div>
+        </div>
+
+        <div class="wizard-nav">
+          <button class="btn btn-secondary" id="wizard-prev" onclick="wizardPrev()" disabled>Back</button>
+          <button class="btn btn-primary" id="wizard-next" onclick="wizardNext()">Next</button>
+        </div>
+      </div>
+
+      <!-- ==================== HISTORY ==================== -->
+      <div id="page-history" class="page hidden">
+        <div class="page-header flex justify-between items-center">
+          <div>
+            <h2>History</h2>
+            <p>All your logged workouts</p>
+          </div>
+        </div>
+
+        <div class="filter-bar">
+          <button class="filter-chip active" data-filter="all" onclick="filterHistory('all')">All</button>
+          <button class="filter-chip" data-filter="weights" onclick="filterHistory('weights')">Weights</button>
+          <button class="filter-chip" data-filter="cycling" onclick="filterHistory('cycling')">Cycling</button>
+          <button class="filter-chip" data-filter="mixed" onclick="filterHistory('mixed')">Mixed</button>
+        </div>
+
+        <div id="history-list"></div>
+      </div>
+
+      <!-- ==================== TRENDS ==================== -->
+      <div id="page-trends" class="page hidden">
+        <div class="page-header">
+          <h2>Trends</h2>
+          <p>Your performance over time</p>
+        </div>
+
+        <div class="card mb-4">
+          <div class="card-header">
+            <span class="card-title">Volume & Intensity</span>
+            <div class="chart-tabs">
+              <button class="chart-tab active" onclick="setTrendRange('4w', this)">4W</button>
+              <button class="chart-tab" onclick="setTrendRange('8w', this)">8W</button>
+              <button class="chart-tab" onclick="setTrendRange('12w', this)">12W</button>
+              <button class="chart-tab" onclick="setTrendRange('all', this)">All</button>
+            </div>
+          </div>
+          <div class="chart-container">
+            <canvas id="trendChart"></canvas>
+          </div>
+        </div>
+
+        <div class="card mb-4">
+          <div class="card-header">
+            <span class="card-title">🔥 Calories Burned (Apple Watch)</span>
+          </div>
+          <div class="chart-container">
+            <canvas id="caloriesBurnedChart"></canvas>
+          </div>
+        </div>
+
+        <div class="stat-grid">
+          <div class="card">
+            <div class="card-header">
+              <span class="card-title">Wellbeing Trend</span>
+            </div>
+            <div class="chart-container">
+              <canvas id="wellbeingChart"></canvas>
+            </div>
+          </div>
+          <div class="card">
+            <div class="card-header">
+              <span class="card-title">RPE vs Performance</span>
+            </div>
+            <div class="chart-container">
+              <canvas id="rpeChart"></canvas>
+            </div>
+          </div>
+        </div>
+
+        <div class="section-title">Strength Progression</div>
+
+        <div class="card mb-4">
+          <div class="card-header">
+            <span class="card-title">Exercise Selector</span>
+          </div>
+          <div class="form-group" style="margin-bottom:0">
+            <select class="form-select" id="strength-exercise-select" onchange="renderStrengthChart()">
+              <option value="">Select an exercise...</option>
+            </select>
+          </div>
+        </div>
+
+        <div id="strength-charts-container" class="hidden">
+          <div class="stat-grid mb-4" id="strength-stats"></div>
+
+          <div class="stat-grid">
+            <div class="card">
+              <div class="card-header">
+                <span class="card-title">Max Weight Over Time</span>
+              </div>
+              <div class="chart-container">
+                <canvas id="strengthMaxChart"></canvas>
+              </div>
+            </div>
+            <div class="card">
+              <div class="card-header">
+                <span class="card-title">Estimated 1RM Progression</span>
+              </div>
+              <div class="chart-container">
+                <canvas id="strength1rmChart"></canvas>
+              </div>
+            </div>
+          </div>
+
+          <div class="card mt-4">
+            <div class="card-header">
+              <span class="card-title">Volume Per Session</span>
+            </div>
+            <div class="chart-container">
+              <canvas id="strengthVolChart"></canvas>
+            </div>
+          </div>
+        </div>
+
+        <div id="strength-all-container" class="card mt-4">
+          <div class="card-header">
+            <span class="card-title">All Exercises — Best Estimated 1RM</span>
+          </div>
+          <div class="chart-container" style="height:auto;min-height:200px">
+            <canvas id="strengthAllChart"></canvas>
+          </div>
+        </div>
+
+        <div class="section-title" style="margin-top:32px">Cycling Progress</div>
+
+        <div class="card mt-4">
+          <div class="card-header">
+            <span class="card-title">Cycling Distance & Duration</span>
+          </div>
+          <div class="chart-container">
+            <canvas id="cyclingChart"></canvas>
+          </div>
+        </div>
+      </div>
+
+      <!-- ==================== INSIGHTS ==================== -->
+      <div id="page-insights" class="page hidden">
+        <div class="page-header">
+          <h2>Insights</h2>
+          <p>Patterns, feedback, and recommendations personalised to you</p>
+        </div>
+
+        <div id="insights-list"></div>
+
+        <div id="no-insights" class="empty-state hidden">
+          <svg fill="none" stroke="currentColor" stroke-width="1.5" viewBox="0 0 24 24"><circle cx="12" cy="12" r="10"/><path d="M12 16v-4M12 8h.01"/></svg>
+          <h3>Not enough data yet</h3>
+          <p>Log a few workouts and I'll start spotting patterns in your training.</p>
+        </div>
+      </div>
+
+      <!-- ==================== MACROS ==================== -->
+      <div id="page-macros" class="page hidden">
+        <div class="page-header">
+          <h2>Macros</h2>
+          <p>Track your daily nutrition</p>
+        </div>
+
+        <!-- Today's Running Total -->
+        <div id="macro-running-total" class="card mb-4" style="border-color:var(--green-700)">
+          <div class="card-header">
+            <span class="card-title">Today's Total</span>
+            <button class="btn btn-danger btn-sm" onclick="resetMacroDay()" style="font-size:0.7rem;padding:4px 10px">Reset Day</button>
+          </div>
+          <div id="macro-running-values" style="display:grid;grid-template-columns:repeat(3,1fr);gap:12px;margin-top:8px"></div>
+        </div>
+
+        <!-- Log Macros Form -->
+        <div class="card mb-4">
+          <h3 style="margin-bottom: 20px; font-size: 1.1rem;">Add to Today's Macros</h3>
+          <div class="text-muted text-sm" style="margin:-12px 0 16px">Values are added to your running total for the day.</div>
+
+          <div class="form-group">
+            <label class="form-label">Date</label>
+            <input type="date" class="form-input" id="macro-date" onchange="updateMacroRunningTotal()">
+          </div>
+
+          <div class="form-row">
+            <div class="form-group">
+              <label class="form-label">Calories (kcal)</label>
+              <input type="number" class="form-input" id="macro-calories" placeholder="e.g. 500">
+            </div>
+            <div class="form-group">
+              <label class="form-label">Protein (g)</label>
+              <input type="number" class="form-input" id="macro-protein" placeholder="e.g. 25">
+            </div>
+          </div>
+          <div class="form-row">
+            <div class="form-group">
+              <label class="form-label">Carbs (g)</label>
+              <input type="number" class="form-input" id="macro-carbs" placeholder="e.g. 60">
+            </div>
+            <div class="form-group">
+              <label class="form-label">Fats (g)</label>
+              <input type="number" class="form-input" id="macro-fats" placeholder="e.g. 15">
+            </div>
+          </div>
+          <div class="form-row">
+            <div class="form-group">
+              <label class="form-label">Water (litres)</label>
+              <input type="number" class="form-input" id="macro-water" placeholder="e.g. 0.5" step="0.1">
+            </div>
+            <div class="form-group">
+              <label class="form-label">Fibre (g, optional)</label>
+              <input type="number" class="form-input" id="macro-fibre" placeholder="e.g. 5">
+            </div>
+          </div>
+          <div class="form-group">
+            <label class="form-label">Notes (optional)</label>
+            <input type="text" class="form-input" id="macro-notes" placeholder="e.g. Post-workout shake, lunch...">
+          </div>
+
+          <button class="btn btn-primary" onclick="saveMacroEntry()" style="margin-top:8px">
+            <svg width="16" height="16" fill="none" stroke="currentColor" stroke-width="2"><path d="M8 2v12M2 8h12"/></svg>
+            Add
+          </button>
+        </div>
+
+        <!-- Macro Stats -->
+        <div class="stat-grid" id="macro-stats"></div>
+
+        <!-- Macro Trends -->
+        <div class="section-title">Trends</div>
+        <div class="card mb-4">
+          <div class="card-header">
+            <span class="card-title">Calories & Protein</span>
+            <div class="chart-tabs" id="macro-range-tabs">
+              <button class="chart-tab active" onclick="setMacroRange('7d', this)">7D</button>
+              <button class="chart-tab" onclick="setMacroRange('14d', this)">14D</button>
+              <button class="chart-tab" onclick="setMacroRange('30d', this)">30D</button>
+              <button class="chart-tab" onclick="setMacroRange('all', this)">All</button>
+            </div>
+          </div>
+          <div class="chart-container">
+            <canvas id="macroCalChart"></canvas>
+          </div>
+        </div>
+
+        <div class="stat-grid">
+          <div class="card">
+            <div class="card-header">
+              <span class="card-title">Macro Breakdown</span>
+            </div>
+            <div class="chart-container">
+              <canvas id="macroBreakdownChart"></canvas>
+            </div>
+          </div>
+          <div class="card">
+            <div class="card-header">
+              <span class="card-title">Water Intake</span>
+            </div>
+            <div class="chart-container">
+              <canvas id="macroWaterChart"></canvas>
+            </div>
+          </div>
+        </div>
+
+        <!-- Macro History -->
+        <div class="section-title">History</div>
+        <div id="macro-history"></div>
+      </div>
+
+    </main>
+  </div>
+
+  <!-- Workout Detail Modal -->
+  <div class="modal-overlay" id="modal-overlay" onclick="if(event.target===this)closeModal()">
+    <div class="modal" id="workout-modal"></div>
+  </div>
+
+  <!-- Toast -->
+  <div class="toast-container" id="toast-container"></div>
+
+  <script>
+    // =====================================================================
+    // DATA LAYER
+    // =====================================================================
+    const STORAGE_KEY = 'ironpulse_workouts';
+
+    function getWorkouts() {
+      try {
+        return JSON.parse(localStorage.getItem(STORAGE_KEY)) || [];
+      } catch { return []; }
+    }
+
+    function saveWorkouts(workouts) {
+      localStorage.setItem(STORAGE_KEY, JSON.stringify(workouts));
+    }
+
+    function addWorkout(workout) {
+      const workouts = getWorkouts();
+      workout.id = Date.now();
+      workout.createdAt = new Date().toISOString();
+      workouts.unshift(workout);
+      saveWorkouts(workouts);
+      return workout;
+    }
+
+    function deleteWorkout(id) {
+      const workouts = getWorkouts().filter(w => w.id !== id);
+      saveWorkouts(workouts);
+    }
+
+    function removeWorkout(id) {
+      if (!confirm('Delete this workout?')) return;
+      deleteWorkout(id);
+      showToast('Workout deleted');
+      // Re-render whichever page is active
+      const page = currentPageName();
+      if (page === 'history') renderHistory();
+      else if (page === 'dashboard') renderDashboard();
+    }
+
+    // =====================================================================
+    // NAVIGATION
+    // =====================================================================
+    function showPage(page) {
+      document.querySelectorAll('.page').forEach(p => p.classList.add('hidden'));
+      document.getElementById('page-' + page).classList.remove('hidden');
+      document.querySelectorAll('.nav-item[data-page]').forEach(n => n.classList.remove('active'));
+      document.querySelector(`.nav-item[data-page="${page}"]`).classList.add('active');
+      closeSidebar();
+
+      if (page === 'dashboard') renderDashboard();
+      if (page === 'checkin') renderCheckin();
+      if (page === 'history') renderHistory();
+      if (page === 'trends') renderTrends();
+      if (page === 'insights') renderInsights();
+      if (page === 'log') initLogForm();
+      if (page === 'macros') renderMacros();
+    }
+
+    function toggleSidebar() {
+      document.getElementById('sidebar').classList.toggle('open');
+      document.getElementById('overlay').classList.toggle('open');
+    }
+
+    function closeSidebar() {
+      document.getElementById('sidebar').classList.remove('open');
+      document.getElementById('overlay').classList.remove('open');
+    }
+
+    // =====================================================================
+    // LOG WORKOUT — WIZARD
+    // =====================================================================
+    let currentStep = 0;
+    const totalSteps = 3;
+
+    function initLogForm() {
+      currentStep = 0;
+      updateWizard();
+      // reset fields
+      document.getElementById('log-date').value = new Date().toISOString().split('T')[0];
+      document.getElementById('log-type').value = 'weights';
+      document.getElementById('log-category').value = '';
+      document.getElementById('log-name').value = '';
+      document.getElementById('log-rpe').value = 5;
+      document.getElementById('log-calories-burned').value = '';
+      document.getElementById('log-feeling').value = '';
+      document.getElementById('log-notes').value = '';
+      document.getElementById('log-distance').value = '';
+      document.getElementById('log-duration').value = '';
+      document.getElementById('log-hr').value = '';
+      document.getElementById('log-speed').value = '';
+      // Reset only sliders within the log page
+      document.querySelectorAll('#page-log .slider-value').forEach(sv => sv.textContent = '5');
+      document.getElementById('exercises-list').innerHTML = '';
+      addExercise();
+      toggleWorkoutFields();
+    }
+
+    function updateWizard() {
+      document.querySelectorAll('.wizard-step').forEach((s, i) => {
+        s.classList.remove('active', 'done');
+        if (i < currentStep) s.classList.add('done');
+        if (i === currentStep) s.classList.add('active');
+      });
+      document.querySelectorAll('.wizard-content').forEach((c, i) => {
+        c.classList.toggle('active', i === currentStep);
+      });
+      document.getElementById('wizard-prev').disabled = currentStep === 0;
+      const nextBtn = document.getElementById('wizard-next');
+      if (currentStep === totalSteps - 1) {
+        nextBtn.textContent = 'Save Workout';
+        nextBtn.style.background = 'var(--green-500)';
+        buildReview();
+      } else {
+        nextBtn.textContent = 'Next';
+        nextBtn.style.background = '';
+      }
+    }
+
+    function wizardNext() {
+      if (currentStep < totalSteps - 1) {
+        currentStep++;
+        updateWizard();
+      } else {
+        saveCurrentWorkout();
+      }
+    }
+
+    function wizardPrev() {
+      if (currentStep > 0) {
+        currentStep--;
+        updateWizard();
+      }
+    }
+
+    function updateSlider(el) {
+      el.closest('.slider-container').querySelector('.slider-value').textContent = el.value;
+    }
+
+    function toggleWorkoutFields() {
+      const type = document.getElementById('log-type').value;
+      const ws = document.getElementById('weights-section');
+      const cs = document.getElementById('cycling-section');
+      ws.classList.toggle('hidden', type === 'cycling');
+      cs.classList.toggle('hidden', type === 'weights');
+    }
+
+    // Exercise presets by category
+    const exercisePresets = {
+      legs: [
+        'Squat', 'Front Squat', 'Leg Press', 'Romanian Deadlift', 'Leg Extension',
+        'Leg Curl', 'Bulgarian Split Squat', 'Calf Raise', 'Goblet Squat',
+        'Hip Thrust', 'Walking Lunge', 'Hack Squat', 'Sumo Deadlift',
+        'Glute Bridge', 'Box Jump', 'Step Up'
+      ],
+      push: [
+        'Bench Press', 'Overhead Press', 'Incline Bench Press', 'Dumbbell Press',
+        'Dips', 'Tricep Pushdown', 'Skull Crusher', 'Lateral Raise',
+        'Cable Fly', 'Push Up', 'Close Grip Bench Press', 'Incline Dumbbell Press',
+        'Arnold Press', 'Tricep Kickback', 'Overhead Tricep Extension'
+      ],
+      pull: [
+        'Deadlift', 'Barbell Row', 'Pull Up', 'Chin Up', 'Lat Pulldown',
+        'Seated Row', 'Face Pull', 'Dumbbell Row', 'Barbell Curl',
+        'Hammer Curl', 'T-Bar Row', 'Cable Row', 'Preacher Curl',
+        'Shrug', 'Reverse Fly', 'EZ Bar Curl'
+      ],
+      upper: [
+        'Bench Press', 'Overhead Press', 'Barbell Row', 'Pull Up',
+        'Dumbbell Press', 'Lateral Raise', 'Face Pull', 'Dips',
+        'Barbell Curl', 'Tricep Pushdown', 'Incline Bench Press',
+        'Lat Pulldown', 'Seated Row', 'Cable Fly'
+      ],
+      chest: [
+        'Bench Press', 'Incline Bench Press', 'Decline Bench Press',
+        'Dumbbell Press', 'Incline Dumbbell Press', 'Cable Fly',
+        'Dumbbell Fly', 'Push Up', 'Chest Dip', 'Pec Deck',
+        'Cable Crossover', 'Close Grip Bench Press'
+      ],
+      back: [
+        'Deadlift', 'Barbell Row', 'Pull Up', 'Lat Pulldown',
+        'Seated Row', 'T-Bar Row', 'Dumbbell Row', 'Cable Row',
+        'Face Pull', 'Reverse Fly', 'Good Morning', 'Chin Up',
+        'Straight Arm Pulldown', 'Shrug'
+      ],
+      shoulders: [
+        'Overhead Press', 'Arnold Press', 'Lateral Raise', 'Front Raise',
+        'Face Pull', 'Reverse Fly', 'Upright Row', 'Dumbbell Shoulder Press',
+        'Cable Lateral Raise', 'Plate Raise', 'Shrug', 'Behind The Neck Press'
+      ],
+      arms: [
+        'Barbell Curl', 'Hammer Curl', 'Tricep Pushdown', 'Skull Crusher',
+        'Preacher Curl', 'Overhead Tricep Extension', 'Concentration Curl',
+        'Tricep Kickback', 'EZ Bar Curl', 'Cable Curl', 'Dips',
+        'Close Grip Bench Press', 'Incline Dumbbell Curl', 'Rope Pushdown'
+      ],
+      core: [
+        'Plank', 'Hanging Leg Raise', 'Cable Crunch', 'Ab Wheel Rollout',
+        'Russian Twist', 'Bicycle Crunch', 'Dead Bug', 'Pallof Press',
+        'Side Plank', 'Decline Sit Up', 'Dragon Flag', 'Woodchop'
+      ],
+      fullbody: [
+        'Squat', 'Deadlift', 'Bench Press', 'Overhead Press', 'Barbell Row',
+        'Pull Up', 'Dips', 'Lunge', 'Hip Thrust', 'Face Pull',
+        'Plank', 'Farmer Walk', 'Clean', 'Snatch', 'Thruster'
+      ]
+    };
+
+    function onCategoryChange() {
+      const cat = document.getElementById('log-category').value;
+      const nameField = document.getElementById('log-name');
+      // Auto-fill the workout name if empty
+      if (cat && !nameField.value) {
+        const labels = { legs: 'Leg Day', push: 'Push Day', pull: 'Pull Day', upper: 'Upper Body', chest: 'Chest Day', back: 'Back Day', shoulders: 'Shoulder Day', arms: 'Arm Day', core: 'Core Session', fullbody: 'Full Body' };
+        nameField.value = labels[cat] || '';
+      }
+      // Rebuild exercise blocks to use dropdowns
+      document.getElementById('exercises-list').innerHTML = '';
+      addExercise();
+    }
+
+    // Exercise management
+    let exerciseCounter = 0;
+
+    function buildExerciseNameField(id) {
+      const cat = document.getElementById('log-category').value;
+      if (cat && exercisePresets[cat]) {
+        const options = exercisePresets[cat].map(e => `<option value="${e}">${e}</option>`).join('');
+        return `
+          <select class="form-select exercise-name-select" data-exercise-id="${id}" style="flex:1;padding:6px 10px;font-size:0.95rem;font-weight:600">
+            <option value="">Select exercise...</option>
+            ${options}
+            <option value="__custom__">Custom...</option>
+          </select>
+          <input type="text" class="exercise-name-input hidden" placeholder="Custom exercise name" data-exercise-id="${id}" style="flex:1">
+        `;
+      }
+      return `<input type="text" class="exercise-name-input" placeholder="Exercise name (e.g. Bench Press)" data-exercise-id="${id}">`;
+    }
+
+    function addExercise() {
+      const id = exerciseCounter++;
+      const div = document.createElement('div');
+      div.className = 'exercise-block';
+      div.id = `exercise-${id}`;
+      div.innerHTML = `
+        <div class="exercise-header">
+          ${buildExerciseNameField(id)}
+          <button class="btn-icon" onclick="removeExercise(${id})" title="Remove exercise" style="margin-left:8px">
+            <svg width="16" height="16" fill="none" stroke="currentColor" stroke-width="2"><path d="M4 4l8 8M12 4l-8 8"/></svg>
+          </button>
+        </div>
+        <div class="set-row" style="margin-bottom:8px">
+          <span class="set-num" style="font-size:0.7rem">SET</span>
+          <span class="set-num" style="font-size:0.7rem">KG</span>
+          <span class="set-num" style="font-size:0.7rem">REPS</span>
+          <span></span>
+        </div>
+        <div class="sets-list" data-exercise-id="${id}"></div>
+        <button class="btn btn-secondary btn-sm mt-4" onclick="addSet(${id})" style="width:100%">+ Add Set</button>
+      `;
+      document.getElementById('exercises-list').appendChild(div);
+
+      // Hook up the select → custom toggle
+      const sel = div.querySelector('.exercise-name-select');
+      if (sel) {
+        sel.addEventListener('change', function() {
+          const customInput = div.querySelector('.exercise-name-input');
+          if (this.value === '__custom__') {
+            this.classList.add('hidden');
+            customInput.classList.remove('hidden');
+            customInput.focus();
+          }
+        });
+      }
+
+      addSet(id);
+    }
+
+    function removeExercise(id) {
+      document.getElementById(`exercise-${id}`)?.remove();
+    }
+
+    let setCounter = 0;
+
+    function addSet(exerciseId) {
+      const setId = setCounter++;
+      const list = document.querySelector(`.sets-list[data-exercise-id="${exerciseId}"]`);
+
+      // Get previous set values for auto-fill
+      let prevWeight = '';
+      let prevReps = '';
+      const existingSets = list.querySelectorAll('.set-row');
+      if (existingSets.length > 0) {
+        const lastSet = existingSets[existingSets.length - 1];
+        const lastWeight = lastSet.querySelector('[data-field="weight"]');
+        const lastReps = lastSet.querySelector('[data-field="reps"]');
+        if (lastWeight && lastWeight.value) prevWeight = lastWeight.value;
+        if (lastReps && lastReps.value) prevReps = lastReps.value;
+      }
+
+      const setNum = list.children.length + 1;
+      const row = document.createElement('div');
+      row.className = 'set-row';
+      row.id = `set-${setId}`;
+      row.innerHTML = `
+        <span class="set-num">${setNum}</span>
+        <input type="number" class="set-input" placeholder="0" data-field="weight" value="${prevWeight}">
+        <input type="number" class="set-input" placeholder="0" data-field="reps" value="${prevReps}">
+        <button class="btn-icon" onclick="removeSet('${setId}', ${exerciseId})" style="width:28px;height:28px">
+          <svg width="12" height="12" fill="none" stroke="currentColor" stroke-width="2"><path d="M3 3l6 6M9 3l-6 6"/></svg>
+        </button>
+      `;
+      list.appendChild(row);
+    }
+
+    function removeSet(setId, exerciseId) {
+      document.getElementById(`set-${setId}`)?.remove();
+      // Renumber
+      const list = document.querySelector(`.sets-list[data-exercise-id="${exerciseId}"]`);
+      list.querySelectorAll('.set-row').forEach((r, i) => {
+        r.querySelector('.set-num').textContent = i + 1;
+      });
+    }
+
+    function gatherExercises() {
+      const exercises = [];
+      document.querySelectorAll('.exercise-block').forEach(block => {
+        // Check select dropdown first, then text input
+        const sel = block.querySelector('.exercise-name-select');
+        const inp = block.querySelector('.exercise-name-input');
+        let name = '';
+        if (sel && !sel.classList.contains('hidden') && sel.value && sel.value !== '__custom__') {
+          name = sel.value.trim();
+        } else if (inp) {
+          name = inp.value.trim();
+        }
+        if (!name) return;
+        const sets = [];
+        block.querySelectorAll('.sets-list .set-row').forEach(row => {
+          const weight = parseFloat(row.querySelector('[data-field="weight"]').value) || 0;
+          const reps = parseInt(row.querySelector('[data-field="reps"]').value) || 0;
+          if (weight > 0 || reps > 0) sets.push({ weight, reps });
+        });
+        if (sets.length > 0) exercises.push({ name, sets });
+      });
+      return exercises;
+    }
+
+    function buildReview() {
+      const type = document.getElementById('log-type').value;
+      const name = document.getElementById('log-name').value || (type === 'weights' ? 'Weights Session' : type === 'cycling' ? 'Cycling Session' : 'Mixed Session');
+      const rpe = document.getElementById('log-rpe').value;
+      const calsBurned = document.getElementById('log-calories-burned').value;
+      const feeling = document.getElementById('log-feeling').value;
+
+      // Pull check-in data for the selected date
+      const dateVal = document.getElementById('log-date').value || new Date().toISOString().split('T')[0];
+      const checkin = getCheckins().find(c => c.date === dateVal);
+
+      let details = '';
+      if (type !== 'cycling') {
+        const exercises = gatherExercises();
+        details += exercises.map(e =>
+          `<div style="margin-bottom:8px"><strong>${e.name}</strong>: ${e.sets.map(s => `${s.weight}kg x ${s.reps}`).join(', ')}</div>`
+        ).join('');
+      }
+      if (type !== 'weights') {
+        const dist = document.getElementById('log-distance').value;
+        const dur = document.getElementById('log-duration').value;
+        details += `<div style="margin-bottom:8px"><strong>Cycling</strong>: ${dist || 0}km in ${dur || 0} min</div>`;
+      }
+
+      const checkinHtml = checkin
+        ? `<div><span class="text-muted text-sm">Mood</span><div style="font-weight:600">${checkin.mood}/10</div></div>
+           <div><span class="text-muted text-sm">Energy</span><div style="font-weight:600">${checkin.energy}/10</div></div>
+           <div><span class="text-muted text-sm">Sleep</span><div style="font-weight:600">${checkin.sleepQuality}/10 (${checkin.sleepHours || '?'}h)</div></div>`
+        : `<div style="grid-column:span 2"><span class="text-muted text-sm" style="color:var(--warning)">No check-in found for ${dateVal}. <a href="#" onclick="event.preventDefault();showPage('checkin')" style="color:var(--green-400)">Log one?</a></span></div>`;
+
+      document.getElementById('review-summary').innerHTML = `
+        <div style="display:grid;grid-template-columns:1fr 1fr;gap:12px;margin-bottom:20px">
+          <div><span class="text-muted text-sm">Workout</span><div style="font-weight:600">${name}</div></div>
+          <div><span class="text-muted text-sm">Type</span><div style="font-weight:600;text-transform:capitalize">${type}</div></div>
+          ${checkinHtml}
+          <div><span class="text-muted text-sm">RPE</span><div style="font-weight:600">${rpe}/10</div></div>
+          <div><span class="text-muted text-sm">Calories Burned</span><div style="font-weight:600">${calsBurned ? calsBurned + ' kcal' : '-'}</div></div>
+        </div>
+        <div class="section-title">Exercises</div>
+        ${details || '<div class="text-muted text-sm">No exercises logged</div>'}
+        ${feeling ? `<div class="section-title">How it felt</div><div style="font-size:0.9rem;color:var(--text-secondary)">${feeling}</div>` : ''}
+      `;
+    }
+
+    function saveCurrentWorkout() {
+      const type = document.getElementById('log-type').value;
+      const dateVal = document.getElementById('log-date').value;
+      const workoutDate = dateVal ? new Date(dateVal + 'T12:00:00').toISOString() : new Date().toISOString();
+
+      // Auto-link check-in data for this date
+      const checkinDate = dateVal || new Date().toISOString().split('T')[0];
+      const checkin = getCheckins().find(c => c.date === checkinDate);
+
+      const workout = {
+        name: document.getElementById('log-name').value || (type === 'weights' ? 'Weights Session' : type === 'cycling' ? 'Cycling Session' : 'Mixed Session'),
+        type,
+        date: workoutDate,
+        preWorkout: checkin ? {
+          mood: checkin.mood,
+          energy: checkin.energy,
+          sleepQuality: checkin.sleepQuality,
+          sleepHours: checkin.sleepHours,
+        } : {
+          mood: 5,
+          energy: 5,
+          sleepQuality: 5,
+          sleepHours: null,
+        },
+        exercises: type !== 'cycling' ? gatherExercises() : [],
+        cycling: type !== 'weights' ? {
+          distance: parseFloat(document.getElementById('log-distance').value) || 0,
+          duration: parseInt(document.getElementById('log-duration').value) || 0,
+          avgHeartRate: parseInt(document.getElementById('log-hr').value) || null,
+          avgSpeed: parseFloat(document.getElementById('log-speed').value) || null,
+        } : null,
+        postWorkout: {
+          rpe: parseInt(document.getElementById('log-rpe').value),
+          caloriesBurned: parseInt(document.getElementById('log-calories-burned').value) || null,
+          feeling: document.getElementById('log-feeling').value,
+          notes: document.getElementById('log-notes').value,
+        },
+      };
+
+      // Compute volume for weights
+      workout.totalVolume = workout.exercises.reduce((sum, ex) =>
+        sum + ex.sets.reduce((s, set) => s + set.weight * set.reps, 0), 0);
+
+      // Compute intensity score (normalized)
+      workout.intensityScore = workout.postWorkout.rpe;
+
+      addWorkout(workout);
+      showToast('Workout saved!');
+      showPage('dashboard');
+    }
+
+    // =====================================================================
+    // DASHBOARD
+    // =====================================================================
+    function renderDashboard() {
+      const workouts = getWorkouts();
+      const now = new Date();
+      const dayNames = ['Sunday','Monday','Tuesday','Wednesday','Thursday','Friday','Saturday'];
+
+      // Greeting
+      const hour = now.getHours();
+      const greeting = hour < 12 ? 'Good morning' : hour < 18 ? 'Good afternoon' : 'Good evening';
+      document.getElementById('dashboard-greeting').textContent = `${greeting}, Stephen. ${dayNames[now.getDay()]}, ${now.toLocaleDateString('en-GB', { day: 'numeric', month: 'long', year: 'numeric' })}.`;
+
+      // Stats
+      const thisWeek = workouts.filter(w => {
+        const d = new Date(w.date);
+        const diff = (now - d) / (1000 * 60 * 60 * 24);
+        return diff <= 7;
+      });
+
+      const thisMonth = workouts.filter(w => {
+        const d = new Date(w.date);
+        return d.getMonth() === now.getMonth() && d.getFullYear() === now.getFullYear();
+      });
+
+      const avgRPE = thisWeek.length > 0
+        ? (thisWeek.reduce((s, w) => s + w.postWorkout.rpe, 0) / thisWeek.length).toFixed(1)
+        : '-';
+
+      const totalVol = thisWeek.reduce((s, w) => s + (w.totalVolume || 0), 0);
+      const totalDist = thisWeek.filter(w => w.cycling).reduce((s, w) => s + (w.cycling?.distance || 0), 0);
+
+      const avgMood = thisWeek.length > 0
+        ? (thisWeek.reduce((s, w) => s + w.preWorkout.mood, 0) / thisWeek.length).toFixed(1)
+        : '-';
+
+      const weekCalsBurned = thisWeek.filter(w => w.postWorkout.caloriesBurned > 0);
+      const totalCalsBurned = weekCalsBurned.reduce((s, w) => s + w.postWorkout.caloriesBurned, 0);
+
+      document.getElementById('dashboard-stats').innerHTML = `
+        <div class="card">
+          <div class="card-header"><span class="card-title">This Week</span><div class="stat-icon green"><svg width="20" height="20" fill="none" stroke="currentColor" stroke-width="2"><path d="M12 5v14M5 12h14"/></svg></div></div>
+          <div class="card-value">${thisWeek.length}</div>
+          <div class="card-sub">workouts logged</div>
+        </div>
+        <div class="card">
+          <div class="card-header"><span class="card-title">Avg RPE</span><div class="stat-icon ${parseFloat(avgRPE) > 7 ? 'red' : parseFloat(avgRPE) > 4 ? 'yellow' : 'green'}"><svg width="20" height="20" fill="none" stroke="currentColor" stroke-width="2"><polyline points="22 12 18 12 15 21 9 3 6 12 2 12"/></svg></div></div>
+          <div class="card-value">${avgRPE}</div>
+          <div class="card-sub">perceived exertion</div>
+        </div>
+        <div class="card">
+          <div class="card-header"><span class="card-title">Volume</span><div class="stat-icon green"><svg width="20" height="20" fill="none" stroke="currentColor" stroke-width="2"><rect x="2" y="7" width="20" height="10" rx="2"/><path d="M6 7V5M18 7V5"/></svg></div></div>
+          <div class="card-value">${totalVol > 0 ? (totalVol/1000).toFixed(1) + 'k' : '-'}</div>
+          <div class="card-sub">kg total volume</div>
+        </div>
+        <div class="card">
+          <div class="card-header"><span class="card-title">Avg Mood</span><div class="stat-icon green"><svg width="20" height="20" fill="none" stroke="currentColor" stroke-width="2"><circle cx="12" cy="12" r="10"/><path d="M8 14s1.5 2 4 2 4-2 4-2"/></svg></div></div>
+          <div class="card-value">${avgMood}</div>
+          <div class="card-sub">pre-workout mood</div>
+        </div>
+        <div class="card">
+          <div class="card-header"><span class="card-title">🔥 Burned</span><div class="stat-icon red"><svg width="20" height="20" fill="none" stroke="currentColor" stroke-width="2"><path d="M12 12c0-3 2-5 2-8-4 2-6 6-6 8a4 4 0 108 0c0-1-.5-2-1-3-1 1-3 3-3 3z"/></svg></div></div>
+          <div class="card-value">${totalCalsBurned > 0 ? totalCalsBurned.toLocaleString() : '-'}</div>
+          <div class="card-sub">kcal burned this week</div>
+        </div>
+      `;
+
+      // Insights
+      const insights = generateInsights(workouts);
+      const insightsHtml = insights.slice(0, 3).map(i => renderInsightCard(i)).join('');
+      document.getElementById('dashboard-insights').innerHTML = insightsHtml || '<div class="text-muted text-sm" style="padding:12px">Log a few workouts to unlock insights.</div>';
+
+      // Week chart
+      renderWeekChart(workouts);
+
+      // Recent workouts
+      const recent = workouts.slice(0, 5);
+      document.getElementById('dashboard-recent').innerHTML = recent.length > 0
+        ? recent.map(w => renderHistoryItem(w)).join('')
+        : `<div class="empty-state">
+            <svg fill="none" stroke="currentColor" stroke-width="1.5" viewBox="0 0 24 24"><path d="M12 5v14M5 12h14"/></svg>
+            <h3>No workouts yet</h3>
+            <p>Start logging to see your data here.</p>
+            <button class="btn btn-primary" onclick="showPage('log')">Log First Workout</button>
+          </div>`;
+    }
+
+    // =====================================================================
+    // HISTORY
+    // =====================================================================
+    let historyFilter = 'all';
+
+    function filterHistory(filter) {
+      historyFilter = filter;
+      document.querySelectorAll('.filter-chip').forEach(c => c.classList.toggle('active', c.dataset.filter === filter));
+      renderHistory();
+    }
+
+    function renderHistory() {
+      let workouts = getWorkouts();
+      if (historyFilter !== 'all') workouts = workouts.filter(w => w.type === historyFilter);
+
+      document.getElementById('history-list').innerHTML = workouts.length > 0
+        ? workouts.map(w => renderHistoryItem(w)).join('')
+        : '<div class="empty-state"><h3>No workouts found</h3><p>Try a different filter or log a new workout.</p></div>';
+    }
+
+    function renderHistoryItem(w) {
+      const d = new Date(w.date);
+      const day = d.getDate();
+      const month = d.toLocaleString('en', { month: 'short' }).toUpperCase();
+      const rpeClass = w.postWorkout.rpe >= 8 ? 'rpe-high' : w.postWorkout.rpe >= 5 ? 'rpe-med' : 'rpe-low';
+      const badgeClass = w.type === 'weights' ? 'badge-weights' : w.type === 'cycling' ? 'badge-cycling' : 'badge-mixed';
+
+      let summary = '';
+      if (w.exercises && w.exercises.length > 0) {
+        summary = w.exercises.map(e => e.name).join(', ');
+      }
+      if (w.cycling && w.cycling.distance > 0) {
+        summary += (summary ? ' + ' : '') + `${w.cycling.distance}km ride`;
+      }
+
+      return `
+        <div class="history-item" onclick="openWorkoutDetail(${w.id})">
+          <div class="history-date">
+            <div class="day">${day}</div>
+            <div class="month">${month}</div>
+          </div>
+          <div class="history-info">
+            <h3>${w.name}</h3>
+            <p>${summary || 'No details'}</p>
+          </div>
+          <span class="history-badge ${badgeClass}">${w.type}</span>
+          <div class="rpe-badge ${rpeClass}">${w.postWorkout.rpe}</div>
+          <button class="btn-icon" onclick="event.stopPropagation();removeWorkout(${w.id})" title="Delete workout" style="color:var(--danger)">
+            <svg width="16" height="16" fill="none" stroke="currentColor" stroke-width="2"><path d="M3 6h10M5 6V4a1 1 0 011-1h4a1 1 0 011 1v2M7 9v4M9 9v4"/><path d="M4 6l.7 8.4a1 1 0 001 .6h4.6a1 1 0 001-.6L12 6"/></svg>
+          </button>
+        </div>
+      `;
+    }
+
+    // =====================================================================
+    // WORKOUT DETAIL MODAL
+    // =====================================================================
+    function openWorkoutDetail(id) {
+      const workout = getWorkouts().find(w => w.id === id);
+      if (!workout) return;
+
+      const d = new Date(workout.date);
+      const dateStr = d.toLocaleDateString('en-GB', { weekday: 'long', day: 'numeric', month: 'long', year: 'numeric' });
+
+      let exerciseHtml = '';
+      if (workout.exercises && workout.exercises.length > 0) {
+        exerciseHtml = workout.exercises.map(e => `
+          <div style="margin-bottom:16px">
+            <div style="font-weight:600;margin-bottom:6px">${e.name}</div>
+            ${e.sets.map((s, i) => `<div class="text-sm text-muted">Set ${i+1}: ${s.weight}kg x ${s.reps} reps</div>`).join('')}
+          </div>
+        `).join('');
+      }
+
+      let cyclingHtml = '';
+      if (workout.cycling && workout.cycling.distance > 0) {
+        cyclingHtml = `
+          <div style="margin-bottom:16px">
+            <div style="font-weight:600;margin-bottom:6px">Cycling</div>
+            <div class="text-sm text-muted">${workout.cycling.distance}km in ${workout.cycling.duration} min</div>
+            ${workout.cycling.avgHeartRate ? `<div class="text-sm text-muted">Avg HR: ${workout.cycling.avgHeartRate} bpm</div>` : ''}
+            ${workout.cycling.avgSpeed ? `<div class="text-sm text-muted">Avg Speed: ${workout.cycling.avgSpeed} km/h</div>` : ''}
+          </div>
+        `;
+      }
+
+      // Generate feedback for this workout
+      const feedback = generateWorkoutFeedback(workout);
+
+      document.getElementById('workout-modal').innerHTML = `
+        <button class="modal-close" onclick="closeModal()">&times;</button>
+        <h3 style="font-size:1.2rem;margin-bottom:4px">${workout.name}</h3>
+        <div class="text-muted text-sm" style="margin-bottom:20px">${dateStr}</div>
+
+        <div style="display:grid;grid-template-columns:repeat(2,1fr);gap:12px;margin-bottom:20px">
+          <div class="card" style="padding:12px;text-align:center">
+            <div class="text-muted text-sm">Mood</div>
+            <div style="font-size:1.3rem;font-weight:700">${workout.preWorkout.mood}/10</div>
+          </div>
+          <div class="card" style="padding:12px;text-align:center">
+            <div class="text-muted text-sm">Energy</div>
+            <div style="font-size:1.3rem;font-weight:700">${workout.preWorkout.energy}/10</div>
+          </div>
+          <div class="card" style="padding:12px;text-align:center">
+            <div class="text-muted text-sm">RPE</div>
+            <div style="font-size:1.3rem;font-weight:700">${workout.postWorkout.rpe}/10</div>
+          </div>
+          <div class="card" style="padding:12px;text-align:center">
+            <div class="text-muted text-sm">🔥 Calories Burned</div>
+            <div style="font-size:1.3rem;font-weight:700">${workout.postWorkout.caloriesBurned ? workout.postWorkout.caloriesBurned + ' kcal' : '-'}</div>
+          </div>
+        </div>
+
+        ${exerciseHtml || cyclingHtml ? '<div class="section-title">Details</div>' : ''}
+        ${exerciseHtml}
+        ${cyclingHtml}
+
+        ${workout.postWorkout.feeling ? `<div class="section-title">How It Felt</div><p style="font-size:0.9rem;color:var(--text-secondary)">${workout.postWorkout.feeling}</p>` : ''}
+
+        ${feedback.length > 0 ? `
+          <div class="section-title">Feedback</div>
+          ${feedback.map(f => `<div class="insight-card" style="margin-bottom:8px;border:none;padding:12px">
+            <div class="insight-icon ${f.type}" style="width:36px;height:36px">${f.icon}</div>
+            <div><div class="insight-title" style="font-size:0.85rem">${f.title}</div><div class="insight-body" style="font-size:0.8rem">${f.body}</div></div>
+          </div>`).join('')}
+        ` : ''}
+
+        <div style="margin-top:24px;display:flex;gap:8px;justify-content:flex-end">
+          <button class="btn btn-danger btn-sm" onclick="if(confirm('Delete this workout?')){deleteWorkout(${workout.id});closeModal();showPage(currentPageName());}">Delete</button>
+          <button class="btn btn-secondary btn-sm" onclick="closeModal()">Close</button>
+        </div>
+      `;
+
+      document.getElementById('modal-overlay').classList.add('open');
+    }
+
+    function closeModal() {
+      document.getElementById('modal-overlay').classList.remove('open');
+    }
+
+    function currentPageName() {
+      const active = document.querySelector('.nav-item.active');
+      return active ? active.dataset.page : 'dashboard';
+    }
+
+    // =====================================================================
+    // WORKOUT FEEDBACK ENGINE
+    // =====================================================================
+    function generateWorkoutFeedback(workout) {
+      const tips = [];
+      const rpe = workout.postWorkout.rpe;
+      const energy = workout.preWorkout.energy;
+      const mood = workout.preWorkout.mood;
+      const sleep = workout.preWorkout.sleepQuality;
+      const sleepH = workout.preWorkout.sleepHours;
+
+      // Nutrition nudges based on intensity
+      if (rpe >= 8) {
+        tips.push({
+          type: 'nutrition',
+          icon: '🥩',
+          title: 'High-Intensity Recovery',
+          body: 'That was a tough session. Prioritise 30-40g protein within 2 hours and complex carbs to replenish glycogen. Consider a casein shake before bed for overnight recovery.'
+        });
+      } else if (rpe >= 6) {
+        tips.push({
+          type: 'nutrition',
+          icon: '🍗',
+          title: 'Moderate Session Nutrition',
+          body: 'Solid effort. Aim for a balanced meal with 25-30g protein and mixed carbs within a couple of hours. Hydration is key — aim for 500ml water in the next hour.'
+        });
+      } else {
+        tips.push({
+          type: 'nutrition',
+          icon: '🥗',
+          title: 'Light Session',
+          body: 'Light session — normal intake is fine. Focus on whole foods and stay hydrated. A good chance to hit your vegetable targets for the day.'
+        });
+      }
+
+      // Sleep-based feedback
+      if (sleepH && sleepH < 6) {
+        tips.push({
+          type: 'recovery',
+          icon: '😴',
+          title: 'Sleep Deficit Detected',
+          body: `You logged ${sleepH} hours of sleep. Performance typically drops 10-15% below 6 hours. Consider an earlier night tonight and maybe a lighter session tomorrow.`
+        });
+      }
+
+      // Low energy + high RPE warning
+      if (energy <= 4 && rpe >= 7) {
+        tips.push({
+          type: 'fatigue',
+          icon: '⚠️',
+          title: 'Pushing Through Fatigue',
+          body: 'You trained hard despite low energy. While mental toughness is valuable, repeated sessions like this increase injury risk. Listen to your body — recovery is where gains happen.'
+        });
+      }
+
+      // Mood correlation
+      if (mood >= 8 && rpe <= 6) {
+        tips.push({
+          type: 'pattern',
+          icon: '💡',
+          title: 'High Mood, Easy Session',
+          body: 'You were feeling great but kept it light. On days like this, you might have headroom to push harder or try progressive overload. Something to consider next time.'
+        });
+      }
+
+      // High volume weights
+      if (workout.totalVolume > 10000) {
+        tips.push({
+          type: 'recovery',
+          icon: '💪',
+          title: 'Big Volume Day',
+          body: `${(workout.totalVolume/1000).toFixed(1)}k kg total volume — that's significant. Make sure tomorrow includes adequate rest or only light active recovery. Cold exposure or foam rolling can help.`
+        });
+      }
+
+      // Cycling specific
+      if (workout.cycling && workout.cycling.distance > 0) {
+        const pace = workout.cycling.duration / workout.cycling.distance;
+        if (workout.cycling.distance >= 40) {
+          tips.push({
+            type: 'nutrition',
+            icon: '🚴',
+            title: 'Long Ride Recovery',
+            body: 'That was a solid distance. Carb replenishment is critical — aim for 1-1.2g carbs per kg bodyweight within the first hour. A banana + protein shake is a quick win.'
+          });
+        }
+      }
+
+      // Calories burned feedback
+      const cals = workout.postWorkout.caloriesBurned;
+      if (cals && cals > 0) {
+        if (cals >= 600) {
+          tips.push({
+            type: 'nutrition',
+            icon: '🔥',
+            title: `${cals} kcal Burned — Major Burn`,
+            body: 'Massive calorie output. You need to refuel aggressively — aim for a meal with 40g+ protein and plenty of complex carbs within 2 hours. Consider an electrolyte drink to replenish what you sweated out.'
+          });
+        } else if (cals >= 400) {
+          tips.push({
+            type: 'nutrition',
+            icon: '🔥',
+            title: `${cals} kcal Burned — Solid Output`,
+            body: 'Good burn. Make sure your next meal accounts for the deficit — a balanced plate with protein, carbs and healthy fats will support recovery. Don\'t skip eating thinking you\'ll "save" the calories.'
+          });
+        } else if (cals >= 200) {
+          tips.push({
+            type: 'nutrition',
+            icon: '🔥',
+            title: `${cals} kcal Burned`,
+            body: 'Moderate burn. Standard post-workout nutrition will cover you — a protein-rich meal or shake within a couple of hours is ideal.'
+          });
+        }
+      }
+
+      return tips;
+    }
+
+    // =====================================================================
+    // INSIGHTS ENGINE — Pattern Correlation & Fatigue Tracking
+    // =====================================================================
+    function generateInsights(workouts) {
+      if (workouts.length < 3) return [];
+      const insights = [];
+      const recent = workouts.slice(0, 30); // Last 30 workouts
+
+      // 1. PATTERN: Sleep quality vs RPE correlation
+      const withSleep = recent.filter(w => w.preWorkout.sleepQuality);
+      if (withSleep.length >= 5) {
+        const goodSleep = withSleep.filter(w => w.preWorkout.sleepQuality >= 7);
+        const poorSleep = withSleep.filter(w => w.preWorkout.sleepQuality <= 4);
+        if (goodSleep.length >= 2 && poorSleep.length >= 2) {
+          const avgRpeGood = goodSleep.reduce((s, w) => s + w.postWorkout.rpe, 0) / goodSleep.length;
+          const avgRpePoor = poorSleep.reduce((s, w) => s + w.postWorkout.rpe, 0) / poorSleep.length;
+          const diff = avgRpePoor - avgRpeGood;
+          if (Math.abs(diff) > 0.5) {
+            insights.push({
+              type: 'pattern',
+              icon: '🧠',
+              title: 'Sleep & Effort Correlation',
+              body: diff > 0
+                ? `Poor sleep nights (≤4) see RPE ${diff.toFixed(1)} points higher on average than good sleep nights (≥7). Better sleep = easier perceived effort for the same work.`
+                : `Interesting — your RPE doesn't seem affected much by sleep quality. You might be good at grinding through, but watch for hidden fatigue accumulation.`,
+              priority: 2
+            });
+          }
+        }
+      }
+
+      // 2. PATTERN: Mood vs performance
+      const withMood = recent.filter(w => w.preWorkout.mood && w.totalVolume > 0);
+      if (withMood.length >= 5) {
+        const highMood = withMood.filter(w => w.preWorkout.mood >= 7);
+        const lowMood = withMood.filter(w => w.preWorkout.mood <= 4);
+        if (highMood.length >= 2 && lowMood.length >= 2) {
+          const avgVolHigh = highMood.reduce((s, w) => s + w.totalVolume, 0) / highMood.length;
+          const avgVolLow = lowMood.reduce((s, w) => s + w.totalVolume, 0) / lowMood.length;
+          const pctDiff = ((avgVolHigh - avgVolLow) / avgVolLow * 100).toFixed(0);
+          if (Math.abs(pctDiff) > 10) {
+            insights.push({
+              type: 'pattern',
+              icon: '😊',
+              title: 'Mood Drives Volume',
+              body: `When your mood is high (≥7), you lift ${pctDiff}% more total volume on average. Mental state matters — consider mood-boosting pre-workout routines on low days.`,
+              priority: 2
+            });
+          }
+        }
+      }
+
+      // 3. FATIGUE: Consecutive hard days
+      const sortedByDate = [...recent].sort((a, b) => new Date(b.date) - new Date(a.date));
+      let consecutiveHard = 0;
+      for (const w of sortedByDate) {
+        if (w.postWorkout.rpe >= 7) consecutiveHard++;
+        else break;
+      }
+      if (consecutiveHard >= 3) {
+        insights.push({
+          type: 'fatigue',
+          icon: '🔥',
+          title: 'Fatigue Accumulation Warning',
+          body: `You've had ${consecutiveHard} consecutive high-intensity sessions (RPE ≥ 7). Accumulated fatigue increases injury risk and can stall progress. Consider active recovery or a deload day.`,
+          priority: 1
+        });
+      }
+
+      // 4. FATIGUE: Weekly load trend
+      const now = new Date();
+      const thisWeekWorkouts = workouts.filter(w => (now - new Date(w.date)) / (1000*60*60*24) <= 7);
+      const lastWeekWorkouts = workouts.filter(w => {
+        const diff = (now - new Date(w.date)) / (1000*60*60*24);
+        return diff > 7 && diff <= 14;
+      });
+
+      if (thisWeekWorkouts.length > 0 && lastWeekWorkouts.length > 0) {
+        const thisWeekLoad = thisWeekWorkouts.reduce((s, w) => s + w.postWorkout.rpe, 0);
+        const lastWeekLoad = lastWeekWorkouts.reduce((s, w) => s + w.postWorkout.rpe, 0);
+        const loadChange = ((thisWeekLoad - lastWeekLoad) / lastWeekLoad * 100).toFixed(0);
+        if (loadChange > 30) {
+          insights.push({
+            type: 'fatigue',
+            icon: '📈',
+            title: 'Training Load Spike',
+            body: `Your cumulative RPE this week is ${loadChange}% higher than last week. Rapid load increases (>30%) are a common injury trigger. Consider dialling back intensity for a day or two.`,
+            priority: 1
+          });
+        }
+      }
+
+      // 5. PATTERN: Energy and sleep hours
+      const withSleepHours = recent.filter(w => w.preWorkout.sleepHours);
+      if (withSleepHours.length >= 5) {
+        const overSeven = withSleepHours.filter(w => w.preWorkout.sleepHours >= 7);
+        const underSix = withSleepHours.filter(w => w.preWorkout.sleepHours < 6);
+        if (overSeven.length >= 2 && underSix.length >= 2) {
+          const avgEnergyGood = overSeven.reduce((s, w) => s + w.preWorkout.energy, 0) / overSeven.length;
+          const avgEnergyBad = underSix.reduce((s, w) => s + w.preWorkout.energy, 0) / underSix.length;
+          const diff = (avgEnergyGood - avgEnergyBad).toFixed(1);
+          if (diff > 1) {
+            insights.push({
+              type: 'pattern',
+              icon: '⚡',
+              title: 'Sleep Hours → Energy',
+              body: `When you sleep 7+ hours, your energy rating averages ${diff} points higher. You rate energy ${avgEnergyGood.toFixed(1)}/10 with good sleep vs ${avgEnergyBad.toFixed(1)}/10 without.`,
+              priority: 3
+            });
+          }
+        }
+      }
+
+      // 6. PROGRESS: Volume trend (weights)
+      const weightWorkouts = recent.filter(w => w.type !== 'cycling' && w.totalVolume > 0);
+      if (weightWorkouts.length >= 6) {
+        const firstHalf = weightWorkouts.slice(Math.floor(weightWorkouts.length / 2));
+        const secondHalf = weightWorkouts.slice(0, Math.floor(weightWorkouts.length / 2));
+        const avgFirst = firstHalf.reduce((s, w) => s + w.totalVolume, 0) / firstHalf.length;
+        const avgSecond = secondHalf.reduce((s, w) => s + w.totalVolume, 0) / secondHalf.length;
+        const trend = ((avgSecond - avgFirst) / avgFirst * 100).toFixed(0);
+        if (trend > 5) {
+          insights.push({
+            type: 'progress',
+            icon: '🏋️',
+            title: 'Volume Trending Up',
+            body: `Your recent lifting volume is up ${trend}% compared to earlier sessions. Progressive overload is working — keep it going.`,
+            priority: 3
+          });
+        } else if (trend < -10) {
+          insights.push({
+            type: 'pattern',
+            icon: '📉',
+            title: 'Volume Declining',
+            body: `Lifting volume has dropped ${Math.abs(trend)}% recently. This could be intentional (deload) or a sign of accumulated fatigue. Worth keeping an eye on.`,
+            priority: 2
+          });
+        }
+      }
+
+      // 7. Cycling distance trend
+      const cyclingWorkouts = recent.filter(w => w.cycling && w.cycling.distance > 0);
+      if (cyclingWorkouts.length >= 4) {
+        const recentCycling = cyclingWorkouts.slice(0, Math.floor(cyclingWorkouts.length / 2));
+        const olderCycling = cyclingWorkouts.slice(Math.floor(cyclingWorkouts.length / 2));
+        const avgRecent = recentCycling.reduce((s, w) => s + w.cycling.distance, 0) / recentCycling.length;
+        const avgOlder = olderCycling.reduce((s, w) => s + w.cycling.distance, 0) / olderCycling.length;
+        const trend = ((avgRecent - avgOlder) / avgOlder * 100).toFixed(0);
+        if (Math.abs(trend) > 10) {
+          insights.push({
+            type: 'progress',
+            icon: '🚴',
+            title: trend > 0 ? 'Cycling Distance Increasing' : 'Cycling Distance Dropping',
+            body: trend > 0
+              ? `Average ride distance is up ${trend}% recently. Great consistency — make sure you're fuelling the extra miles.`
+              : `Ride distances have dropped ${Math.abs(trend)}%. Might be worth checking if fatigue or schedule is the cause.`,
+            priority: 3
+          });
+        }
+      }
+
+      // 8. Weekly consistency
+      const weeks = {};
+      workouts.forEach(w => {
+        const d = new Date(w.date);
+        const weekStart = new Date(d);
+        weekStart.setDate(d.getDate() - d.getDay());
+        const key = weekStart.toISOString().split('T')[0];
+        weeks[key] = (weeks[key] || 0) + 1;
+      });
+      const weekCounts = Object.values(weeks);
+      if (weekCounts.length >= 4) {
+        const avg = weekCounts.reduce((s, c) => s + c, 0) / weekCounts.length;
+        const variance = weekCounts.reduce((s, c) => s + Math.pow(c - avg, 2), 0) / weekCounts.length;
+        const cv = Math.sqrt(variance) / avg;
+        if (cv < 0.3) {
+          insights.push({
+            type: 'progress',
+            icon: '📅',
+            title: 'Great Consistency',
+            body: `You average ${avg.toFixed(1)} workouts per week with low variation. Consistency is the #1 predictor of long-term results. Keep showing up.`,
+            priority: 4
+          });
+        }
+      }
+
+      // 9. Calories burned trends
+      const withCalsBurned = recent.filter(w => w.postWorkout.caloriesBurned > 0);
+      if (withCalsBurned.length >= 4) {
+        const firstHalf = withCalsBurned.slice(Math.floor(withCalsBurned.length / 2));
+        const secondHalf = withCalsBurned.slice(0, Math.floor(withCalsBurned.length / 2));
+        const avgFirst = firstHalf.reduce((s, w) => s + w.postWorkout.caloriesBurned, 0) / firstHalf.length;
+        const avgSecond = secondHalf.reduce((s, w) => s + w.postWorkout.caloriesBurned, 0) / secondHalf.length;
+        const trend = ((avgSecond - avgFirst) / avgFirst * 100).toFixed(0);
+        if (trend > 10) {
+          insights.push({
+            type: 'progress',
+            icon: '🔥',
+            title: 'Calorie Burn Increasing',
+            body: `Your average calories burned per session is up ${trend}% recently (${Math.round(avgSecond)} vs ${Math.round(avgFirst)} kcal). You're pushing harder — make sure nutrition keeps up with the increased output.`,
+            priority: 3
+          });
+        } else if (trend < -15) {
+          insights.push({
+            type: 'pattern',
+            icon: '🔥',
+            title: 'Calorie Burn Dropping',
+            body: `Average burn per session has decreased ${Math.abs(trend)}% recently. Could be lighter sessions, shorter duration, or improved efficiency. Worth checking if it aligns with your goals.`,
+            priority: 3
+          });
+        }
+
+        // Correlation: calories burned vs RPE
+        const highBurn = withCalsBurned.filter(w => w.postWorkout.caloriesBurned >= 400);
+        const lowBurn = withCalsBurned.filter(w => w.postWorkout.caloriesBurned < 250);
+        if (highBurn.length >= 2 && lowBurn.length >= 2) {
+          const avgRpeHigh = highBurn.reduce((s, w) => s + w.postWorkout.rpe, 0) / highBurn.length;
+          const avgRpeLow = lowBurn.reduce((s, w) => s + w.postWorkout.rpe, 0) / lowBurn.length;
+          const diff = (avgRpeHigh - avgRpeLow).toFixed(1);
+          if (diff > 1) {
+            insights.push({
+              type: 'pattern',
+              icon: '📊',
+              title: 'Burn & Effort Correlation',
+              body: `Sessions where you burn 400+ kcal average RPE ${avgRpeHigh.toFixed(1)} vs ${avgRpeLow.toFixed(1)} for lighter sessions. Your perceived effort tracks well with actual calorie output.`,
+              priority: 4
+            });
+          }
+        }
+      }
+
+      // 10. Strength progression — per-exercise 1RM gains
+      const exHistory = getExerciseHistory(workouts);
+      Object.entries(exHistory).forEach(([name, entries]) => {
+        if (entries.length < 4) return;
+        const first = entries[0];
+        const last = entries[entries.length - 1];
+        const change = last.best1RM - first.best1RM;
+        const pct = first.best1RM > 0 ? ((change / first.best1RM) * 100).toFixed(0) : 0;
+        if (change > 2 && pct > 5) {
+          insights.push({
+            type: 'progress',
+            icon: '💪',
+            title: `Getting Stronger: ${name}`,
+            body: `Your estimated 1RM on ${name} has increased from ${first.best1RM}kg to ${last.best1RM}kg (+${pct}%) over ${entries.length} sessions. Progressive overload is working.`,
+            priority: 2
+          });
+        } else if (change < -2 && pct < -5) {
+          insights.push({
+            type: 'pattern',
+            icon: '📉',
+            title: `Strength Dip: ${name}`,
+            body: `Your estimated 1RM on ${name} has dropped from ${first.best1RM}kg to ${last.best1RM}kg (${pct}%). Could be fatigue, poor recovery, or deload — worth monitoring.`,
+            priority: 2
+          });
+        }
+      });
+
+      // Sort by priority
+      insights.sort((a, b) => (a.priority || 5) - (b.priority || 5));
+      return insights;
+    }
+
+    function renderInsightCard(insight) {
+      return `
+        <div class="insight-card animate-in">
+          <div class="insight-icon ${insight.type}">${insight.icon}</div>
+          <div>
+            <div class="insight-title">${insight.title}</div>
+            <div class="insight-body">${insight.body}</div>
+          </div>
+        </div>
+      `;
+    }
+
+    // =====================================================================
+    // INSIGHTS PAGE
+    // =====================================================================
+    function renderInsights() {
+      const workouts = getWorkouts();
+      const insights = generateInsights(workouts);
+
+      if (insights.length > 0) {
+        document.getElementById('insights-list').innerHTML = insights.map(i => renderInsightCard(i)).join('');
+        document.getElementById('no-insights').classList.add('hidden');
+      } else {
+        document.getElementById('insights-list').innerHTML = '';
+        document.getElementById('no-insights').classList.remove('hidden');
+      }
+    }
+
+    // =====================================================================
+    // CHARTS
+    // =====================================================================
+    let weekChartInstance = null;
+    let trendChartInstance = null;
+    let wellbeingChartInstance = null;
+    let rpeChartInstance = null;
+    let cyclingChartInstance = null;
+    let caloriesBurnedChartInstance = null;
+    let strengthMaxChartInstance = null;
+    let strength1rmChartInstance = null;
+    let strengthVolChartInstance = null;
+    let strengthAllChartInstance = null;
+
+    const chartDefaults = {
+      color: '#9ab89a',
+      borderColor: '#1e3a1e',
+      font: { family: 'Inter' }
+    };
+
+    Chart.defaults.color = chartDefaults.color;
+    Chart.defaults.borderColor = chartDefaults.borderColor;
+    Chart.defaults.font.family = chartDefaults.font.family;
+
+    function renderWeekChart(workouts) {
+      const now = new Date();
+      const days = ['Mon','Tue','Wed','Thu','Fri','Sat','Sun'];
+      const data = days.map(() => ({ volume: 0, rpe: 0, count: 0 }));
+
+      workouts.forEach(w => {
+        const d = new Date(w.date);
+        const diff = (now - d) / (1000*60*60*24);
+        if (diff <= 7) {
+          let dayIdx = d.getDay() - 1;
+          if (dayIdx < 0) dayIdx = 6;
+          data[dayIdx].volume += w.totalVolume || 0;
+          data[dayIdx].rpe += w.postWorkout.rpe;
+          data[dayIdx].count++;
+        }
+      });
+
+      const ctx = document.getElementById('weekChart').getContext('2d');
+      if (weekChartInstance) weekChartInstance.destroy();
+
+      weekChartInstance = new Chart(ctx, {
+        type: 'bar',
+        data: {
+          labels: days,
+          datasets: [{
+            label: 'Volume (kg)',
+            data: data.map(d => d.volume),
+            backgroundColor: 'rgba(34, 197, 94, 0.3)',
+            borderColor: 'rgba(34, 197, 94, 0.8)',
+            borderWidth: 1,
+            borderRadius: 6,
+            yAxisID: 'y',
+          }, {
+            label: 'RPE',
+            data: data.map(d => d.count > 0 ? d.rpe / d.count : null),
+            type: 'line',
+            borderColor: '#f59e0b',
+            backgroundColor: 'rgba(245, 158, 11, 0.1)',
+            pointBackgroundColor: '#f59e0b',
+            tension: 0.3,
+            yAxisID: 'y1',
+            spanGaps: true,
+          }]
+        },
+        options: {
+          responsive: true,
+          maintainAspectRatio: false,
+          interaction: { mode: 'index', intersect: false },
+          scales: {
+            y: {
+              beginAtZero: true,
+              grid: { color: 'rgba(30,58,30,0.5)' },
+              title: { display: true, text: 'Volume (kg)' }
+            },
+            y1: {
+              position: 'right',
+              beginAtZero: true,
+              max: 10,
+              grid: { display: false },
+              title: { display: true, text: 'RPE' }
+            },
+            x: { grid: { display: false } }
+          },
+          plugins: { legend: { labels: { usePointStyle: true, pointStyle: 'circle' } } }
+        }
+      });
+    }
+
+    let trendRange = '4w';
+
+    function setTrendRange(range, btn) {
+      trendRange = range;
+      document.querySelectorAll('.chart-tab').forEach(t => t.classList.remove('active'));
+      btn.classList.add('active');
+      renderTrends();
+    }
+
+    function renderTrends() {
+      const workouts = getWorkouts();
+      const now = new Date();
+      let maxDays;
+      switch (trendRange) {
+        case '4w': maxDays = 28; break;
+        case '8w': maxDays = 56; break;
+        case '12w': maxDays = 84; break;
+        default: maxDays = 365;
+      }
+
+      const filtered = workouts.filter(w => (now - new Date(w.date)) / (1000*60*60*24) <= maxDays).reverse();
+
+      // Trend chart — Volume + RPE over time
+      const trendCtx = document.getElementById('trendChart').getContext('2d');
+      if (trendChartInstance) trendChartInstance.destroy();
+
+      trendChartInstance = new Chart(trendCtx, {
+        type: 'bar',
+        data: {
+          labels: filtered.map(w => new Date(w.date).toLocaleDateString('en-GB', { day: 'numeric', month: 'short' })),
+          datasets: [{
+            label: 'Volume (kg)',
+            data: filtered.map(w => w.totalVolume || 0),
+            backgroundColor: 'rgba(34, 197, 94, 0.3)',
+            borderColor: 'rgba(34, 197, 94, 0.8)',
+            borderWidth: 1,
+            borderRadius: 4,
+            yAxisID: 'y',
+          }, {
+            label: 'RPE',
+            data: filtered.map(w => w.postWorkout.rpe),
+            type: 'line',
+            borderColor: '#f59e0b',
+            pointBackgroundColor: '#f59e0b',
+            tension: 0.3,
+            yAxisID: 'y1',
+          }]
+        },
+        options: {
+          responsive: true,
+          maintainAspectRatio: false,
+          interaction: { mode: 'index', intersect: false },
+          scales: {
+            y: { beginAtZero: true, grid: { color: 'rgba(30,58,30,0.5)' }, title: { display: true, text: 'Volume (kg)' } },
+            y1: { position: 'right', beginAtZero: true, max: 10, grid: { display: false }, title: { display: true, text: 'RPE' } },
+            x: { grid: { display: false } }
+          },
+          plugins: { legend: { labels: { usePointStyle: true, pointStyle: 'circle' } } }
+        }
+      });
+
+      // Calories Burned chart
+      const calBurnData = filtered.filter(w => w.postWorkout.caloriesBurned > 0);
+      const calBurnCtx = document.getElementById('caloriesBurnedChart').getContext('2d');
+      if (caloriesBurnedChartInstance) caloriesBurnedChartInstance.destroy();
+
+      if (calBurnData.length > 0) {
+        // Calculate rolling 7-session average
+        const rollingAvg = calBurnData.map((w, i) => {
+          const window = calBurnData.slice(Math.max(0, i - 6), i + 1);
+          return Math.round(window.reduce((s, x) => s + x.postWorkout.caloriesBurned, 0) / window.length);
+        });
+
+        caloriesBurnedChartInstance = new Chart(calBurnCtx, {
+          type: 'bar',
+          data: {
+            labels: calBurnData.map(w => new Date(w.date).toLocaleDateString('en-GB', { day: 'numeric', month: 'short' })),
+            datasets: [{
+              label: 'Calories Burned (kcal)',
+              data: calBurnData.map(w => w.postWorkout.caloriesBurned),
+              backgroundColor: calBurnData.map(w => {
+                const c = w.postWorkout.caloriesBurned;
+                if (c >= 500) return 'rgba(239, 68, 68, 0.4)';
+                if (c >= 300) return 'rgba(245, 158, 11, 0.4)';
+                return 'rgba(34, 197, 94, 0.3)';
+              }),
+              borderColor: calBurnData.map(w => {
+                const c = w.postWorkout.caloriesBurned;
+                if (c >= 500) return 'rgba(239, 68, 68, 0.8)';
+                if (c >= 300) return 'rgba(245, 158, 11, 0.8)';
+                return 'rgba(34, 197, 94, 0.8)';
+              }),
+              borderWidth: 1,
+              borderRadius: 4,
+            }, {
+              label: 'Rolling Average',
+              data: rollingAvg,
+              type: 'line',
+              borderColor: '#f59e0b',
+              pointBackgroundColor: '#f59e0b',
+              tension: 0.4,
+              pointRadius: 3,
+              borderWidth: 2,
+              borderDash: [5, 3],
+            }]
+          },
+          options: {
+            responsive: true,
+            maintainAspectRatio: false,
+            interaction: { mode: 'index', intersect: false },
+            scales: {
+              y: { beginAtZero: true, grid: { color: 'rgba(30,58,30,0.5)' }, title: { display: true, text: 'kcal' } },
+              x: { grid: { display: false } }
+            },
+            plugins: { legend: { labels: { usePointStyle: true, pointStyle: 'circle' } } }
+          }
+        });
+      } else {
+        caloriesBurnedChartInstance = new Chart(calBurnCtx, {
+          type: 'bar',
+          data: { labels: ['No data yet'], datasets: [{ data: [0], backgroundColor: 'rgba(34,197,94,0.1)' }] },
+          options: { responsive: true, maintainAspectRatio: false, plugins: { legend: { display: false } }, scales: { y: { display: false }, x: { grid: { display: false } } } }
+        });
+      }
+
+      // Wellbeing chart — Mood, Energy, Sleep
+      const wellCtx = document.getElementById('wellbeingChart').getContext('2d');
+      if (wellbeingChartInstance) wellbeingChartInstance.destroy();
+
+      wellbeingChartInstance = new Chart(wellCtx, {
+        type: 'line',
+        data: {
+          labels: filtered.map(w => new Date(w.date).toLocaleDateString('en-GB', { day: 'numeric', month: 'short' })),
+          datasets: [
+            { label: 'Mood', data: filtered.map(w => w.preWorkout.mood), borderColor: '#22c55e', backgroundColor: 'rgba(34,197,94,0.05)', tension: 0.3, fill: true },
+            { label: 'Energy', data: filtered.map(w => w.preWorkout.energy), borderColor: '#f59e0b', tension: 0.3 },
+            { label: 'Sleep', data: filtered.map(w => w.preWorkout.sleepQuality), borderColor: '#60a5fa', tension: 0.3 },
+          ]
+        },
+        options: {
+          responsive: true,
+          maintainAspectRatio: false,
+          scales: {
+            y: { min: 0, max: 10, grid: { color: 'rgba(30,58,30,0.5)' } },
+            x: { grid: { display: false } }
+          },
+          plugins: { legend: { labels: { usePointStyle: true, pointStyle: 'circle' } } }
+        }
+      });
+
+      // RPE chart
+      const rpeCtx = document.getElementById('rpeChart').getContext('2d');
+      if (rpeChartInstance) rpeChartInstance.destroy();
+
+      const rpeData = filtered.filter(w => w.totalVolume > 0);
+      rpeChartInstance = new Chart(rpeCtx, {
+        type: 'scatter',
+        data: {
+          datasets: [{
+            label: 'RPE vs Volume',
+            data: rpeData.map(w => ({ x: w.postWorkout.rpe, y: w.totalVolume })),
+            backgroundColor: 'rgba(34, 197, 94, 0.5)',
+            borderColor: 'rgba(34, 197, 94, 0.8)',
+            pointRadius: 6,
+            pointHoverRadius: 8,
+          }]
+        },
+        options: {
+          responsive: true,
+          maintainAspectRatio: false,
+          scales: {
+            x: { min: 0, max: 10, title: { display: true, text: 'RPE' }, grid: { color: 'rgba(30,58,30,0.5)' } },
+            y: { beginAtZero: true, title: { display: true, text: 'Volume (kg)' }, grid: { color: 'rgba(30,58,30,0.5)' } }
+          },
+          plugins: { legend: { display: false } }
+        }
+      });
+
+      // Cycling chart
+      const cyclingData = filtered.filter(w => w.cycling && w.cycling.distance > 0);
+      const cycCtx = document.getElementById('cyclingChart').getContext('2d');
+      if (cyclingChartInstance) cyclingChartInstance.destroy();
+
+      cyclingChartInstance = new Chart(cycCtx, {
+        type: 'line',
+        data: {
+          labels: cyclingData.map(w => new Date(w.date).toLocaleDateString('en-GB', { day: 'numeric', month: 'short' })),
+          datasets: [
+            { label: 'Distance (km)', data: cyclingData.map(w => w.cycling.distance), borderColor: '#60a5fa', backgroundColor: 'rgba(96,165,250,0.1)', tension: 0.3, fill: true, yAxisID: 'y' },
+            { label: 'Duration (min)', data: cyclingData.map(w => w.cycling.duration), borderColor: '#a855f7', tension: 0.3, yAxisID: 'y1' },
+          ]
+        },
+        options: {
+          responsive: true,
+          maintainAspectRatio: false,
+          scales: {
+            y: { beginAtZero: true, grid: { color: 'rgba(30,58,30,0.5)' }, title: { display: true, text: 'Distance (km)' } },
+            y1: { position: 'right', beginAtZero: true, grid: { display: false }, title: { display: true, text: 'Duration (min)' } },
+            x: { grid: { display: false } }
+          },
+          plugins: { legend: { labels: { usePointStyle: true, pointStyle: 'circle' } } }
+        }
+      });
+
+      // Populate exercise selector & render strength overview
+      populateExerciseSelector(workouts);
+      renderStrengthAllChart(workouts);
+    }
+
+    // =====================================================================
+    // STRENGTH PROGRESSION
+    // =====================================================================
+
+    // Epley formula: estimated 1RM = weight × (1 + reps / 30)
+    function estimate1RM(weight, reps) {
+      if (reps <= 0 || weight <= 0) return 0;
+      if (reps === 1) return weight;
+      return weight * (1 + reps / 30);
+    }
+
+    function getExerciseHistory(workouts) {
+      // Returns { exerciseName: [ { date, maxWeight, best1RM, totalVolume, bestSet } ] }
+      const history = {};
+      workouts.forEach(w => {
+        if (!w.exercises) return;
+        w.exercises.forEach(ex => {
+          const name = ex.name;
+          if (!history[name]) history[name] = [];
+          let maxWeight = 0;
+          let best1RM = 0;
+          let totalVolume = 0;
+          let bestSet = null;
+          ex.sets.forEach(s => {
+            if (s.weight > maxWeight) maxWeight = s.weight;
+            const e1rm = estimate1RM(s.weight, s.reps);
+            if (e1rm > best1RM) {
+              best1RM = e1rm;
+              bestSet = s;
+            }
+            totalVolume += s.weight * s.reps;
+          });
+          history[name].push({
+            date: w.date,
+            maxWeight,
+            best1RM: Math.round(best1RM * 10) / 10,
+            totalVolume,
+            bestSet
+          });
+        });
+      });
+      // Sort each exercise's entries by date ascending
+      Object.keys(history).forEach(name => {
+        history[name].sort((a, b) => new Date(a.date) - new Date(b.date));
+      });
+      return history;
+    }
+
+    function populateExerciseSelector(workouts) {
+      const history = getExerciseHistory(workouts);
+      const select = document.getElementById('strength-exercise-select');
+      const currentVal = select.value;
+      const exerciseNames = Object.keys(history).sort();
+
+      select.innerHTML = '<option value="">Select an exercise...</option>' +
+        exerciseNames.map(name => `<option value="${name}">${name} (${history[name].length} sessions)</option>`).join('');
+
+      // Restore selection if it still exists
+      if (currentVal && exerciseNames.includes(currentVal)) {
+        select.value = currentVal;
+      }
+    }
+
+    function renderStrengthChart() {
+      const exerciseName = document.getElementById('strength-exercise-select').value;
+      const container = document.getElementById('strength-charts-container');
+
+      if (!exerciseName) {
+        container.classList.add('hidden');
+        return;
+      }
+      container.classList.remove('hidden');
+
+      const workouts = getWorkouts();
+      const history = getExerciseHistory(workouts);
+      const data = history[exerciseName] || [];
+
+      if (data.length === 0) {
+        container.classList.add('hidden');
+        return;
+      }
+
+      const labels = data.map(d => new Date(d.date).toLocaleDateString('en-GB', { day: 'numeric', month: 'short' }));
+
+      // Stats cards
+      const firstEntry = data[0];
+      const lastEntry = data[data.length - 1];
+      const maxWeightEver = Math.max(...data.map(d => d.maxWeight));
+      const best1RMEver = Math.max(...data.map(d => d.best1RM));
+      const weightChange = lastEntry.maxWeight - firstEntry.maxWeight;
+      const oneRMChange = lastEntry.best1RM - firstEntry.best1RM;
+      const weightPct = firstEntry.maxWeight > 0 ? ((weightChange / firstEntry.maxWeight) * 100).toFixed(0) : 0;
+      const oneRMPct = firstEntry.best1RM > 0 ? ((oneRMChange / firstEntry.best1RM) * 100).toFixed(0) : 0;
+
+      document.getElementById('strength-stats').innerHTML = `
+        <div class="card">
+          <div class="card-header"><span class="card-title">Max Weight</span></div>
+          <div class="card-value">${maxWeightEver}<span style="font-size:0.9rem;font-weight:400">kg</span></div>
+          <div class="card-sub ${weightChange >= 0 ? 'trend-up' : 'trend-down'}">${weightChange >= 0 ? '↑' : '↓'} ${Math.abs(weightChange)}kg (${weightChange >= 0 ? '+' : ''}${weightPct}%) since first logged</div>
+        </div>
+        <div class="card">
+          <div class="card-header"><span class="card-title">Best Est. 1RM</span></div>
+          <div class="card-value">${best1RMEver}<span style="font-size:0.9rem;font-weight:400">kg</span></div>
+          <div class="card-sub ${oneRMChange >= 0 ? 'trend-up' : 'trend-down'}">${oneRMChange >= 0 ? '↑' : '↓'} ${Math.abs(oneRMChange).toFixed(1)}kg (${oneRMChange >= 0 ? '+' : ''}${oneRMPct}%) since first logged</div>
+        </div>
+        <div class="card">
+          <div class="card-header"><span class="card-title">Sessions Logged</span></div>
+          <div class="card-value">${data.length}</div>
+          <div class="card-sub">for ${exerciseName}</div>
+        </div>
+      `;
+
+      // Max Weight chart
+      const maxCtx = document.getElementById('strengthMaxChart').getContext('2d');
+      if (strengthMaxChartInstance) strengthMaxChartInstance.destroy();
+
+      strengthMaxChartInstance = new Chart(maxCtx, {
+        type: 'line',
+        data: {
+          labels,
+          datasets: [{
+            label: 'Max Weight (kg)',
+            data: data.map(d => d.maxWeight),
+            borderColor: '#22c55e',
+            backgroundColor: 'rgba(34, 197, 94, 0.1)',
+            tension: 0.3,
+            fill: true,
+            pointBackgroundColor: '#22c55e',
+            pointRadius: 5,
+            pointHoverRadius: 7,
+          }]
+        },
+        options: {
+          responsive: true,
+          maintainAspectRatio: false,
+          scales: {
+            y: { grid: { color: 'rgba(30,58,30,0.5)' }, title: { display: true, text: 'kg' } },
+            x: { grid: { display: false } }
+          },
+          plugins: { legend: { display: false } }
+        }
+      });
+
+      // Estimated 1RM chart
+      const ormCtx = document.getElementById('strength1rmChart').getContext('2d');
+      if (strength1rmChartInstance) strength1rmChartInstance.destroy();
+
+      strength1rmChartInstance = new Chart(ormCtx, {
+        type: 'line',
+        data: {
+          labels,
+          datasets: [{
+            label: 'Estimated 1RM (kg)',
+            data: data.map(d => d.best1RM),
+            borderColor: '#f59e0b',
+            backgroundColor: 'rgba(245, 158, 11, 0.1)',
+            tension: 0.3,
+            fill: true,
+            pointBackgroundColor: '#f59e0b',
+            pointRadius: 5,
+            pointHoverRadius: 7,
+          }]
+        },
+        options: {
+          responsive: true,
+          maintainAspectRatio: false,
+          scales: {
+            y: { grid: { color: 'rgba(30,58,30,0.5)' }, title: { display: true, text: 'kg (est.)' } },
+            x: { grid: { display: false } }
+          },
+          plugins: { legend: { display: false } }
+        }
+      });
+
+      // Volume per session chart
+      const volCtx = document.getElementById('strengthVolChart').getContext('2d');
+      if (strengthVolChartInstance) strengthVolChartInstance.destroy();
+
+      strengthVolChartInstance = new Chart(volCtx, {
+        type: 'bar',
+        data: {
+          labels,
+          datasets: [{
+            label: 'Volume (kg)',
+            data: data.map(d => d.totalVolume),
+            backgroundColor: 'rgba(34, 197, 94, 0.3)',
+            borderColor: 'rgba(34, 197, 94, 0.8)',
+            borderWidth: 1,
+            borderRadius: 4,
+          }]
+        },
+        options: {
+          responsive: true,
+          maintainAspectRatio: false,
+          scales: {
+            y: { beginAtZero: true, grid: { color: 'rgba(30,58,30,0.5)' }, title: { display: true, text: 'Total kg (weight × reps)' } },
+            x: { grid: { display: false } }
+          },
+          plugins: { legend: { display: false } }
+        }
+      });
+    }
+
+    function renderStrengthAllChart(workouts) {
+      const history = getExerciseHistory(workouts);
+      const exerciseNames = Object.keys(history);
+
+      if (exerciseNames.length === 0) {
+        document.getElementById('strength-all-container').classList.add('hidden');
+        return;
+      }
+      document.getElementById('strength-all-container').classList.remove('hidden');
+
+      // Get best 1RM for each exercise
+      const bestData = exerciseNames.map(name => ({
+        name,
+        best1RM: Math.max(...history[name].map(d => d.best1RM)),
+        maxWeight: Math.max(...history[name].map(d => d.maxWeight)),
+      })).sort((a, b) => b.best1RM - a.best1RM);
+
+      const ctx = document.getElementById('strengthAllChart').getContext('2d');
+      if (strengthAllChartInstance) strengthAllChartInstance.destroy();
+
+      // Dynamic height based on number of exercises
+      const chartContainer = document.getElementById('strengthAllChart').parentElement;
+      chartContainer.style.height = Math.max(200, bestData.length * 40) + 'px';
+
+      strengthAllChartInstance = new Chart(ctx, {
+        type: 'bar',
+        data: {
+          labels: bestData.map(d => d.name),
+          datasets: [{
+            label: 'Est. 1RM (kg)',
+            data: bestData.map(d => d.best1RM),
+            backgroundColor: 'rgba(34, 197, 94, 0.4)',
+            borderColor: 'rgba(34, 197, 94, 0.8)',
+            borderWidth: 1,
+            borderRadius: 4,
+          }, {
+            label: 'Max Weight (kg)',
+            data: bestData.map(d => d.maxWeight),
+            backgroundColor: 'rgba(96, 165, 250, 0.4)',
+            borderColor: 'rgba(96, 165, 250, 0.8)',
+            borderWidth: 1,
+            borderRadius: 4,
+          }]
+        },
+        options: {
+          indexAxis: 'y',
+          responsive: true,
+          maintainAspectRatio: false,
+          scales: {
+            x: { beginAtZero: true, grid: { color: 'rgba(30,58,30,0.5)' }, title: { display: true, text: 'kg' } },
+            y: { grid: { display: false } }
+          },
+          plugins: { legend: { labels: { usePointStyle: true, pointStyle: 'circle' } } }
+        }
+      });
+    }
+
+    // =====================================================================
+    // CHECK-IN DATA LAYER
+    // =====================================================================
+    const CHECKINS_KEY = 'ironpulse_checkins';
+
+    function getCheckins() {
+      try {
+        return JSON.parse(localStorage.getItem(CHECKINS_KEY)) || [];
+      } catch { return []; }
+    }
+
+    function saveCheckins(checkins) {
+      localStorage.setItem(CHECKINS_KEY, JSON.stringify(checkins));
+    }
+
+    function saveCheckin() {
+      const dateVal = document.getElementById('checkin-date').value;
+      if (!dateVal) { showToast('Please select a date'); return; }
+
+      const entry = {
+        date: dateVal,
+        mood: parseInt(document.getElementById('checkin-mood').value),
+        energy: parseInt(document.getElementById('checkin-energy').value),
+        sleepQuality: parseInt(document.getElementById('checkin-sleep-quality').value),
+        sleepHours: parseFloat(document.getElementById('checkin-sleep-hours').value) || null,
+        notes: document.getElementById('checkin-notes').value,
+        id: Date.now(),
+        createdAt: new Date().toISOString()
+      };
+
+      const checkins = getCheckins();
+      const existingIdx = checkins.findIndex(c => c.date === dateVal);
+      if (existingIdx >= 0) {
+        entry.id = checkins[existingIdx].id;
+        checkins[existingIdx] = entry;
+      } else {
+        checkins.push(entry);
+      }
+      checkins.sort((a, b) => b.date.localeCompare(a.date));
+      saveCheckins(checkins);
+      showToast(existingIdx >= 0 ? 'Check-in updated!' : 'Check-in saved!');
+      renderCheckin();
+    }
+
+    function deleteCheckin(date) {
+      if (!confirm('Delete this check-in?')) return;
+      const checkins = getCheckins().filter(c => c.date !== date);
+      saveCheckins(checkins);
+      showToast('Check-in deleted');
+      renderCheckin();
+    }
+
+    function editCheckin(date) {
+      const entry = getCheckins().find(c => c.date === date);
+      if (!entry) return;
+      document.getElementById('checkin-date').value = entry.date;
+      document.getElementById('checkin-mood').value = entry.mood;
+      document.getElementById('checkin-energy').value = entry.energy;
+      document.getElementById('checkin-sleep-quality').value = entry.sleepQuality;
+      document.getElementById('checkin-sleep-hours').value = entry.sleepHours || '';
+      document.getElementById('checkin-notes').value = entry.notes || '';
+      // Update slider displays
+      document.getElementById('checkin-mood').closest('.slider-container').querySelector('.slider-value').textContent = entry.mood;
+      document.getElementById('checkin-energy').closest('.slider-container').querySelector('.slider-value').textContent = entry.energy;
+      document.getElementById('checkin-sleep-quality').closest('.slider-container').querySelector('.slider-value').textContent = entry.sleepQuality;
+      window.scrollTo({ top: 0, behavior: 'smooth' });
+    }
+
+    // =====================================================================
+    // CHECK-IN RENDERING
+    // =====================================================================
+    let checkinRange = '7d';
+    let checkinTrendChartInstance = null;
+
+    function setCheckinRange(range, btn) {
+      checkinRange = range;
+      document.querySelectorAll('#checkin-range-tabs .chart-tab').forEach(t => t.classList.remove('active'));
+      btn.classList.add('active');
+      renderCheckinChart();
+    }
+
+    function renderCheckin() {
+      // Default date to today
+      if (!document.getElementById('checkin-date').value) {
+        document.getElementById('checkin-date').value = new Date().toISOString().split('T')[0];
+      }
+      // Check if today already has an entry and pre-fill
+      const today = new Date().toISOString().split('T')[0];
+      const existing = getCheckins().find(c => c.date === today);
+      if (existing && document.getElementById('checkin-date').value === today) {
+        document.getElementById('checkin-mood').value = existing.mood;
+        document.getElementById('checkin-energy').value = existing.energy;
+        document.getElementById('checkin-sleep-quality').value = existing.sleepQuality;
+        document.getElementById('checkin-sleep-hours').value = existing.sleepHours || '';
+        document.getElementById('checkin-notes').value = existing.notes || '';
+        document.getElementById('checkin-mood').closest('.slider-container').querySelector('.slider-value').textContent = existing.mood;
+        document.getElementById('checkin-energy').closest('.slider-container').querySelector('.slider-value').textContent = existing.energy;
+        document.getElementById('checkin-sleep-quality').closest('.slider-container').querySelector('.slider-value').textContent = existing.sleepQuality;
+      }
+
+      const checkins = getCheckins();
+      renderCheckinStats(checkins);
+      renderCheckinChart();
+      renderCheckinHistory(checkins);
+    }
+
+    function renderCheckinStats(checkins) {
+      const now = new Date();
+      const last7 = checkins.filter(c => (now - new Date(c.date)) / (1000*60*60*24) <= 7);
+
+      const avgMood = last7.length > 0 ? (last7.reduce((s, c) => s + c.mood, 0) / last7.length).toFixed(1) : '-';
+      const avgEnergy = last7.length > 0 ? (last7.reduce((s, c) => s + c.energy, 0) / last7.length).toFixed(1) : '-';
+      const avgSleep = last7.length > 0 ? (last7.reduce((s, c) => s + c.sleepQuality, 0) / last7.length).toFixed(1) : '-';
+      const avgHours = last7.filter(c => c.sleepHours).length > 0
+        ? (last7.filter(c => c.sleepHours).reduce((s, c) => s + c.sleepHours, 0) / last7.filter(c => c.sleepHours).length).toFixed(1)
+        : '-';
+
+      document.getElementById('checkin-stats').innerHTML = `
+        <div class="card">
+          <div class="card-header"><span class="card-title">Avg Mood</span></div>
+          <div class="card-value">${avgMood}<span style="font-size:0.9rem;font-weight:400">/10</span></div>
+          <div class="card-sub">7-day average</div>
+        </div>
+        <div class="card">
+          <div class="card-header"><span class="card-title">Avg Energy</span></div>
+          <div class="card-value">${avgEnergy}<span style="font-size:0.9rem;font-weight:400">/10</span></div>
+          <div class="card-sub">7-day average</div>
+        </div>
+        <div class="card">
+          <div class="card-header"><span class="card-title">Avg Sleep Quality</span></div>
+          <div class="card-value">${avgSleep}<span style="font-size:0.9rem;font-weight:400">/10</span></div>
+          <div class="card-sub">7-day average</div>
+        </div>
+        <div class="card">
+          <div class="card-header"><span class="card-title">Avg Sleep Hours</span></div>
+          <div class="card-value">${avgHours}<span style="font-size:0.9rem;font-weight:400">h</span></div>
+          <div class="card-sub">7-day average</div>
+        </div>
+      `;
+    }
+
+    function renderCheckinChart() {
+      const checkins = getCheckins();
+      const now = new Date();
+      let maxDays;
+      switch (checkinRange) {
+        case '7d': maxDays = 7; break;
+        case '14d': maxDays = 14; break;
+        case '30d': maxDays = 30; break;
+        default: maxDays = 9999;
+      }
+
+      const filtered = checkins
+        .filter(c => (now - new Date(c.date)) / (1000*60*60*24) <= maxDays)
+        .sort((a, b) => a.date.localeCompare(b.date));
+
+      const ctx = document.getElementById('checkinTrendChart').getContext('2d');
+      if (checkinTrendChartInstance) checkinTrendChartInstance.destroy();
+
+      checkinTrendChartInstance = new Chart(ctx, {
+        type: 'line',
+        data: {
+          labels: filtered.map(c => {
+            const d = new Date(c.date);
+            return d.toLocaleDateString('en-GB', { day: 'numeric', month: 'short' });
+          }),
+          datasets: [
+            { label: 'Mood', data: filtered.map(c => c.mood), borderColor: '#22c55e', backgroundColor: 'rgba(34,197,94,0.05)', tension: 0.3, fill: true, pointRadius: 5, pointBackgroundColor: '#22c55e' },
+            { label: 'Energy', data: filtered.map(c => c.energy), borderColor: '#f59e0b', tension: 0.3, pointRadius: 4, pointBackgroundColor: '#f59e0b' },
+            { label: 'Sleep Quality', data: filtered.map(c => c.sleepQuality), borderColor: '#60a5fa', tension: 0.3, pointRadius: 4, pointBackgroundColor: '#60a5fa' },
+          ]
+        },
+        options: {
+          responsive: true,
+          maintainAspectRatio: false,
+          scales: {
+            y: { min: 0, max: 10, grid: { color: 'rgba(30,58,30,0.5)' } },
+            x: { grid: { display: false } }
+          },
+          plugins: { legend: { labels: { usePointStyle: true, pointStyle: 'circle' } } }
+        }
+      });
+    }
+
+    function renderCheckinHistory(checkins) {
+      if (checkins.length === 0) {
+        document.getElementById('checkin-history').innerHTML = '<div class="empty-state"><h3>No check-ins yet</h3><p>Log your first check-in above to start tracking how you feel.</p></div>';
+        return;
+      }
+
+      document.getElementById('checkin-history').innerHTML = checkins.map(c => {
+        const d = new Date(c.date);
+        const day = d.getDate();
+        const month = d.toLocaleString('en', { month: 'short' }).toUpperCase();
+        const dayName = d.toLocaleDateString('en', { weekday: 'short' });
+        const moodColor = c.mood >= 7 ? 'rpe-low' : c.mood >= 4 ? 'rpe-med' : 'rpe-high';
+        return `
+          <div class="history-item" onclick="editCheckin('${c.date}')" style="grid-template-columns:60px 1fr auto auto">
+            <div class="history-date">
+              <div class="day">${day}</div>
+              <div class="month">${month}</div>
+            </div>
+            <div class="history-info">
+              <h3>${dayName}</h3>
+              <p>Mood: ${c.mood} &nbsp; Energy: ${c.energy} &nbsp; Sleep: ${c.sleepQuality}${c.sleepHours ? ' (' + c.sleepHours + 'h)' : ''}${c.notes ? ' — ' + c.notes : ''}</p>
+            </div>
+            <div class="rpe-badge ${moodColor}">${c.mood}</div>
+            <button class="btn-icon" onclick="event.stopPropagation();deleteCheckin('${c.date}')" title="Delete check-in" style="color:var(--danger)">
+              <svg width="16" height="16" fill="none" stroke="currentColor" stroke-width="2"><path d="M3 6h10M5 6V4a1 1 0 011-1h4a1 1 0 011 1v2M7 9v4M9 9v4"/><path d="M4 6l.7 8.4a1 1 0 001 .6h4.6a1 1 0 001-.6L12 6"/></svg>
+            </button>
+          </div>
+        `;
+      }).join('');
+    }
+
+    // =====================================================================
+    // MACROS DATA LAYER
+    // =====================================================================
+    const MACROS_KEY = 'ironpulse_macros';
+
+    function getMacros() {
+      try {
+        return JSON.parse(localStorage.getItem(MACROS_KEY)) || [];
+      } catch { return []; }
+    }
+
+    function saveMacros(macros) {
+      localStorage.setItem(MACROS_KEY, JSON.stringify(macros));
+    }
+
+    function saveMacroEntry() {
+      const dateVal = document.getElementById('macro-date').value;
+      if (!dateVal) { showToast('Please select a date'); return; }
+
+      const calories = parseInt(document.getElementById('macro-calories').value) || 0;
+      const protein = parseInt(document.getElementById('macro-protein').value) || 0;
+      const carbs = parseInt(document.getElementById('macro-carbs').value) || 0;
+      const fats = parseInt(document.getElementById('macro-fats').value) || 0;
+      const water = parseFloat(document.getElementById('macro-water').value) || 0;
+      const fibre = parseInt(document.getElementById('macro-fibre').value) || 0;
+      const notes = document.getElementById('macro-notes').value;
+
+      if (calories === 0 && protein === 0 && carbs === 0 && fats === 0 && water === 0) {
+        showToast('Please enter at least one value');
+        return;
+      }
+
+      const macros = getMacros();
+      const existingIdx = macros.findIndex(m => m.date === dateVal);
+
+      if (existingIdx >= 0) {
+        // Accumulate onto existing day
+        const existing = macros[existingIdx];
+        existing.calories = (existing.calories || 0) + calories;
+        existing.protein = (existing.protein || 0) + protein;
+        existing.carbs = (existing.carbs || 0) + carbs;
+        existing.fats = (existing.fats || 0) + fats;
+        existing.water = Math.round(((existing.water || 0) + water) * 10) / 10;
+        existing.fibre = (existing.fibre || 0) + fibre;
+        if (notes) existing.notes = existing.notes ? existing.notes + ', ' + notes : notes;
+        existing.lastUpdated = new Date().toISOString();
+      } else {
+        macros.push({
+          date: dateVal,
+          calories, protein, carbs, fats, water, fibre, notes,
+          id: Date.now(),
+          createdAt: new Date().toISOString()
+        });
+      }
+
+      macros.sort((a, b) => b.date.localeCompare(a.date));
+      saveMacros(macros);
+
+      // Clear form inputs but keep the date
+      document.getElementById('macro-calories').value = '';
+      document.getElementById('macro-protein').value = '';
+      document.getElementById('macro-carbs').value = '';
+      document.getElementById('macro-fats').value = '';
+      document.getElementById('macro-water').value = '';
+      document.getElementById('macro-fibre').value = '';
+      document.getElementById('macro-notes').value = '';
+
+      showToast(existingIdx >= 0 ? 'Added to today\'s total!' : 'Macros saved!');
+      renderMacros();
+    }
+
+    function resetMacroDay() {
+      const dateVal = document.getElementById('macro-date').value || new Date().toISOString().split('T')[0];
+      if (!confirm(`Reset all macros for ${dateVal}?`)) return;
+      const macros = getMacros().filter(m => m.date !== dateVal);
+      saveMacros(macros);
+      showToast('Day reset');
+      renderMacros();
+    }
+
+    function deleteMacroEntry(date) {
+      if (!confirm('Delete macros for this day?')) return;
+      const macros = getMacros().filter(m => m.date !== date);
+      saveMacros(macros);
+      showToast('Macro entry deleted');
+      renderMacros();
+    }
+
+    function editMacroEntry(date) {
+      // Switch to that date so the user can add more to it
+      document.getElementById('macro-date').value = date;
+      updateMacroRunningTotal();
+      window.scrollTo({ top: 0, behavior: 'smooth' });
+    }
+
+    function updateMacroRunningTotal() {
+      const dateVal = document.getElementById('macro-date').value || new Date().toISOString().split('T')[0];
+      const entry = getMacros().find(m => m.date === dateVal);
+      const container = document.getElementById('macro-running-values');
+
+      if (entry) {
+        container.innerHTML = `
+          <div style="text-align:center">
+            <div style="font-size:1.5rem;font-weight:800;color:var(--green-400)">${entry.calories}</div>
+            <div class="text-muted text-sm">kcal</div>
+          </div>
+          <div style="text-align:center">
+            <div style="font-size:1.5rem;font-weight:800;color:#60a5fa">${entry.protein}g</div>
+            <div class="text-muted text-sm">protein</div>
+          </div>
+          <div style="text-align:center">
+            <div style="font-size:1.5rem;font-weight:800;color:#f59e0b">${entry.carbs}g</div>
+            <div class="text-muted text-sm">carbs</div>
+          </div>
+          <div style="text-align:center">
+            <div style="font-size:1.5rem;font-weight:800;color:var(--danger)">${entry.fats}g</div>
+            <div class="text-muted text-sm">fats</div>
+          </div>
+          <div style="text-align:center">
+            <div style="font-size:1.5rem;font-weight:800;color:#60a5fa">${entry.water}L</div>
+            <div class="text-muted text-sm">water</div>
+          </div>
+          <div style="text-align:center">
+            <div style="font-size:1.5rem;font-weight:800;color:var(--text-secondary)">${entry.fibre}g</div>
+            <div class="text-muted text-sm">fibre</div>
+          </div>
+        `;
+      } else {
+        container.innerHTML = `
+          <div style="grid-column:span 3;text-align:center;color:var(--text-muted);padding:8px 0">
+            Nothing logged yet for this day. Add your first entry below.
+          </div>
+        `;
+      }
+    }
+
+    // =====================================================================
+    // MACROS RENDERING
+    // =====================================================================
+    let macroRange = '7d';
+    let macroCalChartInstance = null;
+    let macroBreakdownChartInstance = null;
+    let macroWaterChartInstance = null;
+
+    function setMacroRange(range, btn) {
+      macroRange = range;
+      document.querySelectorAll('#macro-range-tabs .chart-tab').forEach(t => t.classList.remove('active'));
+      btn.classList.add('active');
+      renderMacroCharts();
+    }
+
+    function renderMacros() {
+      // Default date to today
+      document.getElementById('macro-date').value = document.getElementById('macro-date').value || new Date().toISOString().split('T')[0];
+
+      const macros = getMacros();
+      updateMacroRunningTotal();
+      renderMacroStats(macros);
+      renderMacroCharts();
+      renderMacroHistory(macros);
+    }
+
+    function renderMacroStats(macros) {
+      const now = new Date();
+      const last7 = macros.filter(m => {
+        const diff = (now - new Date(m.date)) / (1000*60*60*24);
+        return diff <= 7;
+      });
+
+      const avgCals = last7.length > 0 ? Math.round(last7.reduce((s, m) => s + m.calories, 0) / last7.length) : '-';
+      const avgProtein = last7.length > 0 ? Math.round(last7.reduce((s, m) => s + m.protein, 0) / last7.length) : '-';
+      const avgCarbs = last7.length > 0 ? Math.round(last7.reduce((s, m) => s + m.carbs, 0) / last7.length) : '-';
+      const avgWater = last7.length > 0 ? (last7.reduce((s, m) => s + m.water, 0) / last7.length).toFixed(1) : '-';
+
+      document.getElementById('macro-stats').innerHTML = `
+        <div class="card">
+          <div class="card-header"><span class="card-title">Avg Calories</span><div class="stat-icon green"><svg width="20" height="20" fill="none" stroke="currentColor" stroke-width="2"><path d="M12 20V10M18 20V4M6 20v-4"/></svg></div></div>
+          <div class="card-value">${avgCals}</div>
+          <div class="card-sub">kcal / day (7d avg)</div>
+        </div>
+        <div class="card">
+          <div class="card-header"><span class="card-title">Avg Protein</span><div class="stat-icon green"><svg width="20" height="20" fill="none" stroke="currentColor" stroke-width="2"><circle cx="12" cy="12" r="10"/><path d="M12 8v8M8 12h8"/></svg></div></div>
+          <div class="card-value">${avgProtein}<span style="font-size:0.9rem;font-weight:400">g</span></div>
+          <div class="card-sub">per day (7d avg)</div>
+        </div>
+        <div class="card">
+          <div class="card-header"><span class="card-title">Avg Carbs</span><div class="stat-icon yellow"><svg width="20" height="20" fill="none" stroke="currentColor" stroke-width="2"><path d="M12 2L2 7l10 5 10-5-10-5zM2 17l10 5 10-5M2 12l10 5 10-5"/></svg></div></div>
+          <div class="card-value">${avgCarbs}<span style="font-size:0.9rem;font-weight:400">g</span></div>
+          <div class="card-sub">per day (7d avg)</div>
+        </div>
+        <div class="card">
+          <div class="card-header"><span class="card-title">Avg Water</span><div class="stat-icon green"><svg width="20" height="20" fill="none" stroke="currentColor" stroke-width="2"><path d="M12 2.69l5.66 5.66a8 8 0 11-11.31 0z"/></svg></div></div>
+          <div class="card-value">${avgWater}<span style="font-size:0.9rem;font-weight:400">L</span></div>
+          <div class="card-sub">per day (7d avg)</div>
+        </div>
+      `;
+    }
+
+    function renderMacroCharts() {
+      const macros = getMacros();
+      const now = new Date();
+      let maxDays;
+      switch (macroRange) {
+        case '7d': maxDays = 7; break;
+        case '14d': maxDays = 14; break;
+        case '30d': maxDays = 30; break;
+        default: maxDays = 9999;
+      }
+
+      const filtered = macros
+        .filter(m => (now - new Date(m.date)) / (1000*60*60*24) <= maxDays)
+        .sort((a, b) => a.date.localeCompare(b.date));
+
+      // Calories & Protein chart
+      const ctx1 = document.getElementById('macroCalChart').getContext('2d');
+      if (macroCalChartInstance) macroCalChartInstance.destroy();
+
+      macroCalChartInstance = new Chart(ctx1, {
+        type: 'bar',
+        data: {
+          labels: filtered.map(m => {
+            const d = new Date(m.date);
+            return d.toLocaleDateString('en-GB', { day: 'numeric', month: 'short' });
+          }),
+          datasets: [{
+            label: 'Calories (kcal)',
+            data: filtered.map(m => m.calories),
+            backgroundColor: 'rgba(34, 197, 94, 0.3)',
+            borderColor: 'rgba(34, 197, 94, 0.8)',
+            borderWidth: 1,
+            borderRadius: 4,
+            yAxisID: 'y',
+          }, {
+            label: 'Protein (g)',
+            data: filtered.map(m => m.protein),
+            type: 'line',
+            borderColor: '#60a5fa',
+            pointBackgroundColor: '#60a5fa',
+            tension: 0.3,
+            yAxisID: 'y1',
+          }]
+        },
+        options: {
+          responsive: true,
+          maintainAspectRatio: false,
+          interaction: { mode: 'index', intersect: false },
+          scales: {
+            y: { beginAtZero: true, grid: { color: 'rgba(30,58,30,0.5)' }, title: { display: true, text: 'Calories (kcal)' } },
+            y1: { position: 'right', beginAtZero: true, grid: { display: false }, title: { display: true, text: 'Protein (g)' } },
+            x: { grid: { display: false } }
+          },
+          plugins: { legend: { labels: { usePointStyle: true, pointStyle: 'circle' } } }
+        }
+      });
+
+      // Macro breakdown (carbs, protein, fats) — stacked bar
+      const ctx2 = document.getElementById('macroBreakdownChart').getContext('2d');
+      if (macroBreakdownChartInstance) macroBreakdownChartInstance.destroy();
+
+      macroBreakdownChartInstance = new Chart(ctx2, {
+        type: 'bar',
+        data: {
+          labels: filtered.map(m => {
+            const d = new Date(m.date);
+            return d.toLocaleDateString('en-GB', { day: 'numeric', month: 'short' });
+          }),
+          datasets: [
+            { label: 'Protein (g)', data: filtered.map(m => m.protein), backgroundColor: 'rgba(96, 165, 250, 0.6)', borderRadius: 2 },
+            { label: 'Carbs (g)', data: filtered.map(m => m.carbs), backgroundColor: 'rgba(245, 158, 11, 0.6)', borderRadius: 2 },
+            { label: 'Fats (g)', data: filtered.map(m => m.fats), backgroundColor: 'rgba(239, 68, 68, 0.5)', borderRadius: 2 },
+          ]
+        },
+        options: {
+          responsive: true,
+          maintainAspectRatio: false,
+          scales: {
+            x: { stacked: true, grid: { display: false } },
+            y: { stacked: true, beginAtZero: true, grid: { color: 'rgba(30,58,30,0.5)' }, title: { display: true, text: 'Grams' } }
+          },
+          plugins: { legend: { labels: { usePointStyle: true, pointStyle: 'circle' } } }
+        }
+      });
+
+      // Water chart
+      const ctx3 = document.getElementById('macroWaterChart').getContext('2d');
+      if (macroWaterChartInstance) macroWaterChartInstance.destroy();
+
+      macroWaterChartInstance = new Chart(ctx3, {
+        type: 'bar',
+        data: {
+          labels: filtered.map(m => {
+            const d = new Date(m.date);
+            return d.toLocaleDateString('en-GB', { day: 'numeric', month: 'short' });
+          }),
+          datasets: [{
+            label: 'Water (L)',
+            data: filtered.map(m => m.water),
+            backgroundColor: 'rgba(96, 165, 250, 0.3)',
+            borderColor: 'rgba(96, 165, 250, 0.8)',
+            borderWidth: 1,
+            borderRadius: 4,
+          }]
+        },
+        options: {
+          responsive: true,
+          maintainAspectRatio: false,
+          scales: {
+            y: { beginAtZero: true, grid: { color: 'rgba(30,58,30,0.5)' }, title: { display: true, text: 'Litres' } },
+            x: { grid: { display: false } }
+          },
+          plugins: { legend: { display: false } }
+        }
+      });
+    }
+
+    function renderMacroHistory(macros) {
+      if (macros.length === 0) {
+        document.getElementById('macro-history').innerHTML = '<div class="empty-state"><h3>No macro entries yet</h3><p>Log your first day above to start tracking.</p></div>';
+        return;
+      }
+
+      document.getElementById('macro-history').innerHTML = macros.map(m => {
+        const d = new Date(m.date);
+        const day = d.getDate();
+        const month = d.toLocaleString('en', { month: 'short' }).toUpperCase();
+        const dayName = d.toLocaleDateString('en', { weekday: 'short' });
+        return `
+          <div class="history-item" onclick="editMacroEntry('${m.date}')" style="grid-template-columns:60px 1fr auto auto auto">
+            <div class="history-date">
+              <div class="day">${day}</div>
+              <div class="month">${month}</div>
+            </div>
+            <div class="history-info">
+              <h3>${dayName} — ${m.calories} kcal</h3>
+              <p>P: ${m.protein}g &nbsp; C: ${m.carbs}g &nbsp; F: ${m.fats}g${m.water ? ' &nbsp; 💧 ' + m.water + 'L' : ''}</p>
+            </div>
+            <span class="history-badge badge-weights" style="font-size:0.7rem">${m.protein}g protein</span>
+            <div class="rpe-badge ${m.calories >= 2500 ? 'rpe-high' : m.calories >= 1800 ? 'rpe-med' : 'rpe-low'}" style="font-size:0.65rem;width:auto;height:auto;padding:6px 8px;border-radius:8px">${m.calories}</div>
+            <button class="btn-icon" onclick="event.stopPropagation();deleteMacroEntry('${m.date}')" title="Delete entry" style="color:var(--danger)">
+              <svg width="16" height="16" fill="none" stroke="currentColor" stroke-width="2"><path d="M3 6h10M5 6V4a1 1 0 011-1h4a1 1 0 011 1v2M7 9v4M9 9v4"/><path d="M4 6l.7 8.4a1 1 0 001 .6h4.6a1 1 0 001-.6L12 6"/></svg>
+            </button>
+          </div>
+        `;
+      }).join('');
+    }
+
+    // =====================================================================
+    // EXPORT / IMPORT
+    // =====================================================================
+    function exportData() {
+      const data = JSON.stringify({ workouts: getWorkouts(), checkins: getCheckins(), macros: getMacros() }, null, 2);
+      const blob = new Blob([data], { type: 'application/json' });
+      const url = URL.createObjectURL(blob);
+      const a = document.createElement('a');
+      a.href = url;
+      a.download = `ironpulse-backup-${new Date().toISOString().split('T')[0]}.json`;
+      a.click();
+      URL.revokeObjectURL(url);
+      showToast('Data exported!');
+    }
+
+    function importData(event) {
+      const file = event.target.files[0];
+      if (!file) return;
+      const reader = new FileReader();
+      reader.onload = function(e) {
+        try {
+          const data = JSON.parse(e.target.result);
+          // Support both old format (plain array) and new format ({ workouts, macros })
+          if (Array.isArray(data)) {
+            const existing = getWorkouts();
+            const existingIds = new Set(existing.map(w => w.id));
+            const newWorkouts = data.filter(w => !existingIds.has(w.id));
+            saveWorkouts([...newWorkouts, ...existing].sort((a, b) => new Date(b.date) - new Date(a.date)));
+            showToast(`Imported ${newWorkouts.length} workouts!`);
+          } else if (data.workouts || data.macros || data.checkins) {
+            if (data.workouts) {
+              const existing = getWorkouts();
+              const existingIds = new Set(existing.map(w => w.id));
+              const newWorkouts = data.workouts.filter(w => !existingIds.has(w.id));
+              saveWorkouts([...newWorkouts, ...existing].sort((a, b) => new Date(b.date) - new Date(a.date)));
+            }
+            if (data.checkins) {
+              const existing = getCheckins();
+              const existingDates = new Set(existing.map(c => c.date));
+              const newCheckins = data.checkins.filter(c => !existingDates.has(c.date));
+              saveCheckins([...newCheckins, ...existing].sort((a, b) => b.date.localeCompare(a.date)));
+            }
+            if (data.macros) {
+              const existing = getMacros();
+              const existingDates = new Set(existing.map(m => m.date));
+              const newMacros = data.macros.filter(m => !existingDates.has(m.date));
+              saveMacros([...newMacros, ...existing].sort((a, b) => b.date.localeCompare(a.date)));
+            }
+            showToast('Data imported!');
+          }
+          renderDashboard();
+        } catch {
+          showToast('Invalid file format');
+        }
+      };
+      reader.readAsText(file);
+      event.target.value = '';
+    }
+
+    // =====================================================================
+    // TOAST
+    // =====================================================================
+    function showToast(message) {
+      const container = document.getElementById('toast-container');
+      const toast = document.createElement('div');
+      toast.className = 'toast';
+      toast.innerHTML = `
+        <svg width="20" height="20" fill="none" stroke="#22c55e" stroke-width="2"><path d="M20 6L9 17l-5-5"/></svg>
+        ${message}
+      `;
+      container.appendChild(toast);
+      setTimeout(() => toast.remove(), 3000);
+    }
+
+    // =====================================================================
+    // INIT
+    // =====================================================================
+    document.addEventListener('DOMContentLoaded', () => {
+      renderDashboard();
+
+      // Register Service Worker for PWA
+      if ('serviceWorker' in navigator) {
+        navigator.serviceWorker.register('./sw.js')
+          .then(() => console.log('SW registered'))
+          .catch(err => console.log('SW registration failed:', err));
+      }
+    });
+  </script>
+</body>
+</html>
