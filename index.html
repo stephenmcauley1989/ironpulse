@@ -1233,6 +1233,20 @@
 
     /* ===== DATA VIZ ===== */
     .dataviz-section { margin-bottom: 20px; }
+
+    /* ===== QUICK LOG ===== */
+    .ql-exercise { background: var(--bg-card); border: 1px solid var(--border); border-radius: var(--radius); padding: 12px; margin-bottom: 10px; }
+    .ql-exercise-header { display: flex; align-items: center; gap: 8px; margin-bottom: 8px; }
+    .ql-exercise-header select { flex: 1; }
+    .ql-set-row { display: grid; grid-template-columns: 32px 1fr 1fr 32px; gap: 6px; align-items: center; margin-bottom: 4px; }
+    .ql-set-row .ql-set-num { font-size: 0.7rem; font-weight: 700; color: var(--text-muted); text-align: center; }
+    .ql-set-row input { padding: 8px; font-size: 0.95rem; text-align: center; background: var(--bg-secondary); border: 1px solid var(--border); border-radius: var(--radius-sm); color: var(--text-primary); }
+    .ql-set-row input:focus { border-color: var(--green-500); outline: none; }
+    .ql-add-set { width: 100%; padding: 6px; font-size: 0.75rem; font-weight: 600; color: var(--green-400); background: transparent; border: 1px dashed var(--border); border-radius: var(--radius-sm); cursor: pointer; margin-top: 4px; }
+    .ql-remove { width: 28px; height: 28px; border: none; background: transparent; color: #f87171; cursor: pointer; font-size: 1rem; display: flex; align-items: center; justify-content: center; border-radius: var(--radius-sm); }
+    .ql-remove:hover { background: rgba(248,113,113,0.15); }
+    .ql-timer { font-size: 1.4rem; font-weight: 800; letter-spacing: -1px; font-variant-numeric: tabular-nums; }
+    .ql-save-bar { position: sticky; bottom: 0; background: var(--bg-primary); padding: 12px 0; border-top: 1px solid var(--border); z-index: 10; }
   </style>
 </head>
 <body>
@@ -1271,6 +1285,10 @@
       <button class="nav-item" data-page="log" onclick="showPage('log')">
         <svg fill="none" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M12 5v14M5 12h14"/></svg>
         Log Workout
+      </button>
+      <button class="nav-item" data-page="quicklog" onclick="showPage('quicklog')">
+        <svg fill="none" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><polygon points="13 2 3 14 12 14 11 22 21 10 12 10 13 2"/></svg>
+        Quick Log
       </button>
       <button class="nav-item" data-page="calendar" onclick="showPage('calendar')">
         <svg fill="none" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><rect x="3" y="4" width="18" height="18" rx="2"/><path d="M16 2v4M8 2v4M3 10h18"/></svg>
@@ -2611,6 +2629,57 @@
         </div>
       </div>
 
+      <!-- ==================== QUICK LOG ==================== -->
+      <div id="page-quicklog" class="page hidden">
+        <div class="page-header">
+          <div style="display:flex;justify-content:space-between;align-items:center">
+            <div>
+              <h2>Quick Log</h2>
+              <p>Fast workout entry — no fuss</p>
+            </div>
+            <div class="ql-timer" id="ql-timer">00:00</div>
+          </div>
+        </div>
+
+        <div class="form-row" style="margin-bottom:12px">
+          <div class="form-group" style="flex:1">
+            <label class="form-label">Category</label>
+            <select class="form-select" id="ql-category" onchange="qlCategoryChange()">
+              <option value="">Any</option>
+              <option value="legs">Legs</option>
+              <option value="push">Push</option>
+              <option value="pull">Pull</option>
+              <option value="upper">Upper</option>
+              <option value="chest">Chest</option>
+              <option value="back">Back</option>
+              <option value="shoulders">Shoulders</option>
+              <option value="arms">Arms</option>
+              <option value="core">Core</option>
+              <option value="fullbody">Full Body</option>
+            </select>
+          </div>
+          <div class="form-group" style="flex:1">
+            <label class="form-label">RPE</label>
+            <select class="form-select" id="ql-rpe">
+              <option value="5">5</option>
+              <option value="6">6</option>
+              <option value="7" selected>7</option>
+              <option value="8">8</option>
+              <option value="9">9</option>
+              <option value="10">10</option>
+            </select>
+          </div>
+        </div>
+
+        <div id="ql-exercises"></div>
+
+        <button class="btn btn-secondary" onclick="qlAddExercise()" style="width:100%;margin-bottom:12px">+ Add Exercise</button>
+
+        <div class="ql-save-bar">
+          <button class="btn btn-primary" onclick="qlSave()" style="width:100%;font-size:1rem;padding:14px">Save Workout</button>
+        </div>
+      </div>
+
     </main>
   </div>
 
@@ -2788,6 +2857,7 @@
       if (page === 'heatmap') renderHeatmap();
       if (page === 'programme') renderProgrammes();
       if (page === 'dataviz') renderDataViz();
+      if (page === 'quicklog') initQuickLog();
     }
 
     function toggleSidebar() {
@@ -8305,6 +8375,276 @@
           }
         }
       });
+    }
+
+    // =====================================================================
+    // QUICK LOG MODE
+    // =====================================================================
+    let qlExerciseCounter = 0;
+    let qlTimerStart = null;
+    let qlTimerInterval = null;
+
+    function initQuickLog() {
+      qlExerciseCounter = 0;
+      document.getElementById('ql-exercises').innerHTML = '';
+      document.getElementById('ql-category').value = '';
+
+      // Pre-select category from split planner if available
+      const split = getSplit();
+      const now = new Date();
+      const dow = now.getDay();
+      const idx = dow === 0 ? 6 : dow - 1;
+      const todayPlan = split[idx];
+      if (todayPlan) {
+        const planMap = { 'Push': 'push', 'Pull': 'pull', 'Legs': 'legs', 'Upper Body': 'upper', 'Chest': 'chest', 'Back': 'back', 'Shoulders': 'shoulders', 'Arms': 'arms', 'Core': 'core', 'Full Body': 'fullbody' };
+        const mapped = planMap[todayPlan];
+        if (mapped) document.getElementById('ql-category').value = mapped;
+      }
+
+      // Start timer
+      qlTimerStart = Date.now();
+      if (qlTimerInterval) clearInterval(qlTimerInterval);
+      qlTimerInterval = setInterval(() => {
+        const elapsed = Math.floor((Date.now() - qlTimerStart) / 1000);
+        const mins = Math.floor(elapsed / 60).toString().padStart(2, '0');
+        const secs = (elapsed % 60).toString().padStart(2, '0');
+        document.getElementById('ql-timer').textContent = `${mins}:${secs}`;
+      }, 1000);
+
+      // Add first exercise
+      qlAddExercise();
+    }
+
+    function qlBuildExerciseSelect(id) {
+      const favs = getFavExercises();
+      const cat = document.getElementById('ql-category').value;
+      const allPresets = getFullExercisePresets();
+      let options = '<option value="">Exercise...</option>';
+
+      if (favs.length > 0) {
+        options += '<optgroup label="★ Favourites">' + favs.map(e => `<option value="${e}">${e}</option>`).join('') + '</optgroup>';
+      }
+      if (cat && allPresets[cat]) {
+        const catEx = allPresets[cat].filter(e => !favs.includes(e));
+        options += `<optgroup label="${cat.charAt(0).toUpperCase() + cat.slice(1)}">${catEx.map(e => `<option value="${e}">${e}</option>`).join('')}</optgroup>`;
+        Object.entries(allPresets).forEach(([key, exs]) => {
+          if (key === cat) return;
+          const others = exs.filter(e => !favs.includes(e));
+          if (others.length === 0) return;
+          options += `<optgroup label="${key.charAt(0).toUpperCase() + key.slice(1)}">${others.map(e => `<option value="${e}">${e}</option>`).join('')}</optgroup>`;
+        });
+      } else {
+        Object.entries(allPresets).forEach(([key, exs]) => {
+          const others = exs.filter(e => !favs.includes(e));
+          if (others.length === 0) return;
+          options += `<optgroup label="${key.charAt(0).toUpperCase() + key.slice(1)}">${others.map(e => `<option value="${e}">${e}</option>`).join('')}</optgroup>`;
+        });
+      }
+      return `<select class="form-select" id="ql-ex-select-${id}" onchange="qlExerciseSelected(${id})" style="flex:1">${options}</select>`;
+    }
+
+    function qlGetLastUsed(exerciseName) {
+      const workouts = getWorkouts();
+      for (const w of workouts) {
+        if (!w.exercises) continue;
+        const ex = w.exercises.find(e => e.name === exerciseName);
+        if (ex && ex.sets && ex.sets.length > 0) {
+          // Return the first working set (non-warmup)
+          const workingSet = ex.sets.find(s => !s.warmup) || ex.sets[0];
+          return { weight: workingSet.weight, reps: workingSet.reps };
+        }
+      }
+      return null;
+    }
+
+    function qlExerciseSelected(exId) {
+      const sel = document.getElementById(`ql-ex-select-${exId}`);
+      const name = sel.value;
+      if (!name) return;
+
+      // If this exercise has no sets yet, auto-add one with last-used values
+      const setsContainer = document.getElementById(`ql-sets-${exId}`);
+      if (setsContainer.children.length === 0) {
+        qlAddSet(exId);
+      }
+    }
+
+    function qlAddExercise() {
+      const id = qlExerciseCounter++;
+      const container = document.getElementById('ql-exercises');
+      const div = document.createElement('div');
+      div.className = 'ql-exercise';
+      div.id = `ql-ex-${id}`;
+      div.innerHTML = `
+        <div class="ql-exercise-header">
+          ${qlBuildExerciseSelect(id)}
+          <button class="ql-remove" onclick="qlRemoveExercise(${id})" title="Remove">&times;</button>
+        </div>
+        <div class="ql-set-row" style="margin-bottom:2px">
+          <span></span>
+          <span style="font-size:0.65rem;font-weight:700;color:var(--text-muted);text-align:center">${unitLabel().toUpperCase()}</span>
+          <span style="font-size:0.65rem;font-weight:700;color:var(--text-muted);text-align:center">REPS</span>
+          <span></span>
+        </div>
+        <div id="ql-sets-${id}"></div>
+        <button class="ql-add-set" onclick="qlAddSet(${id})">+ Set</button>
+      `;
+      container.appendChild(div);
+
+      // Auto-add first set
+      qlAddSet(id);
+
+      // Focus the exercise select
+      document.getElementById(`ql-ex-select-${id}`).focus();
+    }
+
+    function qlRemoveExercise(id) {
+      const el = document.getElementById(`ql-ex-${id}`);
+      if (el) el.remove();
+    }
+
+    function qlAddSet(exId) {
+      const container = document.getElementById(`ql-sets-${exId}`);
+      const setNum = container.children.length + 1;
+
+      // Try to pre-fill from last used or previous set
+      let prefillWeight = '';
+      let prefillReps = '';
+
+      const sel = document.getElementById(`ql-ex-select-${exId}`);
+      const exName = sel ? sel.value : '';
+
+      if (setNum === 1 && exName) {
+        // First set: use last workout's values
+        const lastUsed = qlGetLastUsed(exName);
+        if (lastUsed) {
+          prefillWeight = Math.round(fromKg(lastUsed.weight) * 10) / 10;
+          prefillReps = lastUsed.reps;
+        }
+      } else if (setNum > 1) {
+        // Subsequent sets: copy from previous set
+        const prevRow = container.children[container.children.length - 1];
+        if (prevRow) {
+          const prevW = prevRow.querySelector('[data-field="ql-weight"]');
+          const prevR = prevRow.querySelector('[data-field="ql-reps"]');
+          if (prevW) prefillWeight = prevW.value;
+          if (prevR) prefillReps = prevR.value;
+        }
+      }
+
+      const row = document.createElement('div');
+      row.className = 'ql-set-row';
+      row.innerHTML = `
+        <span class="ql-set-num">${setNum}</span>
+        <input type="number" data-field="ql-weight" value="${prefillWeight}" placeholder="0" inputmode="decimal" step="any">
+        <input type="number" data-field="ql-reps" value="${prefillReps}" placeholder="0" inputmode="numeric">
+        <button class="ql-remove" onclick="this.parentElement.remove();qlRenumberSets(${exId})" title="Remove set">&times;</button>
+      `;
+      container.appendChild(row);
+
+      // Focus the weight input
+      row.querySelector('[data-field="ql-weight"]').focus();
+    }
+
+    function qlRenumberSets(exId) {
+      const container = document.getElementById(`ql-sets-${exId}`);
+      if (!container) return;
+      Array.from(container.children).forEach((row, i) => {
+        const numEl = row.querySelector('.ql-set-num');
+        if (numEl) numEl.textContent = i + 1;
+      });
+    }
+
+    function qlCategoryChange() {
+      // Rebuild all exercise selects with new category priority
+      document.querySelectorAll('.ql-exercise').forEach(block => {
+        const id = parseInt(block.id.replace('ql-ex-', ''));
+        const oldSel = document.getElementById(`ql-ex-select-${id}`);
+        const oldVal = oldSel ? oldSel.value : '';
+        const header = block.querySelector('.ql-exercise-header');
+        const removeBtn = header.querySelector('.ql-remove');
+        header.innerHTML = qlBuildExerciseSelect(id);
+        header.appendChild(removeBtn);
+        // Restore selection
+        const newSel = document.getElementById(`ql-ex-select-${id}`);
+        if (newSel && oldVal) newSel.value = oldVal;
+      });
+    }
+
+    function qlSave() {
+      const exercises = [];
+      const category = document.getElementById('ql-category').value;
+
+      document.querySelectorAll('.ql-exercise').forEach(block => {
+        const id = parseInt(block.id.replace('ql-ex-', ''));
+        const sel = document.getElementById(`ql-ex-select-${id}`);
+        const name = sel ? sel.value : '';
+        if (!name) return;
+
+        const sets = [];
+        const setsContainer = document.getElementById(`ql-sets-${id}`);
+        if (setsContainer) {
+          setsContainer.querySelectorAll('.ql-set-row').forEach(row => {
+            const rawWeight = parseFloat(row.querySelector('[data-field="ql-weight"]').value) || 0;
+            const weight = Math.round(toKg(rawWeight) * 100) / 100;
+            const reps = parseInt(row.querySelector('[data-field="ql-reps"]').value) || 0;
+            if (weight > 0 || reps > 0) sets.push({ weight, reps, warmup: false });
+          });
+        }
+        if (sets.length > 0) exercises.push({ name, sets, note: '' });
+      });
+
+      if (exercises.length === 0) { showToast('Add at least one exercise with sets'); return; }
+
+      // Stop timer
+      const durationSecs = qlTimerStart ? Math.floor((Date.now() - qlTimerStart) / 1000) : 0;
+      if (qlTimerInterval) { clearInterval(qlTimerInterval); qlTimerInterval = null; }
+
+      // Auto-link check-in
+      const today = new Date().toISOString().split('T')[0];
+      const checkin = getCheckins().find(c => c.date === today);
+
+      const catLabels = { legs: 'Leg Day', push: 'Push Day', pull: 'Pull Day', upper: 'Upper Body', chest: 'Chest Day', back: 'Back Day', shoulders: 'Shoulder Day', arms: 'Arm Day', core: 'Core Session', fullbody: 'Full Body' };
+
+      const workout = {
+        name: catLabels[category] || 'Quick Session',
+        type: 'weights',
+        category: category || '',
+        date: new Date().toISOString(),
+        preWorkout: checkin ? {
+          mood: checkin.mood, energy: checkin.energy,
+          sleepQuality: checkin.sleepQuality, sleepHours: checkin.sleepHours,
+        } : { mood: 5, energy: 5, sleepQuality: 5, sleepHours: null },
+        exercises,
+        cycling: null,
+        postWorkout: {
+          rpe: parseInt(document.getElementById('ql-rpe').value) || 7,
+          caloriesBurned: null,
+          feeling: '',
+          notes: 'Quick log',
+        },
+        totalVolume: exercises.reduce((sum, ex) => sum + ex.sets.reduce((s, set) => s + set.weight * set.reps, 0), 0),
+        intensityScore: parseInt(document.getElementById('ql-rpe').value) || 7,
+        durationSeconds: durationSecs,
+        durationMinutes: Math.round(durationSecs / 60),
+      };
+
+      // Detect PRs
+      const newPRs = detectPRs(workout);
+
+      addWorkout(workout);
+
+      // Show toast with summary
+      const totalSets = exercises.reduce((s, e) => s + e.sets.length, 0);
+      const mins = Math.round(durationSecs / 60);
+      showToast(`Saved! ${exercises.length} exercises, ${totalSets} sets, ${mins}min`);
+
+      // Show PRs if any
+      if (newPRs && newPRs.length > 0) {
+        setTimeout(() => showToast(`New PR! ${newPRs.map(p => p.name).join(', ')}`), 1500);
+      }
+
+      showPage('dashboard');
     }
 
     // =====================================================================
