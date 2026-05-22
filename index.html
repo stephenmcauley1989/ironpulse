@@ -2360,14 +2360,21 @@
 
         <div class="card mb-4">
           <div class="card-header">
-            <span class="card-title">This Week</span>
-            <span class="text-muted text-sm" id="split-week-label"></span>
+            <span class="card-title" id="split-week-title">This Week</span>
+            <div style="display:flex;gap:6px;align-items:center">
+              <button class="btn btn-secondary btn-sm" onclick="splitChangeWeek(-1)" style="padding:4px 10px">&larr;</button>
+              <span class="text-muted text-sm" id="split-week-label"></span>
+              <button class="btn btn-secondary btn-sm" onclick="splitChangeWeek(1)" style="padding:4px 10px">&rarr;</button>
+            </div>
           </div>
-          <div class="split-grid" id="split-grid" style="margin-top:12px"></div>
+          <div style="text-align:center;margin:8px 0">
+            <button class="btn btn-secondary btn-sm" onclick="splitGoToThisWeek()" style="font-size:0.7rem;padding:3px 12px">Today</button>
+          </div>
+          <div class="split-grid" id="split-grid" style="margin-top:4px"></div>
         </div>
 
         <div class="card mb-4">
-          <h3 style="margin-bottom:16px;font-size:1.1rem">Assign Workout Types</h3>
+          <h3 style="margin-bottom:16px;font-size:1.1rem">Assign Workout Type</h3>
           <div class="text-muted text-sm" style="margin-bottom:12px">Tap a day above then select what to train, or use the form below.</div>
           <div class="form-row">
             <div class="form-group">
@@ -2402,7 +2409,10 @@
               </select>
             </div>
           </div>
-          <button class="btn btn-primary" onclick="setSplitDay()" style="margin-top:8px">Set Day</button>
+          <div class="form-row" style="margin-top:8px;gap:8px">
+            <button class="btn btn-primary" onclick="setSplitDay()" style="flex:1">Set Day</button>
+            <button class="btn btn-secondary" onclick="copyWeekToNext()" style="flex:1;font-size:0.8rem">Copy Week → Next</button>
+          </div>
         </div>
 
         <div class="card mb-4">
@@ -6781,22 +6791,57 @@
     // SPLIT PLANNER
     // =====================================================================
     const SPLIT_KEY = 'ironpulse_split';
+    const SPLIT_WEEKS_KEY = 'ironpulse_split_weeks';
+    let splitViewOffset = 0; // 0 = this week, 1 = next week, -1 = last week
 
-    function getSplit() {
-      try { return JSON.parse(localStorage.getItem(SPLIT_KEY)) || ['', '', '', '', '', '', '']; }
-      catch { return ['', '', '', '', '', '', '']; }
+    function getWeekMonday(offset) {
+      const now = new Date();
+      const dow = now.getDay();
+      const todayIdx = dow === 0 ? 6 : dow - 1;
+      const monday = new Date(now);
+      monday.setDate(now.getDate() - todayIdx + (offset * 7));
+      return monday.toISOString().split('T')[0];
     }
 
-    function saveSplit(split) {
-      localStorage.setItem(SPLIT_KEY, JSON.stringify(split));
+    function getAllSplitWeeks() {
+      try { return JSON.parse(localStorage.getItem(SPLIT_WEEKS_KEY)) || {}; } catch { return {}; }
     }
+    function saveAllSplitWeeks(weeks) { localStorage.setItem(SPLIT_WEEKS_KEY, JSON.stringify(weeks)); }
+
+    function getSplitForWeek(mondayKey) {
+      const weeks = getAllSplitWeeks();
+      if (weeks[mondayKey]) return weeks[mondayKey];
+      // Fallback: if this is the current week and old format exists, migrate
+      if (mondayKey === getWeekMonday(0)) {
+        try {
+          const old = JSON.parse(localStorage.getItem(SPLIT_KEY));
+          if (Array.isArray(old) && old.length === 7) return old;
+        } catch {}
+      }
+      return ['', '', '', '', '', '', ''];
+    }
+
+    function saveSplitForWeek(mondayKey, split) {
+      const weeks = getAllSplitWeeks();
+      weeks[mondayKey] = split;
+      saveAllSplitWeeks(weeks);
+      // Also keep the old key in sync for this week (used by dashboard greeting, quick log)
+      if (mondayKey === getWeekMonday(0)) {
+        localStorage.setItem(SPLIT_KEY, JSON.stringify(split));
+      }
+    }
+
+    // Backwards compat: getSplit() returns current week
+    function getSplit() { return getSplitForWeek(getWeekMonday(0)); }
+    function saveSplit(split) { saveSplitForWeek(getWeekMonday(0), split); }
 
     function setSplitDay() {
       const dayIdx = parseInt(document.getElementById('split-day-select').value);
       const type = document.getElementById('split-type-select').value;
-      const split = getSplit();
+      const mondayKey = getWeekMonday(splitViewOffset);
+      const split = getSplitForWeek(mondayKey);
       split[dayIdx] = type;
-      saveSplit(split);
+      saveSplitForWeek(mondayKey, split);
       renderSplitPlanner();
       showToast('Schedule updated');
     }
@@ -6806,28 +6851,61 @@
       document.getElementById('split-type-select').focus();
     }
 
+    function splitChangeWeek(dir) {
+      splitViewOffset += dir;
+      renderSplitPlanner();
+    }
+
+    function splitGoToThisWeek() {
+      splitViewOffset = 0;
+      renderSplitPlanner();
+    }
+
+    function copyWeekToNext() {
+      const currentMondayKey = getWeekMonday(splitViewOffset);
+      const nextMondayKey = getWeekMonday(splitViewOffset + 1);
+      const currentSplit = getSplitForWeek(currentMondayKey);
+      saveSplitForWeek(nextMondayKey, [...currentSplit]);
+      splitViewOffset += 1;
+      renderSplitPlanner();
+      showToast('Copied to next week');
+    }
+
     function renderSplitPlanner() {
-      const split = getSplit();
+      const mondayKey = getWeekMonday(splitViewOffset);
+      const split = getSplitForWeek(mondayKey);
       const dayNames = ['Mon', 'Tue', 'Wed', 'Thu', 'Fri', 'Sat', 'Sun'];
       const now = new Date();
-      const todayDow = now.getDay(); // 0=Sun
-      const todayIdx = todayDow === 0 ? 6 : todayDow - 1; // Mon=0
+      const todayDow = now.getDay();
+      const todayIdx = todayDow === 0 ? 6 : todayDow - 1;
 
       // Week label
-      const monday = new Date(now);
-      monday.setDate(now.getDate() - todayIdx);
+      const monday = new Date(mondayKey + 'T12:00:00');
       const sunday = new Date(monday);
       sunday.setDate(monday.getDate() + 6);
+
+      // Title
+      let weekTitle = 'This Week';
+      if (splitViewOffset === 1) weekTitle = 'Next Week';
+      else if (splitViewOffset === -1) weekTitle = 'Last Week';
+      else if (splitViewOffset > 1) weekTitle = `${splitViewOffset} Weeks Ahead`;
+      else if (splitViewOffset < -1) weekTitle = `${Math.abs(splitViewOffset)} Weeks Ago`;
+      document.getElementById('split-week-title').textContent = weekTitle;
+
       document.getElementById('split-week-label').textContent =
         `${monday.toLocaleDateString('en-GB', { day: 'numeric', month: 'short' })} — ${sunday.toLocaleDateString('en-GB', { day: 'numeric', month: 'short' })}`;
 
+      // Day dates for display
       document.getElementById('split-grid').innerHTML = dayNames.map((name, i) => {
+        const dayDate = new Date(monday);
+        dayDate.setDate(monday.getDate() + i);
+        const dateLabel = dayDate.getDate();
         const type = split[i] || '';
-        const isToday = i === todayIdx;
+        const isToday = splitViewOffset === 0 && i === todayIdx;
         const isRest = !type;
         return `
           <div class="split-day${isToday ? ' today' : ''}${isRest ? ' rest' : ''}" onclick="setSplitDayDirect(${i})">
-            <div class="day-label">${name}</div>
+            <div class="day-label">${name} <span style="font-weight:400;opacity:0.6">${dateLabel}</span></div>
             <div class="day-type">${type || 'Rest'}</div>
           </div>
         `;
