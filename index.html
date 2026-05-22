@@ -426,7 +426,7 @@
 
     .set-row {
       display: grid;
-      grid-template-columns: 40px 1fr 1fr 40px;
+      grid-template-columns: 40px 1fr 1fr 20px 40px;
       gap: 8px;
       align-items: center;
       margin-bottom: 6px;
@@ -977,6 +977,104 @@
     }
     .unit-selector select:focus { outline: none; border-color: var(--green-600); }
     .unit-selector select option { background: var(--bg-secondary); }
+
+    /* ===== CALENDAR ===== */
+    .calendar-grid { display: grid; grid-template-columns: repeat(7, 1fr); gap: 2px; }
+    .cal-header { text-align: center; font-size: 0.7rem; font-weight: 600; color: var(--text-muted); padding: 8px 0; text-transform: uppercase; }
+    .cal-day {
+      aspect-ratio: 1; display: flex; flex-direction: column; align-items: center; justify-content: center;
+      border-radius: 8px; font-size: 0.85rem; position: relative; cursor: pointer; transition: all var(--transition);
+      background: var(--bg-card); border: 1px solid transparent;
+    }
+    .cal-day:hover { border-color: var(--border-light); }
+    .cal-day.today { border-color: var(--green-600); font-weight: 700; }
+    .cal-day.empty { background: transparent; cursor: default; }
+    .cal-day.empty:hover { border-color: transparent; }
+    .cal-day .cal-dots { display: flex; gap: 3px; margin-top: 2px; }
+    .cal-dot { width: 5px; height: 5px; border-radius: 50%; }
+    .cal-dot.workout { background: var(--green-400); }
+    .cal-dot.checkin { background: #60a5fa; }
+    .cal-dot.macro { background: #f59e0b; }
+    .cal-month-nav { display: flex; align-items: center; justify-content: space-between; margin-bottom: 16px; }
+    .cal-month-nav h3 { font-size: 1.1rem; font-weight: 700; }
+    .cal-month-nav button { background: var(--bg-card); border: 1px solid var(--border); border-radius: 8px; color: var(--text-primary); padding: 6px 12px; cursor: pointer; font-family: inherit; }
+    .cal-month-nav button:hover { border-color: var(--border-light); }
+    .cal-legend { display: flex; gap: 16px; margin-top: 12px; justify-content: center; }
+    .cal-legend-item { display: flex; align-items: center; gap: 6px; font-size: 0.75rem; color: var(--text-muted); }
+
+    /* ===== RECOVERY GAUGE ===== */
+    .recovery-card { text-align: center; padding: 20px; }
+    .recovery-score { font-size: 3rem; font-weight: 900; letter-spacing: -2px; line-height: 1; }
+    .recovery-label { font-size: 0.9rem; font-weight: 600; margin-top: 4px; }
+    .recovery-bar { width: 100%; height: 10px; border-radius: 5px; background: var(--border); overflow: hidden; margin-top: 12px; }
+    .recovery-bar-fill { height: 100%; border-radius: 5px; transition: width 0.5s ease; }
+    .recovery-factors { display: grid; grid-template-columns: repeat(auto-fit, minmax(100px, 1fr)); gap: 8px; margin-top: 12px; }
+    .recovery-factor { text-align: center; font-size: 0.75rem; color: var(--text-muted); }
+    .recovery-factor .val { font-size: 1rem; font-weight: 700; color: var(--text-primary); }
+
+    /* ===== WEEKLY SUMMARY ===== */
+    .weekly-summary { display: grid; grid-template-columns: repeat(auto-fit, minmax(120px, 1fr)); gap: 12px; }
+    .weekly-stat { text-align: center; }
+    .weekly-stat .ws-val { font-size: 1.3rem; font-weight: 800; }
+    .weekly-stat .ws-label { font-size: 0.7rem; color: var(--text-muted); text-transform: uppercase; letter-spacing: 0.5px; }
+
+    /* ===== WARM-UP SET ===== */
+    .set-row.warmup { opacity: 0.5; }
+    .set-row.warmup .set-input { border-style: dashed; }
+    .warmup-toggle { width: 16px; height: 16px; cursor: pointer; accent-color: var(--green-500); }
+
+    /* ===== PR WALL ===== */
+    .pr-wall-card {
+      background: var(--bg-card); border: 1px solid var(--border); border-radius: var(--radius);
+      padding: 16px; margin-bottom: 8px; display: grid; grid-template-columns: 1fr auto; gap: 12px; align-items: center;
+    }
+    .pr-wall-card .pr-exercise { font-weight: 700; font-size: 0.95rem; }
+    .pr-wall-card .pr-records { display: flex; gap: 16px; }
+    .pr-wall-card .pr-rec { text-align: center; }
+    .pr-wall-card .pr-rec .pr-val { font-size: 1.1rem; font-weight: 800; color: var(--green-400); }
+    .pr-wall-card .pr-rec .pr-type { font-size: 0.65rem; color: var(--text-muted); text-transform: uppercase; letter-spacing: 0.5px; }
+
+    /* ===== COMPARISON ===== */
+    .compare-grid { display: grid; grid-template-columns: 1fr 1fr; gap: 16px; }
+    .compare-col { background: var(--bg-card); border: 1px solid var(--border); border-radius: var(--radius); padding: 16px; }
+    .compare-col h4 { font-size: 0.85rem; font-weight: 700; margin-bottom: 12px; color: var(--green-400); }
+    .compare-ex { margin-bottom: 10px; }
+    .compare-ex .ex-name { font-weight: 600; font-size: 0.85rem; margin-bottom: 4px; }
+    .compare-diff { font-size: 0.75rem; padding: 2px 8px; border-radius: 10px; display: inline-block; }
+    .compare-diff.up { background: rgba(34,197,94,0.1); color: var(--green-400); }
+    .compare-diff.down { background: rgba(239,68,68,0.1); color: var(--danger); }
+    @media (max-width: 768px) { .compare-grid { grid-template-columns: 1fr; } }
+
+    /* ===== FAVOURITE STAR ===== */
+    .fav-star { background: none; border: none; cursor: pointer; font-size: 1rem; padding: 2px; transition: all var(--transition); }
+    .fav-star.active { color: #f59e0b; }
+    .fav-star:not(.active) { color: var(--text-muted); opacity: 0.4; }
+    .fav-star:hover { opacity: 1; }
+
+    /* ===== SUPPLEMENT CHECKLIST ===== */
+    .supp-list { display: flex; flex-direction: column; gap: 8px; }
+    .supp-item {
+      display: flex; align-items: center; gap: 12px; padding: 10px 14px;
+      background: var(--bg-card); border: 1px solid var(--border); border-radius: var(--radius-sm);
+      cursor: pointer; transition: all var(--transition);
+    }
+    .supp-item:hover { border-color: var(--border-light); }
+    .supp-item.checked { opacity: 0.6; border-color: var(--green-700); }
+    .supp-item.checked .supp-name { text-decoration: line-through; }
+    .supp-check { width: 20px; height: 20px; border-radius: 50%; border: 2px solid var(--border-light); display: flex; align-items: center; justify-content: center; flex-shrink: 0; }
+    .supp-item.checked .supp-check { background: var(--green-600); border-color: var(--green-600); }
+    .supp-name { font-size: 0.9rem; flex: 1; }
+
+    /* ===== MEAL PRESET CHIPS ===== */
+    .meal-preset-bar { display: flex; gap: 8px; flex-wrap: wrap; margin-bottom: 16px; padding: 12px; background: var(--bg-secondary); border: 1px solid var(--border); border-radius: var(--radius-sm); }
+    .meal-chip {
+      padding: 6px 14px; border-radius: 20px; font-size: 0.8rem; font-weight: 500; cursor: pointer;
+      border: 1px solid var(--border); background: var(--bg-card); color: var(--text-secondary);
+      font-family: inherit; transition: all var(--transition); display: flex; align-items: center; gap: 6px;
+    }
+    .meal-chip:hover { border-color: var(--green-600); color: var(--text-primary); }
+    .meal-chip .del-meal { background: none; border: none; color: var(--text-muted); cursor: pointer; font-size: 0.7rem; padding: 0 0 0 4px; }
+    .meal-chip .del-meal:hover { color: var(--danger); }
   </style>
 </head>
 <body>
@@ -1014,6 +1112,10 @@
         <svg fill="none" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M12 5v14M5 12h14"/></svg>
         Log Workout
       </button>
+      <button class="nav-item" data-page="calendar" onclick="showPage('calendar')">
+        <svg fill="none" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><rect x="3" y="4" width="18" height="18" rx="2"/><path d="M16 2v4M8 2v4M3 10h18"/></svg>
+        Calendar
+      </button>
       <button class="nav-item" data-page="history" onclick="showPage('history')">
         <svg fill="none" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M12 8v4l3 3"/><circle cx="12" cy="12" r="9"/></svg>
         History
@@ -1021,6 +1123,10 @@
       <button class="nav-item" data-page="trends" onclick="showPage('trends')">
         <svg fill="none" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><polyline points="22 12 18 12 15 21 9 3 6 12 2 12"/></svg>
         Trends
+      </button>
+      <button class="nav-item" data-page="prwall" onclick="showPage('prwall')">
+        <svg fill="none" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M6 9H4.5a2.5 2.5 0 010-5C7 4 9 8 12 8s5-4 7.5-4a2.5 2.5 0 010 5H18"/><path d="M12 8v13M8 21h8"/></svg>
+        PR Wall
       </button>
       <button class="nav-item" data-page="insights" onclick="showPage('insights')">
         <svg fill="none" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><circle cx="12" cy="12" r="10"/><path d="M12 16v-4M12 8h.01"/></svg>
@@ -1072,6 +1178,12 @@
 
         <!-- PR Notifications -->
         <div id="pr-notifications"></div>
+
+        <!-- Recovery Score -->
+        <div id="dashboard-recovery"></div>
+
+        <!-- Weekly Summary -->
+        <div id="dashboard-weekly-summary"></div>
 
         <!-- Streaks on Dashboard -->
         <div id="dashboard-streaks"></div>
@@ -1346,6 +1458,46 @@
         </div>
 
         <div id="history-list"></div>
+
+        <!-- Workout Comparison -->
+        <div class="section-title">Compare Workouts</div>
+        <div class="form-row mb-4">
+          <div class="form-group">
+            <label class="form-label">Workout A</label>
+            <select class="form-select" id="compare-a" onchange="renderComparison()"><option value="">Select...</option></select>
+          </div>
+          <div class="form-group">
+            <label class="form-label">Workout B</label>
+            <select class="form-select" id="compare-b" onchange="renderComparison()"><option value="">Select...</option></select>
+          </div>
+        </div>
+        <div id="compare-result"></div>
+      </div>
+
+      <!-- ==================== CALENDAR ==================== -->
+      <div id="page-calendar" class="page hidden">
+        <div class="page-header">
+          <h2>Calendar</h2>
+          <p>Your training at a glance</p>
+        </div>
+        <div class="card mb-4">
+          <div class="cal-month-nav">
+            <button onclick="calPrevMonth()">&larr;</button>
+            <h3 id="cal-month-title"></h3>
+            <button onclick="calNextMonth()">&rarr;</button>
+          </div>
+          <div class="calendar-grid">
+            <div class="cal-header">Mon</div><div class="cal-header">Tue</div><div class="cal-header">Wed</div>
+            <div class="cal-header">Thu</div><div class="cal-header">Fri</div><div class="cal-header">Sat</div><div class="cal-header">Sun</div>
+          </div>
+          <div class="calendar-grid" id="cal-days"></div>
+          <div class="cal-legend">
+            <div class="cal-legend-item"><span class="cal-dot workout"></span> Workout</div>
+            <div class="cal-legend-item"><span class="cal-dot checkin"></span> Check-in</div>
+            <div class="cal-legend-item"><span class="cal-dot macro"></span> Macros</div>
+          </div>
+        </div>
+        <div class="stat-grid" id="cal-month-stats"></div>
       </div>
 
       <!-- ==================== TRENDS ==================== -->
@@ -1464,6 +1616,22 @@
         </div>
       </div>
 
+      <!-- ==================== PR WALL ==================== -->
+      <div id="page-prwall" class="page hidden">
+        <div class="page-header">
+          <h2>PR Wall</h2>
+          <p>Your personal records hall of fame</p>
+        </div>
+        <div class="stat-grid" id="prwall-stats"></div>
+        <div class="section-title">All Personal Records</div>
+        <div class="filter-bar" id="prwall-sort">
+          <button class="filter-chip active" onclick="setPRSort('name', this)">By Exercise</button>
+          <button class="filter-chip" onclick="setPRSort('weight', this)">By Weight</button>
+          <button class="filter-chip" onclick="setPRSort('1rm', this)">By Est. 1RM</button>
+        </div>
+        <div id="prwall-list"></div>
+      </div>
+
       <!-- ==================== INSIGHTS ==================== -->
       <div id="page-insights" class="page hidden">
         <div class="page-header">
@@ -1498,6 +1666,9 @@
 
         <!-- Log Macros Form -->
         <div class="card mb-4">
+          <!-- Meal Presets -->
+          <div id="meal-preset-container"></div>
+
           <h3 style="margin-bottom: 20px; font-size: 1.1rem;">Add to Today's Macros</h3>
           <div class="text-muted text-sm" style="margin:-12px 0 16px">Values are added to your running total for the day.</div>
 
@@ -1541,10 +1712,16 @@
             <input type="text" class="form-input" id="macro-notes" placeholder="e.g. Post-workout shake, lunch...">
           </div>
 
-          <button class="btn btn-primary" onclick="saveMacroEntry()" style="margin-top:8px">
-            <svg width="16" height="16" fill="none" stroke="currentColor" stroke-width="2"><path d="M8 2v12M2 8h12"/></svg>
-            Add
-          </button>
+          <div style="display:flex;gap:8px;margin-top:8px">
+            <button class="btn btn-primary" onclick="saveMacroEntry()">
+              <svg width="16" height="16" fill="none" stroke="currentColor" stroke-width="2"><path d="M8 2v12M2 8h12"/></svg>
+              Add
+            </button>
+            <button class="btn btn-secondary" onclick="saveAsMealPreset()" title="Save current values as a reusable meal preset">
+              <svg width="16" height="16" fill="none" stroke="currentColor" stroke-width="2"><path d="M13 2H6a2 2 0 00-2 2v12l5-3 5 3V4a2 2 0 00-2-2z"/></svg>
+              Save Preset
+            </button>
+          </div>
         </div>
 
         <!-- Macro Stats -->
@@ -1584,6 +1761,17 @@
               <canvas id="macroWaterChart"></canvas>
             </div>
           </div>
+        </div>
+
+        <!-- Supplements -->
+        <div class="section-title">Daily Supplements</div>
+        <div class="card mb-4">
+          <div style="display:flex;justify-content:space-between;align-items:center;margin-bottom:12px">
+            <span class="card-title">Today's Checklist</span>
+            <button class="btn btn-secondary btn-sm" onclick="addSupplementPrompt()">+ Add</button>
+          </div>
+          <div class="supp-list" id="supp-list"></div>
+          <div id="supp-empty" class="text-muted text-sm" style="padding:12px;text-align:center">No supplements configured. Tap "Add" to set up your daily list.</div>
         </div>
 
         <!-- Macro History -->
@@ -1866,8 +2054,10 @@
 
       if (page === 'dashboard') renderDashboard();
       if (page === 'checkin') renderCheckin();
+      if (page === 'calendar') renderCalendar();
       if (page === 'history') renderHistory();
       if (page === 'trends') renderTrends();
+      if (page === 'prwall') renderPRWall();
       if (page === 'insights') renderInsights();
       if (page === 'log') initLogForm();
       if (page === 'macros') renderMacros();
@@ -2044,7 +2234,20 @@
     function buildExerciseNameField(id) {
       const cat = document.getElementById('log-category').value;
       if (cat && exercisePresets[cat]) {
-        const options = exercisePresets[cat].map(e => `<option value="${e}">${e}</option>`).join('');
+        const favs = getFavExercises();
+        const presetList = exercisePresets[cat];
+        // Split into favourites (that are in this category) and the rest
+        const favInCat = presetList.filter(e => favs.includes(e));
+        const nonFav = presetList.filter(e => !favs.includes(e));
+
+        let options = '';
+        if (favInCat.length > 0) {
+          options += '<optgroup label="★ Favourites">' + favInCat.map(e => `<option value="${e}">${e}</option>`).join('') + '</optgroup>';
+          options += '<optgroup label="All Exercises">' + nonFav.map(e => `<option value="${e}">${e}</option>`).join('') + '</optgroup>';
+        } else {
+          options = presetList.map(e => `<option value="${e}">${e}</option>`).join('');
+        }
+
         return `
           <select class="form-select exercise-name-select" data-exercise-id="${id}" style="flex:1;padding:6px 10px;font-size:0.95rem;font-weight:600">
             <option value="">Select exercise...</option>
@@ -2065,17 +2268,20 @@
       div.innerHTML = `
         <div class="exercise-header">
           ${buildExerciseNameField(id)}
-          <button class="btn-icon" onclick="removeExercise(${id})" title="Remove exercise" style="margin-left:8px">
+          <button class="fav-star ${isFavExercise('') ? 'active' : ''}" onclick="toggleFavExercise(${id})" title="Favourite">&#9733;</button>
+          <button class="btn-icon" onclick="removeExercise(${id})" title="Remove exercise" style="margin-left:4px">
             <svg width="16" height="16" fill="none" stroke="currentColor" stroke-width="2"><path d="M4 4l8 8M12 4l-8 8"/></svg>
           </button>
         </div>
         <div class="set-row" style="margin-bottom:8px">
           <span class="set-num" style="font-size:0.7rem">SET</span>
-          <span class="set-num weight-unit-header" style="font-size:0.7rem">KG</span>
+          <span class="set-num weight-unit-header" style="font-size:0.7rem">${unitLabel().toUpperCase()}</span>
           <span class="set-num" style="font-size:0.7rem">REPS</span>
+          <span style="font-size:0.6rem;color:var(--text-muted)" title="Warm-up">W</span>
           <span></span>
         </div>
         <div class="sets-list" data-exercise-id="${id}"></div>
+        <input type="text" class="form-input exercise-note-input" placeholder="Exercise note (optional)" data-exercise-id="${id}" style="margin-top:8px;font-size:0.8rem;padding:6px 10px">
         <button class="btn btn-secondary btn-sm mt-4" onclick="addSet(${id})" style="width:100%">+ Add Set</button>
       `;
       document.getElementById('exercises-list').appendChild(div);
@@ -2126,6 +2332,7 @@
         <span class="set-num">${setNum}</span>
         <input type="number" class="set-input" placeholder="0" data-field="weight" value="${prevWeight}">
         <input type="number" class="set-input" placeholder="0" data-field="reps" value="${prevReps}">
+        <input type="checkbox" class="warmup-toggle" data-field="warmup" title="Warm-up set" onchange="this.closest('.set-row').classList.toggle('warmup', this.checked)">
         <button class="btn-icon" onclick="removeSet('${setId}', ${exerciseId})" style="width:28px;height:28px">
           <svg width="12" height="12" fill="none" stroke="currentColor" stroke-width="2"><path d="M3 3l6 6M9 3l-6 6"/></svg>
         </button>
@@ -2160,9 +2367,12 @@
           const rawWeight = parseFloat(row.querySelector('[data-field="weight"]').value) || 0;
           const weight = Math.round(toKg(rawWeight) * 100) / 100;
           const reps = parseInt(row.querySelector('[data-field="reps"]').value) || 0;
-          if (weight > 0 || reps > 0) sets.push({ weight, reps });
+          const warmup = row.querySelector('[data-field="warmup"]')?.checked || false;
+          if (weight > 0 || reps > 0) sets.push({ weight, reps, warmup });
         });
-        if (sets.length > 0) exercises.push({ name, sets });
+        const noteInput = block.querySelector('.exercise-note-input');
+        const note = noteInput ? noteInput.value.trim() : '';
+        if (sets.length > 0) exercises.push({ name, sets, note });
       });
       return exercises;
     }
@@ -2182,7 +2392,7 @@
       if (type !== 'cycling') {
         const exercises = gatherExercises();
         details += exercises.map(e =>
-          `<div style="margin-bottom:8px"><strong>${e.name}</strong>: ${e.sets.map(s => `${displayWeight(s.weight)} ${unitLabelShort()} x ${s.reps}`).join(', ')}</div>`
+          `<div style="margin-bottom:8px"><strong>${e.name}</strong>: ${e.sets.map(s => `${displayWeight(s.weight)} ${unitLabelShort()} x ${s.reps}${s.warmup ? ' <span style="opacity:0.5">(w)</span>' : ''}`).join(', ')}${e.note ? `<div class="text-sm text-muted" style="margin-top:2px">📝 ${e.note}</div>` : ''}</div>`
         ).join('');
       }
       if (type !== 'weights') {
@@ -2337,6 +2547,12 @@
         </div>
       `;
 
+      // Recovery Score
+      renderRecoveryScore();
+
+      // Weekly Summary
+      renderWeeklySummary();
+
       // Streaks
       renderDashboardStreaks();
 
@@ -2378,6 +2594,9 @@
       document.getElementById('history-list').innerHTML = workouts.length > 0
         ? workouts.map(w => renderHistoryItem(w)).join('')
         : '<div class="empty-state"><h3>No workouts found</h3><p>Try a different filter or log a new workout.</p></div>';
+
+      // Populate comparison dropdowns
+      populateCompareDropdowns();
     }
 
     function renderHistoryItem(w) {
@@ -2429,7 +2648,8 @@
         exerciseHtml = workout.exercises.map(e => `
           <div style="margin-bottom:16px">
             <div style="font-weight:600;margin-bottom:6px">${e.name}</div>
-            ${e.sets.map((s, i) => `<div class="text-sm text-muted">Set ${i+1}: ${displayWeight(s.weight)} ${unitLabelShort()} x ${s.reps} reps</div>`).join('')}
+            ${e.sets.map((s, i) => `<div class="text-sm text-muted${s.warmup ? ';opacity:0.5' : ''}">Set ${i+1}: ${displayWeight(s.weight)} ${unitLabelShort()} x ${s.reps} reps${s.warmup ? ' (warm-up)' : ''}</div>`).join('')}
+            ${e.note ? `<div class="text-sm" style="margin-top:4px;color:var(--text-secondary);font-style:italic">📝 ${e.note}</div>` : ''}
           </div>
         `).join('');
       }
@@ -3850,6 +4070,10 @@
       renderMacroStats(macros);
       renderMacroCharts();
       renderMacroHistory(macros);
+
+      // Supplements & Meal Presets
+      renderSupplements();
+      renderMealPresetBar();
     }
 
     function renderMacroStats(macros) {
@@ -4066,7 +4290,8 @@
         workoutType: document.getElementById('log-type').value,
         exercises: exercises.map(e => ({
           name: e.name,
-          sets: e.sets.map(s => ({ weight: s.weight, reps: s.reps }))
+          sets: e.sets.map(s => ({ weight: s.weight, reps: s.reps, warmup: s.warmup || false })),
+          note: e.note || ''
         })),
         createdAt: new Date().toISOString()
       };
@@ -4104,17 +4329,20 @@
         div.innerHTML = `
           <div class="exercise-header">
             ${buildExerciseNameField(eid)}
-            <button class="btn-icon" onclick="removeExercise(${eid})" title="Remove exercise" style="margin-left:8px">
+            <button class="fav-star ${isFavExercise(ex.name) ? 'active' : ''}" onclick="toggleFavExercise(${eid})" title="Favourite">&#9733;</button>
+            <button class="btn-icon" onclick="removeExercise(${eid})" title="Remove exercise" style="margin-left:4px">
               <svg width="16" height="16" fill="none" stroke="currentColor" stroke-width="2"><path d="M4 4l8 8M12 4l-8 8"/></svg>
             </button>
           </div>
           <div class="set-row" style="margin-bottom:8px">
             <span class="set-num" style="font-size:0.7rem">SET</span>
-            <span class="set-num weight-unit-header" style="font-size:0.7rem">KG</span>
+            <span class="set-num weight-unit-header" style="font-size:0.7rem">${unitLabel().toUpperCase()}</span>
             <span class="set-num" style="font-size:0.7rem">REPS</span>
+            <span style="font-size:0.6rem;color:var(--text-muted)" title="Warm-up">W</span>
             <span></span>
           </div>
           <div class="sets-list" data-exercise-id="${eid}"></div>
+          <input type="text" class="form-input exercise-note-input" placeholder="Exercise note (optional)" data-exercise-id="${eid}" style="margin-top:8px;font-size:0.8rem;padding:6px 10px" value="${(ex.note || '').replace(/"/g, '&quot;')}">
           <button class="btn btn-secondary btn-sm mt-4" onclick="addSet(${eid})" style="width:100%">+ Add Set</button>
         `;
         document.getElementById('exercises-list').appendChild(div);
@@ -4148,12 +4376,13 @@
         ex.sets.forEach((s, si) => {
           const sid = setCounter++;
           const row = document.createElement('div');
-          row.className = 'set-row';
+          row.className = 'set-row' + (s.warmup ? ' warmup' : '');
           row.id = `set-${sid}`;
           row.innerHTML = `
             <span class="set-num">${si + 1}</span>
-            <input type="number" class="set-input" placeholder="0" data-field="weight" value="${s.weight || ''}">
+            <input type="number" class="set-input" placeholder="0" data-field="weight" value="${s.weight ? displayWeight(s.weight) : ''}">
             <input type="number" class="set-input" placeholder="0" data-field="reps" value="${s.reps || ''}">
+            <input type="checkbox" class="warmup-toggle" data-field="warmup" title="Warm-up set" ${s.warmup ? 'checked' : ''} onchange="this.closest('.set-row').classList.toggle('warmup', this.checked)">
             <button class="btn-icon" onclick="removeSet('${sid}', ${eid})" style="width:28px;height:28px">
               <svg width="12" height="12" fill="none" stroke="currentColor" stroke-width="2"><path d="M3 3l6 6M9 3l-6 6"/></svg>
             </button>
@@ -4899,6 +5128,600 @@
     }
 
     // =====================================================================
+    // FAVOURITE EXERCISES
+    // =====================================================================
+    const FAVS_KEY = 'ironpulse_favourites';
+
+    function getFavExercises() {
+      try { return JSON.parse(localStorage.getItem(FAVS_KEY)) || []; }
+      catch { return []; }
+    }
+
+    function saveFavExercises(favs) {
+      localStorage.setItem(FAVS_KEY, JSON.stringify(favs));
+    }
+
+    function isFavExercise(name) {
+      if (!name) return false;
+      return getFavExercises().includes(name);
+    }
+
+    function toggleFavExercise(exerciseId) {
+      const block = document.getElementById(`exercise-${exerciseId}`);
+      if (!block) return;
+      const sel = block.querySelector('.exercise-name-select');
+      const inp = block.querySelector('.exercise-name-input');
+      let name = '';
+      if (sel && !sel.classList.contains('hidden') && sel.value && sel.value !== '__custom__') {
+        name = sel.value.trim();
+      } else if (inp) {
+        name = inp.value.trim();
+      }
+      if (!name) { showToast('Select an exercise first'); return; }
+
+      const favs = getFavExercises();
+      const idx = favs.indexOf(name);
+      if (idx >= 0) {
+        favs.splice(idx, 1);
+        showToast(`Removed "${name}" from favourites`);
+      } else {
+        favs.push(name);
+        showToast(`Added "${name}" to favourites`);
+      }
+      saveFavExercises(favs);
+
+      // Update star UI
+      const star = block.querySelector('.fav-star');
+      if (star) star.classList.toggle('active', favs.includes(name));
+    }
+
+    // =====================================================================
+    // CALENDAR
+    // =====================================================================
+    let calYear = new Date().getFullYear();
+    let calMonthIdx = new Date().getMonth();
+
+    function calPrevMonth() {
+      calMonthIdx--;
+      if (calMonthIdx < 0) { calMonthIdx = 11; calYear--; }
+      renderCalendar();
+    }
+
+    function calNextMonth() {
+      calMonthIdx++;
+      if (calMonthIdx > 11) { calMonthIdx = 0; calYear++; }
+      renderCalendar();
+    }
+
+    function renderCalendar() {
+      const monthNames = ['January','February','March','April','May','June','July','August','September','October','November','December'];
+      document.getElementById('cal-month-title').textContent = `${monthNames[calMonthIdx]} ${calYear}`;
+
+      const workouts = getWorkouts();
+      const checkins = getCheckins();
+      const macros = getMacros();
+
+      // Build lookup sets for the month (YYYY-MM-DD)
+      const pad = n => String(n).padStart(2, '0');
+      const prefix = `${calYear}-${pad(calMonthIdx + 1)}`;
+      const workoutDates = new Set(workouts.filter(w => w.date.startsWith(prefix)).map(w => w.date));
+      const checkinDates = new Set(checkins.filter(c => c.date.startsWith(prefix)).map(c => c.date));
+      const macroDates = new Set(macros.filter(m => m.date.startsWith(prefix)).map(m => m.date));
+
+      // First day of month (0=Sun ... 6=Sat), adjust for Monday start
+      const firstDay = new Date(calYear, calMonthIdx, 1).getDay();
+      const startOffset = (firstDay === 0 ? 6 : firstDay - 1); // Mon=0
+      const daysInMonth = new Date(calYear, calMonthIdx + 1, 0).getDate();
+
+      let html = '';
+      // Empty cells before first day
+      for (let i = 0; i < startOffset; i++) html += '<div class="cal-day empty"></div>';
+
+      for (let d = 1; d <= daysInMonth; d++) {
+        const dateStr = `${calYear}-${pad(calMonthIdx + 1)}-${pad(d)}`;
+        const hasWorkout = workoutDates.has(dateStr);
+        const hasCheckin = checkinDates.has(dateStr);
+        const hasMacro = macroDates.has(dateStr);
+        const today = dateStr === new Date().toISOString().split('T')[0] ? ' today' : '';
+        const hasActivity = hasWorkout || hasCheckin || hasMacro ? ' has-activity' : '';
+
+        html += `
+          <div class="cal-day${today}${hasActivity}">
+            <span class="cal-day-num">${d}</span>
+            <div class="cal-dots">
+              ${hasWorkout ? '<span class="cal-dot workout"></span>' : ''}
+              ${hasCheckin ? '<span class="cal-dot checkin"></span>' : ''}
+              ${hasMacro ? '<span class="cal-dot macro"></span>' : ''}
+            </div>
+          </div>
+        `;
+      }
+
+      document.getElementById('cal-days').innerHTML = html;
+
+      // Month stats
+      const monthWorkouts = workouts.filter(w => w.date.startsWith(prefix));
+      const monthVol = monthWorkouts.reduce((s, w) => s + (w.totalVolume || 0), 0);
+      const monthDist = monthWorkouts.filter(w => w.cycling).reduce((s, w) => s + (w.cycling?.distance || 0), 0);
+      const activeDays = new Set([...workoutDates, ...checkinDates, ...macroDates]).size;
+
+      document.getElementById('cal-month-stats').innerHTML = `
+        <div class="card">
+          <div class="card-header"><span class="card-title">Workouts</span></div>
+          <div class="card-value">${monthWorkouts.length}</div>
+          <div class="card-sub">this month</div>
+        </div>
+        <div class="card">
+          <div class="card-header"><span class="card-title">Active Days</span></div>
+          <div class="card-value">${activeDays}</div>
+          <div class="card-sub">days with activity</div>
+        </div>
+        <div class="card">
+          <div class="card-header"><span class="card-title">Volume</span></div>
+          <div class="card-value">${monthVol > 0 ? (fromKg(monthVol) / 1000).toFixed(1) + 'k' : '-'}</div>
+          <div class="card-sub">${unitLabelShort()} total</div>
+        </div>
+        <div class="card">
+          <div class="card-header"><span class="card-title">Distance</span></div>
+          <div class="card-value">${monthDist > 0 ? monthDist.toFixed(1) : '-'}</div>
+          <div class="card-sub">km cycled</div>
+        </div>
+      `;
+    }
+
+    // =====================================================================
+    // PR WALL
+    // =====================================================================
+    let prSortMode = 'name';
+
+    function setPRSort(mode, btn) {
+      prSortMode = mode;
+      document.querySelectorAll('#prwall-sort .filter-chip').forEach(c => c.classList.remove('active'));
+      if (btn) btn.classList.add('active');
+      renderPRWall();
+    }
+
+    function renderPRWall() {
+      const prs = getPRs();
+      const entries = Object.entries(prs);
+
+      // Stats summary
+      const totalExercises = entries.length;
+      const heaviest = entries.reduce((best, [name, pr]) => (!best || pr.maxWeight > best.w) ? { name, w: pr.maxWeight } : best, null);
+      const strongest1rm = entries.reduce((best, [name, pr]) => (!best || pr.best1RM > best.v) ? { name, v: pr.best1RM } : best, null);
+
+      document.getElementById('prwall-stats').innerHTML = `
+        <div class="card">
+          <div class="card-header"><span class="card-title">Exercises</span></div>
+          <div class="card-value">${totalExercises}</div>
+          <div class="card-sub">with personal records</div>
+        </div>
+        <div class="card">
+          <div class="card-header"><span class="card-title">Heaviest Lift</span></div>
+          <div class="card-value">${heaviest ? displayWeight(heaviest.w) + ' ' + unitLabelShort() : '-'}</div>
+          <div class="card-sub">${heaviest ? heaviest.name : ''}</div>
+        </div>
+        <div class="card">
+          <div class="card-header"><span class="card-title">Best Est. 1RM</span></div>
+          <div class="card-value">${strongest1rm ? displayWeight(strongest1rm.v) + ' ' + unitLabelShort() : '-'}</div>
+          <div class="card-sub">${strongest1rm ? strongest1rm.name : ''}</div>
+        </div>
+      `;
+
+      // Sort
+      let sorted = [...entries];
+      if (prSortMode === 'weight') sorted.sort((a, b) => b[1].maxWeight - a[1].maxWeight);
+      else if (prSortMode === '1rm') sorted.sort((a, b) => b[1].best1RM - a[1].best1RM);
+      else sorted.sort((a, b) => a[0].localeCompare(b[0]));
+
+      if (sorted.length === 0) {
+        document.getElementById('prwall-list').innerHTML = '<div class="empty-state"><h3>No PRs yet</h3><p>Log some weight training to start building your PR wall.</p></div>';
+        return;
+      }
+
+      document.getElementById('prwall-list').innerHTML = sorted.map(([name, pr]) => `
+        <div class="pr-wall-card">
+          <div>
+            <div class="pr-exercise">${name}</div>
+            <div class="text-muted text-sm">${pr.date ? new Date(pr.date).toLocaleDateString('en-GB', { day: 'numeric', month: 'short', year: 'numeric' }) : ''}</div>
+          </div>
+          <div class="pr-records">
+            <div class="pr-rec">
+              <div class="pr-val">${displayWeight(pr.maxWeight)}</div>
+              <div class="pr-type">${unitLabelShort()} max</div>
+            </div>
+            <div class="pr-rec">
+              <div class="pr-val">${displayWeight(pr.best1RM)}</div>
+              <div class="pr-type">est 1rm</div>
+            </div>
+            <div class="pr-rec">
+              <div class="pr-val">${pr.maxVolume ? (fromKg(pr.maxVolume) / 1000).toFixed(1) + 'k' : '-'}</div>
+              <div class="pr-type">volume</div>
+            </div>
+          </div>
+        </div>
+      `).join('');
+    }
+
+    // =====================================================================
+    // RECOVERY SCORE (Dashboard widget)
+    // =====================================================================
+    function renderRecoveryScore() {
+      const container = document.getElementById('dashboard-recovery');
+      const workouts = getWorkouts();
+      const checkins = getCheckins();
+      const today = new Date().toISOString().split('T')[0];
+
+      // Get most recent check-in
+      const recentCheckin = checkins[0];
+      // Get workouts from last 3 days
+      const now = new Date();
+      const threeDaysAgo = new Date(now - 3 * 86400000);
+      const recentWorkouts = workouts.filter(w => new Date(w.date) >= threeDaysAgo);
+
+      if (!recentCheckin && recentWorkouts.length === 0) {
+        container.innerHTML = '';
+        return;
+      }
+
+      // Calculate factors (each 0-100)
+      // Sleep factor: scale 1-10 to 0-100
+      const sleepScore = recentCheckin ? (recentCheckin.sleep || 5) * 10 : 50;
+      // Mood factor
+      const moodScore = recentCheckin ? (recentCheckin.mood || 5) * 10 : 50;
+      // Training load factor (inverse: more recent training = lower recovery)
+      const loadFactor = recentWorkouts.length === 0 ? 100
+        : recentWorkouts.length === 1 ? 70
+        : recentWorkouts.length === 2 ? 45
+        : 25;
+      // RPE factor (inverse: higher RPE from last session = lower recovery)
+      const lastRPE = workouts.length > 0 ? workouts[0].postWorkout.rpe : 5;
+      const rpeFactor = Math.max(0, 100 - (lastRPE * 10));
+      // Days since last workout factor
+      const daysSinceLast = workouts.length > 0 ? Math.floor((now - new Date(workouts[0].date)) / 86400000) : 3;
+      const restFactor = daysSinceLast === 0 ? 30 : daysSinceLast === 1 ? 60 : daysSinceLast >= 2 ? 90 : 50;
+
+      // Weighted average
+      const score = Math.round(
+        (sleepScore * 0.25) +
+        (moodScore * 0.15) +
+        (loadFactor * 0.25) +
+        (rpeFactor * 0.15) +
+        (restFactor * 0.20)
+      );
+
+      const color = score >= 70 ? 'var(--green-400)' : score >= 40 ? 'var(--warning)' : 'var(--danger)';
+      const label = score >= 70 ? 'Good to Train' : score >= 40 ? 'Moderate' : 'Consider Rest';
+
+      container.innerHTML = `
+        <div class="card recovery-card mb-4">
+          <div class="recovery-score" style="color:${color}">${score}</div>
+          <div class="recovery-label" style="color:${color}">${label}</div>
+          <div class="recovery-bar">
+            <div class="recovery-bar-fill" style="width:${score}%;background:${color}"></div>
+          </div>
+          <div class="recovery-factors">
+            <div class="recovery-factor"><div class="val">${Math.round(sleepScore / 10)}/10</div>Sleep</div>
+            <div class="recovery-factor"><div class="val">${Math.round(moodScore / 10)}/10</div>Mood</div>
+            <div class="recovery-factor"><div class="val">${recentWorkouts.length}</div>Sessions (3d)</div>
+            <div class="recovery-factor"><div class="val">${lastRPE}/10</div>Last RPE</div>
+            <div class="recovery-factor"><div class="val">${daysSinceLast}d</div>Rest</div>
+          </div>
+        </div>
+      `;
+    }
+
+    // =====================================================================
+    // WEEKLY SUMMARY (Dashboard widget)
+    // =====================================================================
+    function renderWeeklySummary() {
+      const container = document.getElementById('dashboard-weekly-summary');
+      const workouts = getWorkouts();
+      const macros = getMacros();
+      const checkins = getCheckins();
+      const now = new Date();
+
+      // This week (Mon-Sun)
+      const dayOfWeek = now.getDay(); // 0=Sun
+      const mondayOffset = dayOfWeek === 0 ? 6 : dayOfWeek - 1;
+      const monday = new Date(now);
+      monday.setDate(now.getDate() - mondayOffset);
+      monday.setHours(0, 0, 0, 0);
+
+      const weekWorkouts = workouts.filter(w => new Date(w.date) >= monday);
+      const weekMacros = macros.filter(m => new Date(m.date) >= monday);
+      const weekCheckins = checkins.filter(c => new Date(c.date) >= monday);
+
+      if (weekWorkouts.length === 0 && weekMacros.length === 0) {
+        container.innerHTML = '';
+        return;
+      }
+
+      const totalVol = weekWorkouts.reduce((s, w) => s + (w.totalVolume || 0), 0);
+      const totalDist = weekWorkouts.filter(w => w.cycling).reduce((s, w) => s + (w.cycling?.distance || 0), 0);
+      const avgProtein = weekMacros.length > 0
+        ? Math.round(weekMacros.reduce((s, m) => s + (m.protein || 0), 0) / weekMacros.length)
+        : 0;
+      const totalCalsBurned = weekWorkouts.reduce((s, w) => s + (w.postWorkout?.caloriesBurned || 0), 0);
+      const avgSleep = weekCheckins.length > 0
+        ? (weekCheckins.reduce((s, c) => s + (c.sleep || 0), 0) / weekCheckins.length).toFixed(1)
+        : '-';
+
+      container.innerHTML = `
+        <div class="card mb-4">
+          <div class="card-header"><span class="card-title">This Week</span><span class="text-muted text-sm">${monday.toLocaleDateString('en-GB', { day: 'numeric', month: 'short' })} — Now</span></div>
+          <div class="weekly-summary" style="margin-top:12px">
+            <div class="weekly-stat"><div class="ws-val">${weekWorkouts.length}</div><div class="ws-label">Workouts</div></div>
+            <div class="weekly-stat"><div class="ws-val">${totalVol > 0 ? (fromKg(totalVol) / 1000).toFixed(1) + 'k' : '-'}</div><div class="ws-label">Volume (${unitLabelShort()})</div></div>
+            <div class="weekly-stat"><div class="ws-val">${totalDist > 0 ? totalDist.toFixed(1) : '-'}</div><div class="ws-label">Km Cycled</div></div>
+            <div class="weekly-stat"><div class="ws-val">${avgProtein > 0 ? avgProtein + 'g' : '-'}</div><div class="ws-label">Avg Protein</div></div>
+            <div class="weekly-stat"><div class="ws-val">${totalCalsBurned > 0 ? totalCalsBurned.toLocaleString() : '-'}</div><div class="ws-label">Kcal Burned</div></div>
+            <div class="weekly-stat"><div class="ws-val">${avgSleep}</div><div class="ws-label">Avg Sleep</div></div>
+          </div>
+        </div>
+      `;
+    }
+
+    // =====================================================================
+    // WORKOUT COMPARISON
+    // =====================================================================
+    function populateCompareDropdowns() {
+      const workouts = getWorkouts();
+      const options = workouts.map(w => {
+        const d = new Date(w.date).toLocaleDateString('en-GB', { day: 'numeric', month: 'short' });
+        return `<option value="${w.id}">${d} — ${w.name}</option>`;
+      }).join('');
+      const base = '<option value="">Select...</option>' + options;
+      document.getElementById('compare-a').innerHTML = base;
+      document.getElementById('compare-b').innerHTML = base;
+    }
+
+    function renderComparison() {
+      const aId = parseInt(document.getElementById('compare-a').value);
+      const bId = parseInt(document.getElementById('compare-b').value);
+      const container = document.getElementById('compare-result');
+
+      if (!aId || !bId) { container.innerHTML = ''; return; }
+      if (aId === bId) { container.innerHTML = '<div class="text-muted text-sm" style="padding:12px">Select two different workouts to compare.</div>'; return; }
+
+      const workouts = getWorkouts();
+      const a = workouts.find(w => w.id === aId);
+      const b = workouts.find(w => w.id === bId);
+      if (!a || !b) { container.innerHTML = ''; return; }
+
+      const dateA = new Date(a.date).toLocaleDateString('en-GB', { day: 'numeric', month: 'short', year: 'numeric' });
+      const dateB = new Date(b.date).toLocaleDateString('en-GB', { day: 'numeric', month: 'short', year: 'numeric' });
+
+      // Build exercise comparison
+      const allExNames = new Set();
+      (a.exercises || []).forEach(e => allExNames.add(e.name));
+      (b.exercises || []).forEach(e => allExNames.add(e.name));
+
+      let comparisonHtml = '';
+      allExNames.forEach(name => {
+        const exA = (a.exercises || []).find(e => e.name === name);
+        const exB = (b.exercises || []).find(e => e.name === name);
+        const volA = exA ? exA.sets.reduce((s, set) => s + (set.weight * set.reps), 0) : 0;
+        const volB = exB ? exB.sets.reduce((s, set) => s + (set.weight * set.reps), 0) : 0;
+        const maxA = exA ? Math.max(...exA.sets.map(s => s.weight)) : 0;
+        const maxB = exB ? Math.max(...exB.sets.map(s => s.weight)) : 0;
+
+        const volDiff = volB - volA;
+        const volBadge = volDiff > 0 ? `<span class="compare-diff up">+${displayWeight(volDiff)} ${unitLabelShort()}</span>`
+          : volDiff < 0 ? `<span class="compare-diff down">${displayWeight(volDiff)} ${unitLabelShort()}</span>` : '';
+
+        comparisonHtml += `
+          <div class="compare-ex">
+            <div class="ex-name">${name}</div>
+            <div class="text-sm text-muted">
+              A: ${exA ? exA.sets.length + ' sets, max ' + displayWeight(maxA) + ' ' + unitLabelShort() : 'Not done'}
+              &nbsp;|&nbsp;
+              B: ${exB ? exB.sets.length + ' sets, max ' + displayWeight(maxB) + ' ' + unitLabelShort() : 'Not done'}
+              ${volBadge}
+            </div>
+          </div>
+        `;
+      });
+
+      // Overall stats
+      const volTotalA = (a.totalVolume || 0);
+      const volTotalB = (b.totalVolume || 0);
+      const volChange = volTotalB - volTotalA;
+      const volPct = volTotalA > 0 ? ((volChange / volTotalA) * 100).toFixed(1) : 0;
+
+      container.innerHTML = `
+        <div class="compare-grid">
+          <div class="compare-col">
+            <h4>A — ${dateA}</h4>
+            <div class="text-sm">${a.name}</div>
+            <div class="text-sm text-muted" style="margin-top:4px">Volume: ${displayWeight(volTotalA)} ${unitLabelShort()} · RPE: ${a.postWorkout.rpe}/10</div>
+          </div>
+          <div class="compare-col">
+            <h4>B — ${dateB}</h4>
+            <div class="text-sm">${b.name}</div>
+            <div class="text-sm text-muted" style="margin-top:4px">Volume: ${displayWeight(volTotalB)} ${unitLabelShort()} · RPE: ${b.postWorkout.rpe}/10</div>
+            ${volChange !== 0 ? `<div style="margin-top:4px"><span class="compare-diff ${volChange > 0 ? 'up' : 'down'}">${volChange > 0 ? '+' : ''}${volPct}% volume</span></div>` : ''}
+          </div>
+        </div>
+        <div class="card mt-4" style="padding:16px">
+          <div class="card-header" style="margin-bottom:12px"><span class="card-title">Exercise Breakdown</span></div>
+          ${comparisonHtml || '<div class="text-muted text-sm">No exercises to compare.</div>'}
+        </div>
+      `;
+    }
+
+    // =====================================================================
+    // SUPPLEMENT TRACKER
+    // =====================================================================
+    const SUPPS_KEY = 'ironpulse_supplements';
+    const SUPPS_LOG_KEY = 'ironpulse_supplements_log';
+
+    function getSupplements() {
+      try { return JSON.parse(localStorage.getItem(SUPPS_KEY)) || []; }
+      catch { return []; }
+    }
+
+    function saveSupplements(supps) {
+      localStorage.setItem(SUPPS_KEY, JSON.stringify(supps));
+    }
+
+    function getSuppsLog() {
+      try { return JSON.parse(localStorage.getItem(SUPPS_LOG_KEY)) || {}; }
+      catch { return {}; }
+    }
+
+    function saveSuppsLog(log) {
+      localStorage.setItem(SUPPS_LOG_KEY, JSON.stringify(log));
+    }
+
+    function addSupplementPrompt() {
+      const name = prompt('Enter supplement name (e.g. Creatine, Vitamin D, Fish Oil):');
+      if (!name || !name.trim()) return;
+      const supps = getSupplements();
+      if (supps.includes(name.trim())) { showToast('Already in your list'); return; }
+      supps.push(name.trim());
+      saveSupplements(supps);
+      renderSupplements();
+      showToast(`Added "${name.trim()}"`);
+    }
+
+    function removeSupplement(name) {
+      if (!confirm(`Remove "${name}" from your supplement list?`)) return;
+      const supps = getSupplements().filter(s => s !== name);
+      saveSupplements(supps);
+      renderSupplements();
+      showToast('Removed');
+    }
+
+    function toggleSupplement(name) {
+      const today = new Date().toISOString().split('T')[0];
+      const log = getSuppsLog();
+      if (!log[today]) log[today] = [];
+      const idx = log[today].indexOf(name);
+      if (idx >= 0) log[today].splice(idx, 1);
+      else log[today].push(name);
+      saveSuppsLog(log);
+      renderSupplements();
+    }
+
+    function renderSupplements() {
+      const supps = getSupplements();
+      const today = new Date().toISOString().split('T')[0];
+      const log = getSuppsLog();
+      const todayChecked = log[today] || [];
+
+      const listEl = document.getElementById('supp-list');
+      const emptyEl = document.getElementById('supp-empty');
+
+      if (supps.length === 0) {
+        listEl.innerHTML = '';
+        emptyEl.style.display = '';
+        return;
+      }
+
+      emptyEl.style.display = 'none';
+      listEl.innerHTML = supps.map(name => {
+        const checked = todayChecked.includes(name);
+        return `
+          <div class="supp-item${checked ? ' checked' : ''}" onclick="toggleSupplement('${name.replace(/'/g, "\\'")}')">
+            <div class="supp-check">${checked ? '<svg width="12" height="12" fill="none" stroke="white" stroke-width="3"><path d="M2 6l3 3 5-5"/></svg>' : ''}</div>
+            <span class="supp-name">${name}</span>
+            <button class="btn-icon" onclick="event.stopPropagation(); removeSupplement('${name.replace(/'/g, "\\'")}')" title="Remove" style="color:var(--text-muted);width:24px;height:24px">
+              <svg width="12" height="12" fill="none" stroke="currentColor" stroke-width="2"><path d="M3 3l6 6M9 3l-6 6"/></svg>
+            </button>
+          </div>
+        `;
+      }).join('');
+    }
+
+    // =====================================================================
+    // MEAL PRESETS
+    // =====================================================================
+    const MEAL_PRESETS_KEY = 'ironpulse_meal_presets';
+
+    function getMealPresets() {
+      try { return JSON.parse(localStorage.getItem(MEAL_PRESETS_KEY)) || []; }
+      catch { return []; }
+    }
+
+    function saveMealPresets(presets) {
+      localStorage.setItem(MEAL_PRESETS_KEY, JSON.stringify(presets));
+    }
+
+    function saveAsMealPreset() {
+      const cal = document.getElementById('macro-calories').value;
+      const protein = document.getElementById('macro-protein').value;
+      const carbs = document.getElementById('macro-carbs').value;
+      const fats = document.getElementById('macro-fats').value;
+      const water = document.getElementById('macro-water').value;
+      const fibre = document.getElementById('macro-fibre').value;
+
+      if (!cal && !protein && !carbs && !fats) {
+        showToast('Enter some macro values first');
+        return;
+      }
+
+      const name = prompt('Name this meal preset (e.g. Protein Shake, Chicken & Rice):');
+      if (!name || !name.trim()) return;
+
+      const presets = getMealPresets();
+      presets.push({
+        id: Date.now(),
+        name: name.trim(),
+        calories: parseFloat(cal) || 0,
+        protein: parseFloat(protein) || 0,
+        carbs: parseFloat(carbs) || 0,
+        fats: parseFloat(fats) || 0,
+        water: parseFloat(water) || 0,
+        fibre: parseFloat(fibre) || 0
+      });
+      saveMealPresets(presets);
+      renderMealPresetBar();
+      showToast(`Saved "${name.trim()}" preset`);
+    }
+
+    function loadMealPreset(id) {
+      const preset = getMealPresets().find(p => p.id === id);
+      if (!preset) return;
+      document.getElementById('macro-calories').value = preset.calories || '';
+      document.getElementById('macro-protein').value = preset.protein || '';
+      document.getElementById('macro-carbs').value = preset.carbs || '';
+      document.getElementById('macro-fats').value = preset.fats || '';
+      document.getElementById('macro-water').value = preset.water || '';
+      document.getElementById('macro-fibre').value = preset.fibre || '';
+      showToast(`Loaded "${preset.name}"`);
+    }
+
+    function deleteMealPreset(id) {
+      if (!confirm('Delete this meal preset?')) return;
+      const presets = getMealPresets().filter(p => p.id !== id);
+      saveMealPresets(presets);
+      renderMealPresetBar();
+      showToast('Preset deleted');
+    }
+
+    function renderMealPresetBar() {
+      const presets = getMealPresets();
+      const container = document.getElementById('meal-preset-container');
+      if (presets.length === 0) {
+        container.innerHTML = '';
+        return;
+      }
+      container.innerHTML = `
+        <div class="meal-preset-bar">
+          <span class="text-sm text-muted" style="align-self:center;white-space:nowrap">Quick Add:</span>
+          ${presets.map(p => `
+            <button class="meal-chip" onclick="loadMealPreset(${p.id})">
+              ${p.name}
+              <span class="text-muted text-sm">${p.calories ? p.calories + 'kcal' : ''}</span>
+              <span class="del-meal" onclick="event.stopPropagation(); deleteMealPreset(${p.id})">&times;</span>
+            </button>
+          `).join('')}
+        </div>
+      `;
+    }
+
+    // =====================================================================
     // EXPORT / IMPORT (updated to include all new data)
     // =====================================================================
     function exportData() {
@@ -4909,7 +5732,11 @@
         goals: getGoals(),
         bodyweight: getBodyWeights(),
         templates: getTemplates(),
-        prs: getPRs()
+        prs: getPRs(),
+        favourites: getFavExercises(),
+        supplements: getSupplements(),
+        supplementsLog: getSuppsLog(),
+        mealPresets: getMealPresets()
       }, null, 2);
       const blob = new Blob([data], { type: 'application/json' });
       const url = URL.createObjectURL(blob);
@@ -4983,6 +5810,29 @@
                 }
               });
               savePRs(existing);
+            }
+            if (data.favourites && Array.isArray(data.favourites)) {
+              const existing = getFavExercises();
+              const merged = [...new Set([...existing, ...data.favourites])];
+              saveFavExercises(merged);
+            }
+            if (data.supplements && Array.isArray(data.supplements)) {
+              const existing = getSupplements();
+              const merged = [...new Set([...existing, ...data.supplements])];
+              saveSupplements(merged);
+            }
+            if (data.supplementsLog && typeof data.supplementsLog === 'object') {
+              const existing = getSuppsLog();
+              Object.entries(data.supplementsLog).forEach(([date, items]) => {
+                if (!existing[date]) existing[date] = items;
+              });
+              saveSuppsLog(existing);
+            }
+            if (data.mealPresets && Array.isArray(data.mealPresets)) {
+              const existing = getMealPresets();
+              const existingIds = new Set(existing.map(p => p.id));
+              const newPresets = data.mealPresets.filter(p => !existingIds.has(p.id));
+              saveMealPresets([...existing, ...newPresets]);
             }
             showToast('Data imported!');
           }
