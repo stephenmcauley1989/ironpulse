@@ -1134,6 +1134,51 @@
     .checkin-metric .cm-val { font-size: 1.1rem; font-weight: 700; }
     .checkin-metric .cm-label { font-size: 0.65rem; color: var(--text-muted); text-transform: uppercase; }
     .diary-entry { padding: 10px 14px; background: var(--bg-secondary); border-radius: var(--radius-sm); margin-top: 8px; font-size: 0.85rem; color: var(--text-secondary); font-style: italic; }
+
+    /* ===== SIDEBAR SECTIONS ===== */
+    .nav-section { font-size: 0.6rem; font-weight: 700; text-transform: uppercase; letter-spacing: 1.5px; color: var(--text-muted); padding: 12px 12px 4px; margin-top: 4px; }
+
+    /* ===== HABIT TRACKER ===== */
+    .habit-grid { display: flex; flex-direction: column; gap: 6px; }
+    .habit-row {
+      display: flex; align-items: center; gap: 10px; padding: 10px 14px;
+      background: var(--bg-card); border: 1px solid var(--border); border-radius: var(--radius-sm);
+      cursor: pointer; transition: all var(--transition);
+    }
+    .habit-row:hover { border-color: var(--border-light); }
+    .habit-row.done { border-color: var(--green-700); }
+    .habit-row.done .habit-name { text-decoration: line-through; opacity: 0.6; }
+    .habit-check { width: 22px; height: 22px; border-radius: 6px; border: 2px solid var(--border-light); display: flex; align-items: center; justify-content: center; flex-shrink: 0; font-size: 0.7rem; }
+    .habit-row.done .habit-check { background: var(--green-600); border-color: var(--green-600); }
+    .habit-name { font-size: 0.9rem; flex: 1; }
+    .habit-streak { font-size: 0.7rem; color: var(--text-muted); font-weight: 600; }
+    .habit-streak.active { color: var(--green-400); }
+    .habit-progress-ring { width: 80px; height: 80px; margin: 0 auto; }
+
+    /* ===== JOURNAL ===== */
+    .gratitude-item { display: flex; gap: 8px; align-items: start; margin-bottom: 8px; }
+    .gratitude-num { width: 24px; height: 24px; border-radius: 50%; background: var(--green-800); color: var(--green-300); font-size: 0.7rem; font-weight: 700; display: flex; align-items: center; justify-content: center; flex-shrink: 0; margin-top: 6px; }
+    .win-item { padding: 8px 12px; background: var(--bg-secondary); border-left: 3px solid var(--green-500); border-radius: 0 var(--radius-sm) var(--radius-sm) 0; margin-bottom: 6px; font-size: 0.9rem; }
+    .reflection-card { background: var(--bg-card); border: 1px solid var(--border); border-radius: var(--radius); padding: 16px; margin-bottom: 8px; }
+    .reflection-card h4 { font-size: 0.85rem; font-weight: 700; margin-bottom: 8px; color: var(--green-400); }
+    .reflection-card p { font-size: 0.85rem; color: var(--text-secondary); }
+
+    /* ===== FOCUS / PRIORITIES ===== */
+    .priority-row { display: flex; align-items: center; gap: 10px; margin-bottom: 6px; }
+    .priority-check { width: 20px; height: 20px; border-radius: 50%; border: 2px solid var(--border-light); cursor: pointer; display: flex; align-items: center; justify-content: center; flex-shrink: 0; transition: all var(--transition); }
+    .priority-check.done { background: var(--green-600); border-color: var(--green-600); }
+    .priority-text { font-size: 0.9rem; flex: 1; }
+    .priority-text.done { text-decoration: line-through; opacity: 0.5; }
+    .focus-session { padding: 10px 14px; background: var(--bg-card); border: 1px solid var(--border); border-radius: var(--radius-sm); margin-bottom: 6px; display: flex; justify-content: space-between; align-items: center; }
+    .focus-cat { font-size: 0.7rem; padding: 2px 8px; border-radius: 10px; background: var(--green-900); color: var(--green-300); }
+
+    /* ===== LIFE SCORE ===== */
+    .life-score-card { text-align: center; padding: 20px; background: linear-gradient(135deg, var(--bg-card), var(--green-900)); border: 1px solid var(--green-800); }
+    .life-score { font-size: 3rem; font-weight: 900; letter-spacing: -2px; }
+    .life-score-breakdown { display: grid; grid-template-columns: repeat(auto-fit, minmax(70px, 1fr)); gap: 6px; margin-top: 12px; }
+    .life-score-item { text-align: center; }
+    .life-score-item .ls-val { font-size: 0.9rem; font-weight: 700; }
+    .life-score-item .ls-label { font-size: 0.6rem; color: var(--text-muted); text-transform: uppercase; }
   </style>
 </head>
 <body>
@@ -1155,7 +1200,7 @@
         </svg>
         <div>
           <h1>IronPulse</h1>
-          <small>Workout Tracker</small>
+          <small>Life &amp; Fitness Tracker</small>
         </div>
       </div>
 
@@ -1163,6 +1208,8 @@
         <svg fill="none" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><rect x="3" y="3" width="7" height="7" rx="1"/><rect x="14" y="3" width="7" height="7" rx="1"/><rect x="3" y="14" width="7" height="7" rx="1"/><rect x="14" y="14" width="7" height="7" rx="1"/></svg>
         Dashboard
       </button>
+
+      <div class="nav-section">Training</div>
       <button class="nav-item" data-page="checkin" onclick="showPage('checkin')">
         <svg fill="none" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M20 21v-2a4 4 0 00-4-4H8a4 4 0 00-4 4v2"/><circle cx="12" cy="7" r="4"/></svg>
         Check In
@@ -1187,25 +1234,41 @@
         <svg fill="none" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M6 9H4.5a2.5 2.5 0 010-5C7 4 9 8 12 8s5-4 7.5-4a2.5 2.5 0 010 5H18"/><path d="M12 8v13M8 21h8"/></svg>
         PR Wall
       </button>
-      <button class="nav-item" data-page="insights" onclick="showPage('insights')">
-        <svg fill="none" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><circle cx="12" cy="12" r="10"/><path d="M12 16v-4M12 8h.01"/></svg>
-        Insights
+      <button class="nav-item" data-page="split" onclick="showPage('split')">
+        <svg fill="none" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><rect x="3" y="4" width="18" height="18" rx="2"/><path d="M3 10h18M10 4v18"/></svg>
+        Split Planner
       </button>
+
+      <div class="nav-section">Wellness</div>
       <button class="nav-item" data-page="macros" onclick="showPage('macros')">
         <svg fill="none" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M18 8h1a4 4 0 010 8h-1M2 8h16v9a4 4 0 01-4 4H6a4 4 0 01-4-4V8zM6 1v3M10 1v3M14 1v3"/></svg>
         Macros
-      </button>
-      <button class="nav-item" data-page="goals" onclick="showPage('goals')">
-        <svg fill="none" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M12 22c5.523 0 10-4.477 10-10S17.523 2 12 2 2 6.477 2 12s4.477 10 10 10z"/><circle cx="12" cy="12" r="6"/><circle cx="12" cy="12" r="2"/></svg>
-        Goals
       </button>
       <button class="nav-item" data-page="bodyweight" onclick="showPage('bodyweight')">
         <svg fill="none" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M12 3v18M3 12h18M5.6 5.6l12.8 12.8M18.4 5.6L5.6 18.4"/></svg>
         Body Weight
       </button>
-      <button class="nav-item" data-page="split" onclick="showPage('split')">
-        <svg fill="none" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><rect x="3" y="4" width="18" height="18" rx="2"/><path d="M3 10h18M10 4v18"/></svg>
-        Split Planner
+      <button class="nav-item" data-page="goals" onclick="showPage('goals')">
+        <svg fill="none" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M12 22c5.523 0 10-4.477 10-10S17.523 2 12 2 2 6.477 2 12s4.477 10 10 10z"/><circle cx="12" cy="12" r="6"/><circle cx="12" cy="12" r="2"/></svg>
+        Goals
+      </button>
+      <button class="nav-item" data-page="insights" onclick="showPage('insights')">
+        <svg fill="none" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><circle cx="12" cy="12" r="10"/><path d="M12 16v-4M12 8h.01"/></svg>
+        Insights
+      </button>
+
+      <div class="nav-section">Life</div>
+      <button class="nav-item" data-page="habits" onclick="showPage('habits')">
+        <svg fill="none" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M9 11l3 3L22 4"/><path d="M21 12v7a2 2 0 01-2 2H5a2 2 0 01-2-2V5a2 2 0 012-2h11"/></svg>
+        Habits
+      </button>
+      <button class="nav-item" data-page="journal" onclick="showPage('journal')">
+        <svg fill="none" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M4 19.5A2.5 2.5 0 016.5 17H20"/><path d="M6.5 2H20v20H6.5A2.5 2.5 0 014 19.5v-15A2.5 2.5 0 016.5 2z"/></svg>
+        Journal
+      </button>
+      <button class="nav-item" data-page="focus" onclick="showPage('focus')">
+        <svg fill="none" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><circle cx="12" cy="12" r="10"/><polyline points="12 6 12 12 16 14"/></svg>
+        Focus
       </button>
 
       <div class="sidebar-footer">
@@ -1241,6 +1304,9 @@
 
         <!-- PR Notifications -->
         <div id="pr-notifications"></div>
+
+        <!-- Life Score -->
+        <div id="dashboard-life-score"></div>
 
         <!-- Recovery Score -->
         <div id="dashboard-recovery"></div>
@@ -1985,6 +2051,189 @@
         <div id="bw-history"></div>
       </div>
 
+      <!-- ==================== HABITS ==================== -->
+      <div id="page-habits" class="page hidden">
+        <div class="page-header">
+          <h2>Habits</h2>
+          <p>Build consistency, one day at a time</p>
+        </div>
+
+        <!-- Today's Habits -->
+        <div class="card mb-4">
+          <div style="display:flex;justify-content:space-between;align-items:center;margin-bottom:12px">
+            <span class="card-title">Today's Habits</span>
+            <span class="text-muted text-sm" id="habits-progress-text"></span>
+          </div>
+          <div class="habit-grid" id="habits-today-list"></div>
+          <div id="habits-empty" class="text-muted text-sm" style="padding:16px;text-align:center">No habits set up yet. Add some below to start tracking.</div>
+        </div>
+
+        <!-- Add Habit -->
+        <div class="card mb-4">
+          <h3 style="margin-bottom:16px;font-size:1.1rem">Add New Habit</h3>
+          <div class="form-row">
+            <div class="form-group">
+              <label class="form-label">Habit Name</label>
+              <input type="text" class="form-input" id="habit-name" placeholder="e.g. Read 30 min, Cold shower, No phone before 9am...">
+            </div>
+            <div class="form-group">
+              <label class="form-label">Category</label>
+              <select class="form-select" id="habit-category">
+                <option value="health">Health</option>
+                <option value="mind">Mind</option>
+                <option value="productivity">Productivity</option>
+                <option value="social">Social</option>
+                <option value="other">Other</option>
+              </select>
+            </div>
+          </div>
+          <button class="btn btn-primary" onclick="addHabit()" style="margin-top:8px">Add Habit</button>
+        </div>
+
+        <!-- Habits Stats -->
+        <div class="stat-grid" id="habits-stats"></div>
+
+        <!-- Habit Completion Chart -->
+        <div class="section-title">Completion Rate</div>
+        <div class="card mb-4">
+          <div class="chart-container">
+            <canvas id="habitsChart"></canvas>
+          </div>
+        </div>
+
+        <!-- Manage Habits -->
+        <div class="section-title">Manage Habits</div>
+        <div id="habits-manage-list"></div>
+      </div>
+
+      <!-- ==================== JOURNAL ==================== -->
+      <div id="page-journal" class="page hidden">
+        <div class="page-header">
+          <h2>Journal</h2>
+          <p>Reflect, appreciate, and celebrate</p>
+        </div>
+
+        <!-- Gratitude -->
+        <div class="card mb-4">
+          <div class="card-header">
+            <span class="card-title">Today's Gratitude</span>
+            <span class="text-muted text-sm" id="journal-date-label"></span>
+          </div>
+          <div style="margin-top:12px">
+            <div class="gratitude-item"><div class="gratitude-num">1</div><input type="text" class="form-input" id="gratitude-1" placeholder="I'm grateful for..."></div>
+            <div class="gratitude-item"><div class="gratitude-num">2</div><input type="text" class="form-input" id="gratitude-2" placeholder="I'm grateful for..."></div>
+            <div class="gratitude-item"><div class="gratitude-num">3</div><input type="text" class="form-input" id="gratitude-3" placeholder="I'm grateful for..."></div>
+          </div>
+        </div>
+
+        <!-- Daily Wins -->
+        <div class="card mb-4">
+          <div class="card-header"><span class="card-title">Today's Wins</span></div>
+          <div style="margin-top:12px">
+            <div class="form-group"><input type="text" class="form-input" id="win-1" placeholder="Win #1 — What went well today?"></div>
+            <div class="form-group"><input type="text" class="form-input" id="win-2" placeholder="Win #2 (optional)"></div>
+            <div class="form-group"><input type="text" class="form-input" id="win-3" placeholder="Win #3 (optional)"></div>
+          </div>
+        </div>
+
+        <button class="btn btn-primary" onclick="saveJournalEntry()" style="margin-bottom:24px;width:100%">Save Today's Journal</button>
+
+        <!-- Weekly Reflection -->
+        <div class="card mb-4">
+          <div class="card-header"><span class="card-title">Weekly Reflection</span></div>
+          <div style="margin-top:12px">
+            <div class="form-group">
+              <label class="form-label">What went well this week?</label>
+              <textarea class="form-textarea" id="reflect-well" placeholder="Achievements, progress, good moments..."></textarea>
+            </div>
+            <div class="form-group">
+              <label class="form-label">What could improve?</label>
+              <textarea class="form-textarea" id="reflect-improve" placeholder="Challenges, things to work on..."></textarea>
+            </div>
+            <div class="form-group">
+              <label class="form-label">Focus for next week</label>
+              <textarea class="form-textarea" id="reflect-focus" placeholder="Top priority, intention, goal..."></textarea>
+            </div>
+          </div>
+          <button class="btn btn-secondary" onclick="saveReflection()" style="margin-top:8px">Save Reflection</button>
+        </div>
+
+        <!-- Journal History -->
+        <div class="section-title">Recent Entries</div>
+        <div id="journal-history"></div>
+
+        <!-- Reflections History -->
+        <div class="section-title">Past Reflections</div>
+        <div id="reflections-history"></div>
+      </div>
+
+      <!-- ==================== FOCUS ==================== -->
+      <div id="page-focus" class="page hidden">
+        <div class="page-header">
+          <h2>Focus</h2>
+          <p>Track productive time and daily priorities</p>
+        </div>
+
+        <!-- Today's Priorities -->
+        <div class="card mb-4">
+          <div class="card-header">
+            <span class="card-title">Today's Priorities</span>
+            <span class="text-muted text-sm" id="priorities-date-label"></span>
+          </div>
+          <div style="margin-top:12px" id="priorities-list"></div>
+          <div class="form-row" style="margin-top:12px">
+            <input type="text" class="form-input" id="priority-input" placeholder="Add a priority..." style="flex:1" onkeydown="if(event.key==='Enter')addPriority()">
+            <button class="btn btn-primary btn-sm" onclick="addPriority()">Add</button>
+          </div>
+        </div>
+
+        <!-- Log Focus Time -->
+        <div class="card mb-4">
+          <h3 style="margin-bottom:16px;font-size:1.1rem">Log Focus Session</h3>
+          <div class="form-row">
+            <div class="form-group">
+              <label class="form-label">Minutes</label>
+              <input type="number" class="form-input" id="focus-minutes" placeholder="e.g. 45">
+            </div>
+            <div class="form-group">
+              <label class="form-label">Category</label>
+              <select class="form-select" id="focus-category">
+                <option value="deep-work">Deep Work</option>
+                <option value="learning">Learning</option>
+                <option value="creative">Creative</option>
+                <option value="planning">Planning</option>
+                <option value="reading">Reading</option>
+                <option value="other">Other</option>
+              </select>
+            </div>
+          </div>
+          <div class="form-group">
+            <label class="form-label">What did you work on? (optional)</label>
+            <input type="text" class="form-input" id="focus-notes" placeholder="e.g. Project proposal, chapter 5 of book...">
+          </div>
+          <button class="btn btn-primary" onclick="saveFocusSession()" style="margin-top:8px">Log Session</button>
+        </div>
+
+        <!-- Focus Stats -->
+        <div class="stat-grid" id="focus-stats"></div>
+
+        <!-- Focus Chart -->
+        <div class="section-title">Focus Trend</div>
+        <div class="card mb-4">
+          <div class="chart-container">
+            <canvas id="focusChart"></canvas>
+          </div>
+        </div>
+
+        <!-- Today's Sessions -->
+        <div class="section-title">Today's Sessions</div>
+        <div id="focus-today-list"></div>
+
+        <!-- Focus History -->
+        <div class="section-title">Recent History</div>
+        <div id="focus-history"></div>
+      </div>
+
       <!-- ==================== SPLIT PLANNER ==================== -->
       <div id="page-split" class="page hidden">
         <div class="page-header">
@@ -2215,6 +2464,9 @@
       if (page === 'goals') renderGoals();
       if (page === 'bodyweight') renderBodyWeight();
       if (page === 'split') renderSplitPlanner();
+      if (page === 'habits') renderHabits();
+      if (page === 'journal') renderJournal();
+      if (page === 'focus') renderFocus();
     }
 
     function toggleSidebar() {
@@ -2731,6 +2983,9 @@
           <div class="card-sub">kcal burned this week</div>
         </div>
       `;
+
+      // Life Score
+      renderLifeScore();
 
       // Recovery Score
       renderRecoveryScore();
@@ -3292,6 +3547,13 @@
       // Deload / stress-recovery alerts
       const deload = checkDeloadNeeded();
       if (deload) insights.unshift(deload);
+
+      // Cross-domain life insights (habits, focus, mood correlations)
+      const lifeInsights = generateLifeInsights();
+      insights.push(...lifeInsights);
+
+      // Re-sort after merging
+      insights.sort((a, b) => (a.priority || 5) - (b.priority || 5));
 
       return insights;
     }
@@ -6247,6 +6509,572 @@
     }
 
     // =====================================================================
+    // HABIT TRACKER
+    // =====================================================================
+    const HABITS_KEY = 'ironpulse_habits';
+    const HABITS_LOG_KEY = 'ironpulse_habits_log';
+
+    function getHabitDefs() { try { return JSON.parse(localStorage.getItem(HABITS_KEY)) || []; } catch { return []; } }
+    function saveHabitDefs(h) { localStorage.setItem(HABITS_KEY, JSON.stringify(h)); }
+    function getHabitsLog() { try { return JSON.parse(localStorage.getItem(HABITS_LOG_KEY)) || {}; } catch { return {}; } }
+    function saveHabitsLog(l) { localStorage.setItem(HABITS_LOG_KEY, JSON.stringify(l)); }
+
+    function addHabit() {
+      const name = document.getElementById('habit-name').value.trim();
+      if (!name) { showToast('Enter a habit name'); return; }
+      const category = document.getElementById('habit-category').value;
+      const habits = getHabitDefs();
+      habits.push({ id: Date.now(), name, category });
+      saveHabitDefs(habits);
+      document.getElementById('habit-name').value = '';
+      renderHabits();
+      showToast(`Added "${name}"`);
+    }
+
+    function removeHabit(id) {
+      if (!confirm('Remove this habit?')) return;
+      saveHabitDefs(getHabitDefs().filter(h => h.id !== id));
+      renderHabits();
+    }
+
+    function toggleHabit(id) {
+      const today = new Date().toISOString().split('T')[0];
+      const log = getHabitsLog();
+      if (!log[today]) log[today] = [];
+      const idx = log[today].indexOf(id);
+      if (idx >= 0) log[today].splice(idx, 1); else log[today].push(id);
+      saveHabitsLog(log);
+      renderHabits();
+    }
+
+    function getHabitStreak(id) {
+      const log = getHabitsLog();
+      let streak = 0;
+      const d = new Date();
+      for (let i = 0; i < 365; i++) {
+        const ds = d.toISOString().split('T')[0];
+        if (log[ds] && log[ds].includes(id)) streak++;
+        else if (i > 0) break; // allow today to be unchecked
+        d.setDate(d.getDate() - 1);
+      }
+      return streak;
+    }
+
+    function renderHabits() {
+      const habits = getHabitDefs();
+      const today = new Date().toISOString().split('T')[0];
+      const log = getHabitsLog();
+      const todayDone = log[today] || [];
+
+      const listEl = document.getElementById('habits-today-list');
+      const emptyEl = document.getElementById('habits-empty');
+      const progEl = document.getElementById('habits-progress-text');
+
+      if (habits.length === 0) {
+        listEl.innerHTML = '';
+        emptyEl.style.display = '';
+        progEl.textContent = '';
+      } else {
+        emptyEl.style.display = 'none';
+        const doneCount = habits.filter(h => todayDone.includes(h.id)).length;
+        progEl.textContent = `${doneCount}/${habits.length} done`;
+        listEl.innerHTML = habits.map(h => {
+          const done = todayDone.includes(h.id);
+          const streak = getHabitStreak(h.id);
+          return `
+            <div class="habit-row${done ? ' done' : ''}" onclick="toggleHabit(${h.id})">
+              <div class="habit-check">${done ? '<svg width="14" height="14" fill="none" stroke="white" stroke-width="3"><path d="M2 7l4 4 6-6"/></svg>' : ''}</div>
+              <span class="habit-name">${h.name}</span>
+              ${streak > 0 ? `<span class="habit-streak${streak >= 3 ? ' active' : ''}">${streak}d</span>` : ''}
+            </div>
+          `;
+        }).join('');
+      }
+
+      // Stats
+      const last7 = [];
+      const d = new Date();
+      for (let i = 0; i < 7; i++) {
+        const ds = d.toISOString().split('T')[0];
+        const dayDone = log[ds] || [];
+        const pct = habits.length > 0 ? Math.round((dayDone.filter(id => habits.some(h => h.id === id)).length / habits.length) * 100) : 0;
+        last7.push({ date: ds, pct });
+        d.setDate(d.getDate() - 1);
+      }
+      const avgCompletion = last7.length > 0 ? Math.round(last7.reduce((s, d) => s + d.pct, 0) / last7.length) : 0;
+      const bestStreak = habits.length > 0 ? Math.max(...habits.map(h => getHabitStreak(h.id))) : 0;
+
+      document.getElementById('habits-stats').innerHTML = `
+        <div class="card"><div class="card-header"><span class="card-title">Habits</span></div><div class="card-value">${habits.length}</div><div class="card-sub">tracked</div></div>
+        <div class="card"><div class="card-header"><span class="card-title">Today</span></div><div class="card-value">${habits.length > 0 ? Math.round((todayDone.filter(id => habits.some(h => h.id === id)).length / habits.length) * 100) : 0}%</div><div class="card-sub">completion</div></div>
+        <div class="card"><div class="card-header"><span class="card-title">7-Day Avg</span></div><div class="card-value">${avgCompletion}%</div><div class="card-sub">completion rate</div></div>
+        <div class="card"><div class="card-header"><span class="card-title">Best Streak</span></div><div class="card-value">${bestStreak}d</div><div class="card-sub">consecutive days</div></div>
+      `;
+
+      // Chart
+      renderHabitsChart(last7.reverse());
+
+      // Manage list
+      document.getElementById('habits-manage-list').innerHTML = habits.map(h => `
+        <div class="focus-session">
+          <div><strong>${h.name}</strong> <span class="focus-cat">${h.category}</span></div>
+          <button class="btn-icon" onclick="event.stopPropagation();removeHabit(${h.id})" style="color:var(--danger)">
+            <svg width="14" height="14" fill="none" stroke="currentColor" stroke-width="2"><path d="M3 3l8 8M11 3l-8 8"/></svg>
+          </button>
+        </div>
+      `).join('') || '<div class="text-muted text-sm" style="padding:12px">No habits configured.</div>';
+    }
+
+    let habitsChartInstance = null;
+    function renderHabitsChart(data) {
+      const ctx = document.getElementById('habitsChart').getContext('2d');
+      if (habitsChartInstance) habitsChartInstance.destroy();
+      habitsChartInstance = new Chart(ctx, {
+        type: 'bar',
+        data: {
+          labels: data.map(d => { const dt = new Date(d.date); return dt.toLocaleDateString('en-GB', { weekday: 'short' }); }),
+          datasets: [{ label: 'Completion %', data: data.map(d => d.pct), backgroundColor: 'rgba(34,197,94,0.3)', borderColor: '#22c55e', borderWidth: 1, borderRadius: 4 }]
+        },
+        options: {
+          responsive: true, maintainAspectRatio: false,
+          scales: { y: { min: 0, max: 100, grid: { color: 'rgba(30,58,30,0.5)' } }, x: { grid: { display: false } } },
+          plugins: { legend: { display: false } }
+        }
+      });
+    }
+
+    // =====================================================================
+    // JOURNAL (Gratitude + Daily Wins + Weekly Reflection)
+    // =====================================================================
+    const JOURNAL_KEY = 'ironpulse_journal';
+    const REFLECT_KEY = 'ironpulse_reflections';
+
+    function getJournalEntries() { try { return JSON.parse(localStorage.getItem(JOURNAL_KEY)) || []; } catch { return []; } }
+    function saveJournalEntries(e) { localStorage.setItem(JOURNAL_KEY, JSON.stringify(e)); }
+    function getReflections() { try { return JSON.parse(localStorage.getItem(REFLECT_KEY)) || []; } catch { return []; } }
+    function saveReflections(r) { localStorage.setItem(REFLECT_KEY, JSON.stringify(r)); }
+
+    function saveJournalEntry() {
+      const today = new Date().toISOString().split('T')[0];
+      const gratitude = [
+        document.getElementById('gratitude-1').value.trim(),
+        document.getElementById('gratitude-2').value.trim(),
+        document.getElementById('gratitude-3').value.trim()
+      ].filter(g => g);
+      const wins = [
+        document.getElementById('win-1').value.trim(),
+        document.getElementById('win-2').value.trim(),
+        document.getElementById('win-3').value.trim()
+      ].filter(w => w);
+
+      if (gratitude.length === 0 && wins.length === 0) { showToast('Write at least one gratitude or win'); return; }
+
+      const entries = getJournalEntries();
+      const existing = entries.findIndex(e => e.date === today);
+      const entry = { date: today, gratitude, wins, createdAt: new Date().toISOString() };
+      if (existing >= 0) entries[existing] = entry; else entries.unshift(entry);
+      entries.sort((a, b) => b.date.localeCompare(a.date));
+      saveJournalEntries(entries);
+      showToast('Journal saved!');
+      renderJournal();
+    }
+
+    function saveReflection() {
+      const well = document.getElementById('reflect-well').value.trim();
+      const improve = document.getElementById('reflect-improve').value.trim();
+      const focus = document.getElementById('reflect-focus').value.trim();
+      if (!well && !improve && !focus) { showToast('Write at least one reflection'); return; }
+
+      const now = new Date();
+      const dayOfWeek = now.getDay();
+      const mondayOffset = dayOfWeek === 0 ? 6 : dayOfWeek - 1;
+      const monday = new Date(now);
+      monday.setDate(now.getDate() - mondayOffset);
+      const weekOf = monday.toISOString().split('T')[0];
+
+      const reflections = getReflections();
+      const existing = reflections.findIndex(r => r.weekOf === weekOf);
+      const entry = { weekOf, well, improve, focus, createdAt: new Date().toISOString() };
+      if (existing >= 0) reflections[existing] = entry; else reflections.unshift(entry);
+      reflections.sort((a, b) => b.weekOf.localeCompare(a.weekOf));
+      saveReflections(reflections);
+      showToast('Reflection saved!');
+      renderJournal();
+    }
+
+    function renderJournal() {
+      const today = new Date().toISOString().split('T')[0];
+      document.getElementById('journal-date-label').textContent = new Date().toLocaleDateString('en-GB', { weekday: 'long', day: 'numeric', month: 'long' });
+
+      // Pre-fill today's entry if exists
+      const entries = getJournalEntries();
+      const todayEntry = entries.find(e => e.date === today);
+      if (todayEntry) {
+        document.getElementById('gratitude-1').value = todayEntry.gratitude[0] || '';
+        document.getElementById('gratitude-2').value = todayEntry.gratitude[1] || '';
+        document.getElementById('gratitude-3').value = todayEntry.gratitude[2] || '';
+        document.getElementById('win-1').value = todayEntry.wins[0] || '';
+        document.getElementById('win-2').value = todayEntry.wins[1] || '';
+        document.getElementById('win-3').value = todayEntry.wins[2] || '';
+      }
+
+      // Pre-fill this week's reflection
+      const reflections = getReflections();
+      const now = new Date();
+      const dayOfWeek = now.getDay();
+      const mondayOffset = dayOfWeek === 0 ? 6 : dayOfWeek - 1;
+      const monday = new Date(now);
+      monday.setDate(now.getDate() - mondayOffset);
+      const weekOf = monday.toISOString().split('T')[0];
+      const thisWeekReflection = reflections.find(r => r.weekOf === weekOf);
+      if (thisWeekReflection) {
+        document.getElementById('reflect-well').value = thisWeekReflection.well || '';
+        document.getElementById('reflect-improve').value = thisWeekReflection.improve || '';
+        document.getElementById('reflect-focus').value = thisWeekReflection.focus || '';
+      }
+
+      // Journal history (last 14 entries)
+      const recent = entries.filter(e => e.date !== today).slice(0, 14);
+      document.getElementById('journal-history').innerHTML = recent.length > 0
+        ? recent.map(e => {
+            const d = new Date(e.date);
+            const dateStr = d.toLocaleDateString('en-GB', { weekday: 'short', day: 'numeric', month: 'short' });
+            return `
+              <div class="card mb-4" style="padding:14px">
+                <div style="font-weight:600;font-size:0.85rem;margin-bottom:8px">${dateStr}</div>
+                ${e.gratitude.length > 0 ? `<div class="text-muted text-sm" style="margin-bottom:4px">Grateful for:</div>${e.gratitude.map((g, i) => `<div class="gratitude-item" style="margin-bottom:4px"><div class="gratitude-num">${i + 1}</div><span style="font-size:0.85rem">${g}</span></div>`).join('')}` : ''}
+                ${e.wins.length > 0 ? `<div class="text-muted text-sm" style="margin:8px 0 4px">Wins:</div>${e.wins.map(w => `<div class="win-item">${w}</div>`).join('')}` : ''}
+              </div>
+            `;
+          }).join('')
+        : '<div class="text-muted text-sm" style="padding:12px">No journal entries yet. Start writing above!</div>';
+
+      // Reflections history
+      const pastReflections = reflections.filter(r => r.weekOf !== weekOf).slice(0, 8);
+      document.getElementById('reflections-history').innerHTML = pastReflections.length > 0
+        ? pastReflections.map(r => {
+            const wk = new Date(r.weekOf);
+            const wkEnd = new Date(wk);
+            wkEnd.setDate(wk.getDate() + 6);
+            const label = `${wk.toLocaleDateString('en-GB', { day: 'numeric', month: 'short' })} — ${wkEnd.toLocaleDateString('en-GB', { day: 'numeric', month: 'short' })}`;
+            return `
+              <div class="reflection-card">
+                <div class="text-muted text-sm" style="margin-bottom:8px">Week of ${label}</div>
+                ${r.well ? `<h4>What went well</h4><p>${r.well}</p>` : ''}
+                ${r.improve ? `<h4 style="margin-top:8px">To improve</h4><p>${r.improve}</p>` : ''}
+                ${r.focus ? `<h4 style="margin-top:8px">Next week's focus</h4><p>${r.focus}</p>` : ''}
+              </div>
+            `;
+          }).join('')
+        : '<div class="text-muted text-sm" style="padding:12px">No reflections yet.</div>';
+    }
+
+    // =====================================================================
+    // FOCUS & PRIORITIES
+    // =====================================================================
+    const FOCUS_KEY = 'ironpulse_focus';
+    const PRIORITIES_KEY = 'ironpulse_priorities';
+
+    function getFocusSessions() { try { return JSON.parse(localStorage.getItem(FOCUS_KEY)) || []; } catch { return []; } }
+    function saveFocusSessions(s) { localStorage.setItem(FOCUS_KEY, JSON.stringify(s)); }
+    function getPriorities() { try { return JSON.parse(localStorage.getItem(PRIORITIES_KEY)) || {}; } catch { return {}; } }
+    function savePriorities(p) { localStorage.setItem(PRIORITIES_KEY, JSON.stringify(p)); }
+
+    function saveFocusSession() {
+      const minutes = parseInt(document.getElementById('focus-minutes').value);
+      if (!minutes || minutes <= 0) { showToast('Enter the number of minutes'); return; }
+      const category = document.getElementById('focus-category').value;
+      const notes = document.getElementById('focus-notes').value.trim();
+      const today = new Date().toISOString().split('T')[0];
+
+      const sessions = getFocusSessions();
+      sessions.unshift({ date: today, minutes, category, notes, id: Date.now() });
+      saveFocusSessions(sessions);
+      document.getElementById('focus-minutes').value = '';
+      document.getElementById('focus-notes').value = '';
+      showToast(`Logged ${minutes} min of focus`);
+      renderFocus();
+    }
+
+    function addPriority() {
+      const input = document.getElementById('priority-input');
+      const text = input.value.trim();
+      if (!text) return;
+      const today = new Date().toISOString().split('T')[0];
+      const priorities = getPriorities();
+      if (!priorities[today]) priorities[today] = [];
+      if (priorities[today].length >= 5) { showToast('Max 5 priorities per day'); return; }
+      priorities[today].push({ text, done: false, id: Date.now() });
+      savePriorities(priorities);
+      input.value = '';
+      renderFocus();
+    }
+
+    function togglePriority(id) {
+      const today = new Date().toISOString().split('T')[0];
+      const priorities = getPriorities();
+      if (!priorities[today]) return;
+      const item = priorities[today].find(p => p.id === id);
+      if (item) item.done = !item.done;
+      savePriorities(priorities);
+      renderFocus();
+    }
+
+    function removePriority(id) {
+      const today = new Date().toISOString().split('T')[0];
+      const priorities = getPriorities();
+      if (!priorities[today]) return;
+      priorities[today] = priorities[today].filter(p => p.id !== id);
+      savePriorities(priorities);
+      renderFocus();
+    }
+
+    let focusChartInstance = null;
+
+    function renderFocus() {
+      const today = new Date().toISOString().split('T')[0];
+      document.getElementById('priorities-date-label').textContent = new Date().toLocaleDateString('en-GB', { weekday: 'long', day: 'numeric', month: 'short' });
+
+      // Priorities
+      const priorities = getPriorities();
+      const todayP = priorities[today] || [];
+      document.getElementById('priorities-list').innerHTML = todayP.length > 0
+        ? todayP.map(p => `
+            <div class="priority-row">
+              <div class="priority-check${p.done ? ' done' : ''}" onclick="togglePriority(${p.id})">
+                ${p.done ? '<svg width="12" height="12" fill="none" stroke="white" stroke-width="3"><path d="M2 6l3 3 5-5"/></svg>' : ''}
+              </div>
+              <span class="priority-text${p.done ? ' done' : ''}">${p.text}</span>
+              <button class="btn-icon" onclick="removePriority(${p.id})" style="width:24px;height:24px;color:var(--text-muted)">
+                <svg width="12" height="12" fill="none" stroke="currentColor" stroke-width="2"><path d="M3 3l6 6M9 3l-6 6"/></svg>
+              </button>
+            </div>
+          `).join('')
+        : '<div class="text-muted text-sm">No priorities set for today. Add up to 5.</div>';
+
+      // Focus sessions
+      const sessions = getFocusSessions();
+      const todaySessions = sessions.filter(s => s.date === today);
+      const todayTotal = todaySessions.reduce((s, f) => s + f.minutes, 0);
+
+      document.getElementById('focus-today-list').innerHTML = todaySessions.length > 0
+        ? todaySessions.map(s => `
+            <div class="focus-session">
+              <div><strong>${s.minutes} min</strong>${s.notes ? ` — ${s.notes}` : ''}</div>
+              <span class="focus-cat">${s.category.replace('-', ' ')}</span>
+            </div>
+          `).join('')
+        : '<div class="text-muted text-sm" style="padding:12px">No focus sessions logged today.</div>';
+
+      // Stats
+      const now = new Date();
+      const last7Sessions = sessions.filter(s => (now - new Date(s.date)) / 86400000 <= 7);
+      const weekTotal = last7Sessions.reduce((s, f) => s + f.minutes, 0);
+      const daysWithFocus = new Set(last7Sessions.map(s => s.date)).size;
+      const completedP = todayP.filter(p => p.done).length;
+
+      document.getElementById('focus-stats').innerHTML = `
+        <div class="card"><div class="card-header"><span class="card-title">Today</span></div><div class="card-value">${todayTotal}m</div><div class="card-sub">focus time</div></div>
+        <div class="card"><div class="card-header"><span class="card-title">This Week</span></div><div class="card-value">${Math.round(weekTotal / 60 * 10) / 10}h</div><div class="card-sub">total focus</div></div>
+        <div class="card"><div class="card-header"><span class="card-title">Focus Days</span></div><div class="card-value">${daysWithFocus}/7</div><div class="card-sub">this week</div></div>
+        <div class="card"><div class="card-header"><span class="card-title">Priorities</span></div><div class="card-value">${completedP}/${todayP.length}</div><div class="card-sub">completed today</div></div>
+      `;
+
+      // Chart — last 7 days focus time
+      const chartData = [];
+      const dd = new Date();
+      for (let i = 6; i >= 0; i--) {
+        const dds = new Date(dd);
+        dds.setDate(dd.getDate() - i);
+        const ds = dds.toISOString().split('T')[0];
+        const dayTotal = sessions.filter(s => s.date === ds).reduce((s, f) => s + f.minutes, 0);
+        chartData.push({ date: ds, minutes: dayTotal, label: dds.toLocaleDateString('en-GB', { weekday: 'short' }) });
+      }
+      const ctx = document.getElementById('focusChart').getContext('2d');
+      if (focusChartInstance) focusChartInstance.destroy();
+      focusChartInstance = new Chart(ctx, {
+        type: 'bar',
+        data: {
+          labels: chartData.map(d => d.label),
+          datasets: [{ label: 'Focus (min)', data: chartData.map(d => d.minutes), backgroundColor: 'rgba(96,165,250,0.3)', borderColor: '#60a5fa', borderWidth: 1, borderRadius: 4 }]
+        },
+        options: {
+          responsive: true, maintainAspectRatio: false,
+          scales: { y: { min: 0, grid: { color: 'rgba(30,58,30,0.5)' } }, x: { grid: { display: false } } },
+          plugins: { legend: { display: false } }
+        }
+      });
+
+      // Recent history (last 7 days, grouped)
+      const histDays = [];
+      for (let i = 1; i <= 7; i++) {
+        const dh = new Date();
+        dh.setDate(dh.getDate() - i);
+        const ds = dh.toISOString().split('T')[0];
+        const daySessions = sessions.filter(s => s.date === ds);
+        if (daySessions.length > 0) {
+          histDays.push({ date: ds, sessions: daySessions, total: daySessions.reduce((s, f) => s + f.minutes, 0) });
+        }
+      }
+      document.getElementById('focus-history').innerHTML = histDays.length > 0
+        ? histDays.map(d => {
+            const dt = new Date(d.date);
+            return `<div class="card mb-4" style="padding:12px"><div style="display:flex;justify-content:space-between;margin-bottom:6px"><strong style="font-size:0.85rem">${dt.toLocaleDateString('en-GB', { weekday: 'short', day: 'numeric', month: 'short' })}</strong><span class="text-muted text-sm">${d.total} min total</span></div>${d.sessions.map(s => `<div class="text-sm text-muted">${s.minutes}m ${s.category.replace('-', ' ')}${s.notes ? ' — ' + s.notes : ''}</div>`).join('')}</div>`;
+          }).join('')
+        : '<div class="text-muted text-sm" style="padding:12px">No history yet.</div>';
+    }
+
+    // =====================================================================
+    // LIFE SCORE (Dashboard widget)
+    // =====================================================================
+    function renderLifeScore() {
+      const container = document.getElementById('dashboard-life-score');
+      const today = new Date().toISOString().split('T')[0];
+      const now = new Date();
+
+      // Training score (0-100): based on weekly workout frequency vs split plan
+      const workouts = getWorkouts();
+      const weekWorkouts = workouts.filter(w => (now - new Date(w.date)) / 86400000 <= 7);
+      const trainingScore = Math.min(100, weekWorkouts.length * 20); // 5 workouts = 100
+
+      // Habits score (0-100): today's completion rate
+      const habits = getHabitDefs();
+      const habitsLog = getHabitsLog();
+      const todayHabits = habitsLog[today] || [];
+      const habitScore = habits.length > 0 ? Math.round((todayHabits.filter(id => habits.some(h => h.id === id)).length / habits.length) * 100) : 0;
+
+      // Wellbeing score (0-100): from latest check-in mood + energy + inverse stress
+      const checkins = getCheckins();
+      const latestCheckin = checkins[0];
+      let wellbeingScore = 50;
+      if (latestCheckin) {
+        const mood = latestCheckin.mood * 10;
+        const energy = latestCheckin.energy * 10;
+        const stressInv = Math.max(0, 100 - (latestCheckin.stress || 3) * 10);
+        wellbeingScore = Math.round((mood + energy + stressInv) / 3);
+      }
+
+      // Productivity score (0-100): focus time + priority completion
+      const focusSessions = getFocusSessions();
+      const todayFocus = focusSessions.filter(s => s.date === today).reduce((s, f) => s + f.minutes, 0);
+      const focusScore = Math.min(100, Math.round(todayFocus / 1.2)); // 120 min = 100
+      const priorities = getPriorities();
+      const todayP = priorities[today] || [];
+      const priorityScore = todayP.length > 0 ? Math.round((todayP.filter(p => p.done).length / todayP.length) * 100) : 0;
+      const productivityScore = todayP.length > 0 ? Math.round((focusScore + priorityScore) / 2) : focusScore;
+
+      // Nutrition score (0-100): based on whether macros logged today
+      const macros = getMacros();
+      const todayMacro = macros.find(m => m.date === today);
+      const nutritionScore = todayMacro ? Math.min(100, Math.round(((todayMacro.protein || 0) / 150) * 100)) : 0;
+
+      // Overall life score
+      const hasHabits = habits.length > 0;
+      const hasFocus = todayFocus > 0 || todayP.length > 0;
+      const components = [
+        { score: trainingScore, weight: 0.25 },
+        { score: wellbeingScore, weight: 0.25 },
+        { score: nutritionScore, weight: 0.15 },
+      ];
+      if (hasHabits) components.push({ score: habitScore, weight: 0.20 });
+      if (hasFocus) components.push({ score: productivityScore, weight: 0.15 });
+      // Normalize weights
+      const totalWeight = components.reduce((s, c) => s + c.weight, 0);
+      const lifeScore = Math.round(components.reduce((s, c) => s + c.score * (c.weight / totalWeight), 0));
+
+      const color = lifeScore >= 70 ? 'var(--green-400)' : lifeScore >= 40 ? 'var(--warning)' : 'var(--danger)';
+
+      container.innerHTML = `
+        <div class="card life-score-card mb-4">
+          <div class="text-muted text-sm" style="text-transform:uppercase;letter-spacing:1px;margin-bottom:4px">Life Score</div>
+          <div class="life-score" style="color:${color}">${lifeScore}</div>
+          <div class="life-score-breakdown">
+            <div class="life-score-item"><div class="ls-val">${trainingScore}</div><div class="ls-label">Training</div></div>
+            <div class="life-score-item"><div class="ls-val">${wellbeingScore}</div><div class="ls-label">Wellbeing</div></div>
+            <div class="life-score-item"><div class="ls-val">${nutritionScore}</div><div class="ls-label">Nutrition</div></div>
+            ${hasHabits ? `<div class="life-score-item"><div class="ls-val">${habitScore}</div><div class="ls-label">Habits</div></div>` : ''}
+            ${hasFocus ? `<div class="life-score-item"><div class="ls-val">${productivityScore}</div><div class="ls-label">Focus</div></div>` : ''}
+          </div>
+        </div>
+      `;
+    }
+
+    // =====================================================================
+    // CROSS-DOMAIN CORRELATION INSIGHTS
+    // =====================================================================
+    function generateLifeInsights() {
+      const insights = [];
+      const workouts = getWorkouts();
+      const checkins = getCheckins();
+      const habits = getHabitDefs();
+      const habitsLog = getHabitsLog();
+      const focusSessions = getFocusSessions();
+
+      if (checkins.length < 7) return insights;
+
+      // Correlation: workout days vs non-workout days mood/energy
+      const workoutDates = new Set(workouts.map(w => new Date(w.date).toISOString().split('T')[0]));
+      const workoutDayCheckins = checkins.filter(c => workoutDates.has(c.date));
+      const restDayCheckins = checkins.filter(c => !workoutDates.has(c.date));
+
+      if (workoutDayCheckins.length >= 3 && restDayCheckins.length >= 3) {
+        const wMood = workoutDayCheckins.reduce((s, c) => s + c.mood, 0) / workoutDayCheckins.length;
+        const rMood = restDayCheckins.reduce((s, c) => s + c.mood, 0) / restDayCheckins.length;
+        if (Math.abs(wMood - rMood) >= 0.5) {
+          insights.push({
+            type: 'correlation', icon: '🔗', priority: 7,
+            title: wMood > rMood ? 'Training Boosts Your Mood' : 'Rest Days Feel Better',
+            body: `Your average mood on workout days is ${wMood.toFixed(1)} vs ${rMood.toFixed(1)} on rest days. ${wMood > rMood ? 'Exercise has a positive effect on how you feel.' : 'You might be pushing too hard — consider lighter sessions.'}`
+          });
+        }
+      }
+
+      // Correlation: habit completion vs mood
+      if (habits.length > 0 && checkins.length >= 7) {
+        const highHabitDays = [];
+        const lowHabitDays = [];
+        checkins.forEach(c => {
+          const dayDone = habitsLog[c.date] || [];
+          const pct = dayDone.filter(id => habits.some(h => h.id === id)).length / habits.length;
+          if (pct >= 0.8) highHabitDays.push(c);
+          else if (pct < 0.5) lowHabitDays.push(c);
+        });
+        if (highHabitDays.length >= 3 && lowHabitDays.length >= 3) {
+          const highMood = highHabitDays.reduce((s, c) => s + c.mood, 0) / highHabitDays.length;
+          const lowMood = lowHabitDays.reduce((s, c) => s + c.mood, 0) / lowHabitDays.length;
+          if (highMood - lowMood >= 0.5) {
+            insights.push({
+              type: 'correlation', icon: '✅', priority: 8,
+              title: 'Habits = Happiness',
+              body: `When you complete 80%+ of your habits, your mood averages ${highMood.toFixed(1)} vs ${lowMood.toFixed(1)} when below 50%. Sticking to your routines is paying off.`
+            });
+          }
+        }
+      }
+
+      // Correlation: focus time vs stress
+      if (focusSessions.length >= 5 && checkins.length >= 5) {
+        const focusByDate = {};
+        focusSessions.forEach(s => { focusByDate[s.date] = (focusByDate[s.date] || 0) + s.minutes; });
+        const highFocus = checkins.filter(c => (focusByDate[c.date] || 0) >= 60 && c.stress);
+        const lowFocus = checkins.filter(c => (focusByDate[c.date] || 0) < 15 && c.stress);
+        if (highFocus.length >= 2 && lowFocus.length >= 2) {
+          const highStress = highFocus.reduce((s, c) => s + c.stress, 0) / highFocus.length;
+          const lowStress = lowFocus.reduce((s, c) => s + c.stress, 0) / lowFocus.length;
+          if (Math.abs(highStress - lowStress) >= 1) {
+            insights.push({
+              type: 'correlation', icon: '🧠', priority: 7,
+              title: highStress < lowStress ? 'Focus Time Reduces Stress' : 'Productive Days Are Stressful',
+              body: `Avg stress on high-focus days (60+ min): ${highStress.toFixed(1)} vs low-focus days: ${lowStress.toFixed(1)}. ${highStress < lowStress ? 'Getting into flow helps you feel calmer.' : 'Consider balancing intensity with breaks.'}`
+            });
+          }
+        }
+      }
+
+      return insights;
+    }
+
+    // =====================================================================
     // EXPORT / IMPORT (updated to include all new data)
     // =====================================================================
     function exportData() {
@@ -6262,7 +7090,13 @@
         supplements: getSupplements(),
         supplementsLog: getSuppsLog(),
         mealPresets: getMealPresets(),
-        split: getSplit()
+        split: getSplit(),
+        habits: getHabitDefs(),
+        habitsLog: getHabitsLog(),
+        journal: getJournalEntries(),
+        reflections: getReflections(),
+        focus: getFocusSessions(),
+        priorities: getPriorities()
       }, null, 2);
       const blob = new Blob([data], { type: 'application/json' });
       const url = URL.createObjectURL(blob);
@@ -6362,6 +7196,44 @@
             }
             if (data.split && Array.isArray(data.split)) {
               saveSplit(data.split);
+            }
+            if (data.habits && Array.isArray(data.habits)) {
+              const existing = getHabitDefs();
+              const existingIds = new Set(existing.map(h => h.id));
+              const newH = data.habits.filter(h => !existingIds.has(h.id));
+              saveHabitDefs([...existing, ...newH]);
+            }
+            if (data.habitsLog && typeof data.habitsLog === 'object') {
+              const existing = getHabitsLog();
+              Object.entries(data.habitsLog).forEach(([date, ids]) => {
+                if (!existing[date]) existing[date] = ids;
+              });
+              saveHabitsLog(existing);
+            }
+            if (data.journal && Array.isArray(data.journal)) {
+              const existing = getJournalEntries();
+              const existingDates = new Set(existing.map(j => j.date));
+              const newJ = data.journal.filter(j => !existingDates.has(j.date));
+              saveJournalEntries([...newJ, ...existing].sort((a, b) => b.date.localeCompare(a.date)));
+            }
+            if (data.reflections && Array.isArray(data.reflections)) {
+              const existing = getReflections();
+              const existingIds = new Set(existing.map(r => r.id));
+              const newR = data.reflections.filter(r => !existingIds.has(r.id));
+              saveReflections([...newR, ...existing].sort((a, b) => b.date.localeCompare(a.date)));
+            }
+            if (data.focus && Array.isArray(data.focus)) {
+              const existing = getFocusSessions();
+              const existingIds = new Set(existing.map(f => f.id));
+              const newF = data.focus.filter(f => !existingIds.has(f.id));
+              saveFocusSessions([...newF, ...existing].sort((a, b) => b.date.localeCompare(a.date)));
+            }
+            if (data.priorities && typeof data.priorities === 'object') {
+              const existing = getPriorities();
+              Object.entries(data.priorities).forEach(([date, items]) => {
+                if (!existing[date]) existing[date] = items;
+              });
+              savePriorities(existing);
             }
             showToast('Data imported!');
           }
