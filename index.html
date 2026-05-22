@@ -1076,27 +1076,8 @@
     .meal-chip .del-meal { background: none; border: none; color: var(--text-muted); cursor: pointer; font-size: 0.7rem; padding: 0 0 0 4px; }
     .meal-chip .del-meal:hover { color: var(--danger); }
 
-    /* ===== REST TIMER ===== */
-    .rest-timer-bar {
-      position: fixed; bottom: 0; left: 0; right: 0; z-index: 200;
-      background: var(--bg-secondary); border-top: 2px solid var(--green-600);
-      padding: 12px 20px; display: flex; align-items: center; justify-content: space-between;
-      gap: 12px; transition: transform 0.3s ease;
-      padding-bottom: calc(env(safe-area-inset-bottom, 0px) + 12px);
-    }
-    .rest-timer-bar.hidden { transform: translateY(100%); pointer-events: none; }
-    .rest-timer-display { font-size: 1.8rem; font-weight: 900; font-variant-numeric: tabular-nums; letter-spacing: -1px; min-width: 70px; text-align: center; }
-    .rest-timer-display.warning { color: var(--warning); }
-    .rest-timer-display.done { color: var(--green-400); animation: pulse 0.5s ease infinite alternate; }
-    @keyframes pulse { from { opacity: 1; } to { opacity: 0.4; } }
-    .rest-timer-presets { display: flex; gap: 6px; flex-wrap: wrap; }
-    .rest-timer-presets button {
-      padding: 6px 12px; border-radius: 8px; border: 1px solid var(--border); background: var(--bg-card);
-      color: var(--text-secondary); font-family: inherit; font-size: 0.8rem; font-weight: 600; cursor: pointer;
-    }
-    .rest-timer-presets button:hover, .rest-timer-presets button.active { border-color: var(--green-600); color: var(--green-400); }
-
     /* ===== WORKOUT DURATION ===== */
+    @keyframes pulse { from { opacity: 1; } to { opacity: 0.4; } }
     .duration-badge {
       display: inline-flex; align-items: center; gap: 6px; padding: 4px 12px;
       background: var(--bg-card); border: 1px solid var(--border); border-radius: 20px;
@@ -1129,6 +1110,19 @@
     .ex-hist-session:last-child { border-bottom: none; }
     .ex-hist-date { font-size: 0.75rem; color: var(--text-muted); margin-bottom: 4px; }
     .ex-hist-sets { font-size: 0.85rem; }
+
+    /* ===== TEMPLATE MANAGER ===== */
+    .template-detail {
+      background: var(--bg-card); border: 1px solid var(--border); border-radius: var(--radius);
+      padding: 16px; margin-bottom: 8px;
+    }
+    .template-detail .tmpl-header { display: flex; justify-content: space-between; align-items: center; margin-bottom: 10px; }
+    .template-detail .tmpl-name { font-weight: 700; font-size: 0.95rem; }
+    .template-detail .tmpl-meta { font-size: 0.7rem; color: var(--text-muted); }
+    .template-detail .tmpl-exercises { font-size: 0.85rem; color: var(--text-secondary); }
+    .template-detail .tmpl-ex-item { padding: 4px 0; border-bottom: 1px solid var(--border); }
+    .template-detail .tmpl-ex-item:last-child { border-bottom: none; }
+    .template-detail .tmpl-actions { display: flex; gap: 6px; margin-top: 10px; }
 
     /* ===== CHECKIN DIARY / EXPANDED VIEW ===== */
     .checkin-detail-card {
@@ -1441,18 +1435,14 @@
             <div id="weights-section">
               <div class="section-title">Exercises</div>
               <div id="exercises-list"></div>
-              <div class="flex gap-2 mt-4" style="flex-wrap:wrap">
-                <button class="btn btn-secondary btn-sm" onclick="addExercise()" style="flex:1;min-width:120px">
+              <div class="flex gap-2 mt-4">
+                <button class="btn btn-secondary btn-sm" onclick="addExercise()" style="flex:1">
                   <svg width="16" height="16" fill="none" stroke="currentColor" stroke-width="2"><path d="M8 2v12M2 8h12"/></svg>
                   Add Exercise
                 </button>
-                <button class="btn btn-secondary btn-sm" onclick="saveAsTemplate()" style="flex:1;min-width:120px" title="Save current exercises as a reusable template">
+                <button class="btn btn-secondary btn-sm" onclick="saveAsTemplate()" style="flex:1" title="Save current exercises as a reusable template">
                   <svg width="16" height="16" fill="none" stroke="currentColor" stroke-width="2"><path d="M13 2H6a2 2 0 00-2 2v12l5-3 5 3V4a2 2 0 00-2-2z"/></svg>
                   Save Template
-                </button>
-                <button class="btn btn-secondary btn-sm" onclick="toggleRestTimerBar()" style="flex:1;min-width:120px" title="Show rest timer between sets">
-                  <svg width="16" height="16" fill="none" stroke="currentColor" stroke-width="2"><circle cx="8" cy="8" r="7"/><path d="M8 4v4l2.5 2.5"/></svg>
-                  Rest Timer
                 </button>
               </div>
             </div>
@@ -2065,18 +2055,6 @@
     <div class="modal" id="workout-modal"></div>
   </div>
 
-  <!-- Rest Timer -->
-  <div class="rest-timer-bar hidden" id="rest-timer-bar">
-    <div class="rest-timer-display" id="rest-timer-display">0:00</div>
-    <div class="rest-timer-presets">
-      <button onclick="startRestTimer(60)">1:00</button>
-      <button onclick="startRestTimer(90)">1:30</button>
-      <button onclick="startRestTimer(120)">2:00</button>
-      <button onclick="startRestTimer(180)">3:00</button>
-      <button onclick="stopRestTimer()" style="color:var(--danger)">✕</button>
-    </div>
-  </div>
-
   <!-- Exercise History Popup -->
   <div class="modal-overlay hidden" id="ex-history-overlay" onclick="if(event.target===this)closeExHistory()">
     <div class="ex-history-popup" id="ex-history-popup"></div>
@@ -2279,8 +2257,6 @@
       renderTemplateBar();
       // Start workout duration timer
       startWorkoutTimer();
-      // Hide rest timer bar
-      stopRestTimer();
     }
 
     function updateWizard() {
@@ -2672,9 +2648,6 @@
 
       // Detect PRs before saving (so we compare against old records)
       const newPRs = detectPRs(workout);
-
-      // Stop rest timer
-      stopRestTimer();
 
       addWorkout(workout);
       showToast('Workout saved!');
@@ -4647,6 +4620,31 @@
       showToast(`Loaded "${template.name}"`);
     }
 
+    let templateManagerOpen = false;
+
+    function toggleTemplateManager() {
+      templateManagerOpen = !templateManagerOpen;
+      renderTemplateBar();
+    }
+
+    function renameTemplate(id) {
+      const templates = getTemplates();
+      const tmpl = templates.find(t => t.id === id);
+      if (!tmpl) return;
+      const newName = prompt('Rename template:', tmpl.name);
+      if (!newName || !newName.trim()) return;
+      tmpl.name = newName.trim();
+      saveTemplates(templates);
+      renderTemplateBar();
+      showToast('Template renamed');
+    }
+
+    function editTemplateExercises(id) {
+      // Load the template into the form so the user can edit and re-save
+      loadTemplate(id);
+      showToast('Template loaded — edit exercises then tap "Save Template" to update');
+    }
+
     function renderTemplateBar() {
       const templates = getTemplates();
       const container = document.getElementById('template-bar-container');
@@ -4654,16 +4652,55 @@
         container.innerHTML = '';
         return;
       }
+
+      let managerHtml = '';
+      if (templateManagerOpen) {
+        managerHtml = `
+          <div style="margin-top:12px">
+            ${templates.map(t => {
+              const exList = t.exercises || [];
+              const catLabel = t.category ? t.category.charAt(0).toUpperCase() + t.category.slice(1) : 'Custom';
+              const created = t.createdAt ? new Date(t.createdAt).toLocaleDateString('en-GB', { day: 'numeric', month: 'short', year: 'numeric' }) : '';
+              return `
+                <div class="template-detail">
+                  <div class="tmpl-header">
+                    <div>
+                      <div class="tmpl-name">${t.name}</div>
+                      <div class="tmpl-meta">${catLabel} · ${exList.length} exercises${created ? ' · Created ' + created : ''}</div>
+                    </div>
+                  </div>
+                  <div class="tmpl-exercises">
+                    ${exList.map(ex => {
+                      const setsInfo = ex.sets.map(s => `${displayWeight(s.weight)} ${unitLabelShort()} x ${s.reps}${s.warmup ? ' (w)' : ''}`).join(', ');
+                      return `<div class="tmpl-ex-item"><strong>${ex.name}</strong>: ${setsInfo}${ex.note ? ` <span class="text-muted">— ${ex.note}</span>` : ''}</div>`;
+                    }).join('')}
+                  </div>
+                  <div class="tmpl-actions">
+                    <button class="btn btn-primary btn-sm" onclick="loadTemplate(${t.id})" style="font-size:0.75rem;padding:4px 10px">Load</button>
+                    <button class="btn btn-secondary btn-sm" onclick="renameTemplate(${t.id})" style="font-size:0.75rem;padding:4px 10px">Rename</button>
+                    <button class="btn btn-secondary btn-sm" onclick="editTemplateExercises(${t.id})" style="font-size:0.75rem;padding:4px 10px">Edit</button>
+                    <button class="btn btn-danger btn-sm" onclick="deleteTemplate(${t.id})" style="font-size:0.75rem;padding:4px 10px">Delete</button>
+                  </div>
+                </div>
+              `;
+            }).join('')}
+          </div>
+        `;
+      }
+
       container.innerHTML = `
         <div class="template-bar">
           <span class="text-muted text-sm" style="align-self:center;margin-right:4px">Templates:</span>
           ${templates.map(t => `
             <span class="template-chip" onclick="loadTemplate(${t.id})">
               ${t.name}
-              <button class="delete-template" onclick="event.stopPropagation();deleteTemplate(${t.id})" title="Delete template">&times;</button>
             </span>
           `).join('')}
+          <button class="template-chip" onclick="toggleTemplateManager()" style="border-color:var(--green-700);color:var(--green-400)">
+            ${templateManagerOpen ? '✕ Close' : '⚙ Manage'}
+          </button>
         </div>
+        ${managerHtml}
       `;
     }
 
@@ -5977,80 +6014,6 @@
           `).join('')}
         </div>
       `;
-    }
-
-    // =====================================================================
-    // REST TIMER
-    // =====================================================================
-    let restTimerInterval = null;
-    let restTimerRemaining = 0;
-
-    function toggleRestTimerBar() {
-      const bar = document.getElementById('rest-timer-bar');
-      bar.classList.toggle('hidden');
-    }
-
-    function startRestTimer(seconds) {
-      if (restTimerInterval) clearInterval(restTimerInterval);
-      restTimerRemaining = seconds;
-      const display = document.getElementById('rest-timer-display');
-      display.className = 'rest-timer-display';
-
-      // Show the bar if hidden
-      document.getElementById('rest-timer-bar').classList.remove('hidden');
-
-      // Highlight active button
-      document.querySelectorAll('.rest-timer-presets button').forEach(b => b.classList.remove('active'));
-      const btns = document.querySelectorAll('.rest-timer-presets button');
-      btns.forEach(b => { if (b.textContent.trim() === formatTimer(seconds)) b.classList.add('active'); });
-
-      updateTimerDisplay();
-
-      restTimerInterval = setInterval(() => {
-        restTimerRemaining--;
-        if (restTimerRemaining <= 0) {
-          clearInterval(restTimerInterval);
-          restTimerInterval = null;
-          restTimerRemaining = 0;
-          display.className = 'rest-timer-display done';
-          display.textContent = 'GO!';
-          // Vibrate if supported
-          if (navigator.vibrate) navigator.vibrate([200, 100, 200]);
-          // Auto-hide after 5s
-          setTimeout(() => {
-            if (display.textContent === 'GO!') {
-              display.textContent = '0:00';
-              display.className = 'rest-timer-display';
-            }
-          }, 5000);
-          return;
-        }
-        if (restTimerRemaining <= 5) display.className = 'rest-timer-display warning';
-        updateTimerDisplay();
-      }, 1000);
-    }
-
-    function stopRestTimer() {
-      if (restTimerInterval) clearInterval(restTimerInterval);
-      restTimerInterval = null;
-      restTimerRemaining = 0;
-      const display = document.getElementById('rest-timer-display');
-      display.textContent = '0:00';
-      display.className = 'rest-timer-display';
-      document.getElementById('rest-timer-bar').classList.add('hidden');
-      document.querySelectorAll('.rest-timer-presets button').forEach(b => b.classList.remove('active'));
-    }
-
-    function updateTimerDisplay() {
-      const m = Math.floor(restTimerRemaining / 60);
-      const s = restTimerRemaining % 60;
-      document.getElementById('rest-timer-display').textContent = `${m}:${String(s).padStart(2, '0')}`;
-    }
-
-    function formatTimer(totalSecs) {
-      const m = Math.floor(totalSecs / 60);
-      const s = totalSecs % 60;
-      return `${m}:${String(s).padStart(2, '0')}`;
     }
 
     // =====================================================================
