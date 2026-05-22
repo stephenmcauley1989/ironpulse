@@ -1162,6 +1162,12 @@
     .reflection-card { background: var(--bg-card); border: 1px solid var(--border); border-radius: var(--radius); padding: 16px; margin-bottom: 8px; }
     .reflection-card h4 { font-size: 0.85rem; font-weight: 700; margin-bottom: 8px; color: var(--green-400); }
     .reflection-card p { font-size: 0.85rem; color: var(--text-secondary); }
+    .journal-card-actions { display: flex; gap: 6px; margin-top: 10px; padding-top: 10px; border-top: 1px solid var(--border); }
+    .journal-card-actions button { flex: 1; padding: 6px 10px; border-radius: var(--radius-sm); font-size: 0.75rem; font-weight: 600; cursor: pointer; border: none; }
+    .journal-card-actions .btn-edit-journal { background: var(--green-800); color: var(--green-300); }
+    .journal-card-actions .btn-delete-journal { background: rgba(239,68,68,0.15); color: #f87171; }
+    .journal-editing-banner { background: var(--green-900); border: 1px solid var(--green-700); border-radius: var(--radius-sm); padding: 10px 14px; margin-bottom: 12px; display: flex; align-items: center; justify-content: space-between; font-size: 0.8rem; color: var(--green-300); }
+    .journal-editing-banner button { background: var(--bg-secondary); border: 1px solid var(--border); color: var(--text-secondary); padding: 4px 10px; border-radius: var(--radius-sm); font-size: 0.75rem; cursor: pointer; }
 
     /* ===== FOCUS / PRIORITIES ===== */
     .priority-row { display: flex; align-items: center; gap: 10px; margin-bottom: 6px; }
@@ -2113,10 +2119,16 @@
           <p>Reflect, appreciate, and celebrate</p>
         </div>
 
+        <!-- Editing banner (hidden by default) -->
+        <div id="journal-editing-banner" class="journal-editing-banner" style="display:none">
+          <span id="journal-editing-label">Editing: —</span>
+          <button onclick="cancelJournalEdit()">Cancel</button>
+        </div>
+
         <!-- Gratitude -->
         <div class="card mb-4">
           <div class="card-header">
-            <span class="card-title">Today's Gratitude</span>
+            <span class="card-title" id="journal-gratitude-title">Today's Gratitude</span>
             <span class="text-muted text-sm" id="journal-date-label"></span>
           </div>
           <div style="margin-top:12px">
@@ -2136,11 +2148,17 @@
           </div>
         </div>
 
-        <button class="btn btn-primary" onclick="saveJournalEntry()" style="margin-bottom:24px;width:100%">Save Today's Journal</button>
+        <button class="btn btn-primary" id="journal-save-btn" onclick="saveJournalEntry()" style="margin-bottom:24px;width:100%">Save Today's Journal</button>
+
+        <!-- Reflection editing banner (hidden by default) -->
+        <div id="reflection-editing-banner" class="journal-editing-banner" style="display:none">
+          <span id="reflection-editing-label">Editing: —</span>
+          <button onclick="cancelReflectionEdit()">Cancel</button>
+        </div>
 
         <!-- Weekly Reflection -->
         <div class="card mb-4">
-          <div class="card-header"><span class="card-title">Weekly Reflection</span></div>
+          <div class="card-header"><span class="card-title" id="reflection-section-title">Weekly Reflection</span></div>
           <div style="margin-top:12px">
             <div class="form-group">
               <label class="form-label">What went well this week?</label>
@@ -2155,7 +2173,7 @@
               <textarea class="form-textarea" id="reflect-focus" placeholder="Top priority, intention, goal..."></textarea>
             </div>
           </div>
-          <button class="btn btn-secondary" onclick="saveReflection()" style="margin-top:8px">Save Reflection</button>
+          <button class="btn btn-secondary" id="reflection-save-btn" onclick="saveReflection()" style="margin-top:8px">Save Reflection</button>
         </div>
 
         <!-- Journal History -->
@@ -6654,8 +6672,11 @@
     function getReflections() { try { return JSON.parse(localStorage.getItem(REFLECT_KEY)) || []; } catch { return []; } }
     function saveReflections(r) { localStorage.setItem(REFLECT_KEY, JSON.stringify(r)); }
 
+    let journalEditingDate = null;   // null = today, otherwise ISO date string
+    let reflectionEditingWeek = null; // null = this week, otherwise weekOf string
+
     function saveJournalEntry() {
-      const today = new Date().toISOString().split('T')[0];
+      const targetDate = journalEditingDate || new Date().toISOString().split('T')[0];
       const gratitude = [
         document.getElementById('gratitude-1').value.trim(),
         document.getElementById('gratitude-2').value.trim(),
@@ -6670,27 +6691,73 @@
       if (gratitude.length === 0 && wins.length === 0) { showToast('Write at least one gratitude or win'); return; }
 
       const entries = getJournalEntries();
-      const existing = entries.findIndex(e => e.date === today);
-      const entry = { date: today, gratitude, wins, createdAt: new Date().toISOString() };
+      const existing = entries.findIndex(e => e.date === targetDate);
+      const entry = { date: targetDate, gratitude, wins, createdAt: new Date().toISOString() };
       if (existing >= 0) entries[existing] = entry; else entries.unshift(entry);
       entries.sort((a, b) => b.date.localeCompare(a.date));
       saveJournalEntries(entries);
-      showToast('Journal saved!');
+      showToast(journalEditingDate ? 'Entry updated!' : 'Journal saved!');
+      journalEditingDate = null;
+      renderJournal();
+    }
+
+    function editJournalEntry(date) {
+      const entries = getJournalEntries();
+      const entry = entries.find(e => e.date === date);
+      if (!entry) return;
+      journalEditingDate = date;
+      document.getElementById('gratitude-1').value = entry.gratitude[0] || '';
+      document.getElementById('gratitude-2').value = entry.gratitude[1] || '';
+      document.getElementById('gratitude-3').value = entry.gratitude[2] || '';
+      document.getElementById('win-1').value = entry.wins[0] || '';
+      document.getElementById('win-2').value = entry.wins[1] || '';
+      document.getElementById('win-3').value = entry.wins[2] || '';
+      const d = new Date(date);
+      const label = d.toLocaleDateString('en-GB', { weekday: 'long', day: 'numeric', month: 'long' });
+      document.getElementById('journal-editing-banner').style.display = 'flex';
+      document.getElementById('journal-editing-label').textContent = `Editing: ${label}`;
+      document.getElementById('journal-gratitude-title').textContent = `Editing Gratitude`;
+      document.getElementById('journal-date-label').textContent = label;
+      document.getElementById('journal-save-btn').textContent = 'Update Entry';
+      document.getElementById('journal-editing-banner').scrollIntoView({ behavior: 'smooth', block: 'start' });
+    }
+
+    function cancelJournalEdit() {
+      journalEditingDate = null;
+      document.getElementById('journal-editing-banner').style.display = 'none';
+      document.getElementById('journal-gratitude-title').textContent = `Today's Gratitude`;
+      document.getElementById('journal-save-btn').textContent = `Save Today's Journal`;
+      renderJournal();
+    }
+
+    function deleteJournalEntry(date) {
+      const d = new Date(date);
+      const label = d.toLocaleDateString('en-GB', { weekday: 'short', day: 'numeric', month: 'short' });
+      if (!confirm(`Delete journal entry for ${label}?`)) return;
+      const entries = getJournalEntries().filter(e => e.date !== date);
+      saveJournalEntries(entries);
+      if (journalEditingDate === date) cancelJournalEdit();
+      showToast('Entry deleted');
       renderJournal();
     }
 
     function saveReflection() {
+      let weekOf;
+      if (reflectionEditingWeek) {
+        weekOf = reflectionEditingWeek;
+      } else {
+        const now = new Date();
+        const dayOfWeek = now.getDay();
+        const mondayOffset = dayOfWeek === 0 ? 6 : dayOfWeek - 1;
+        const monday = new Date(now);
+        monday.setDate(now.getDate() - mondayOffset);
+        weekOf = monday.toISOString().split('T')[0];
+      }
+
       const well = document.getElementById('reflect-well').value.trim();
       const improve = document.getElementById('reflect-improve').value.trim();
       const focus = document.getElementById('reflect-focus').value.trim();
       if (!well && !improve && !focus) { showToast('Write at least one reflection'); return; }
-
-      const now = new Date();
-      const dayOfWeek = now.getDay();
-      const mondayOffset = dayOfWeek === 0 ? 6 : dayOfWeek - 1;
-      const monday = new Date(now);
-      monday.setDate(now.getDate() - mondayOffset);
-      const weekOf = monday.toISOString().split('T')[0];
 
       const reflections = getReflections();
       const existing = reflections.findIndex(r => r.weekOf === weekOf);
@@ -6698,71 +6765,145 @@
       if (existing >= 0) reflections[existing] = entry; else reflections.unshift(entry);
       reflections.sort((a, b) => b.weekOf.localeCompare(a.weekOf));
       saveReflections(reflections);
-      showToast('Reflection saved!');
+      showToast(reflectionEditingWeek ? 'Reflection updated!' : 'Reflection saved!');
+      reflectionEditingWeek = null;
+      renderJournal();
+    }
+
+    function editReflection(weekOf) {
+      const reflections = getReflections();
+      const entry = reflections.find(r => r.weekOf === weekOf);
+      if (!entry) return;
+      reflectionEditingWeek = weekOf;
+      document.getElementById('reflect-well').value = entry.well || '';
+      document.getElementById('reflect-improve').value = entry.improve || '';
+      document.getElementById('reflect-focus').value = entry.focus || '';
+      const wk = new Date(weekOf);
+      const wkEnd = new Date(wk); wkEnd.setDate(wk.getDate() + 6);
+      const label = `${wk.toLocaleDateString('en-GB', { day: 'numeric', month: 'short' })} — ${wkEnd.toLocaleDateString('en-GB', { day: 'numeric', month: 'short' })}`;
+      document.getElementById('reflection-editing-banner').style.display = 'flex';
+      document.getElementById('reflection-editing-label').textContent = `Editing: Week of ${label}`;
+      document.getElementById('reflection-section-title').textContent = 'Editing Reflection';
+      document.getElementById('reflection-save-btn').textContent = 'Update Reflection';
+      document.getElementById('reflection-editing-banner').scrollIntoView({ behavior: 'smooth', block: 'start' });
+    }
+
+    function cancelReflectionEdit() {
+      reflectionEditingWeek = null;
+      document.getElementById('reflection-editing-banner').style.display = 'none';
+      document.getElementById('reflection-section-title').textContent = 'Weekly Reflection';
+      document.getElementById('reflection-save-btn').textContent = 'Save Reflection';
+      renderJournal();
+    }
+
+    function deleteReflection(weekOf) {
+      const wk = new Date(weekOf);
+      const wkEnd = new Date(wk); wkEnd.setDate(wk.getDate() + 6);
+      const label = `${wk.toLocaleDateString('en-GB', { day: 'numeric', month: 'short' })} — ${wkEnd.toLocaleDateString('en-GB', { day: 'numeric', month: 'short' })}`;
+      if (!confirm(`Delete reflection for week of ${label}?`)) return;
+      const reflections = getReflections().filter(r => r.weekOf !== weekOf);
+      saveReflections(reflections);
+      if (reflectionEditingWeek === weekOf) cancelReflectionEdit();
+      showToast('Reflection deleted');
       renderJournal();
     }
 
     function renderJournal() {
       const today = new Date().toISOString().split('T')[0];
-      document.getElementById('journal-date-label').textContent = new Date().toLocaleDateString('en-GB', { weekday: 'long', day: 'numeric', month: 'long' });
 
-      // Pre-fill today's entry if exists
+      // Reset editing UI if not actively editing
+      if (!journalEditingDate) {
+        document.getElementById('journal-editing-banner').style.display = 'none';
+        document.getElementById('journal-gratitude-title').textContent = "Today's Gratitude";
+        document.getElementById('journal-save-btn').textContent = "Save Today's Journal";
+        document.getElementById('journal-date-label').textContent = new Date().toLocaleDateString('en-GB', { weekday: 'long', day: 'numeric', month: 'long' });
+
+        // Pre-fill today's entry if exists
+        const entries = getJournalEntries();
+        const todayEntry = entries.find(e => e.date === today);
+        document.getElementById('gratitude-1').value = todayEntry ? (todayEntry.gratitude[0] || '') : '';
+        document.getElementById('gratitude-2').value = todayEntry ? (todayEntry.gratitude[1] || '') : '';
+        document.getElementById('gratitude-3').value = todayEntry ? (todayEntry.gratitude[2] || '') : '';
+        document.getElementById('win-1').value = todayEntry ? (todayEntry.wins[0] || '') : '';
+        document.getElementById('win-2').value = todayEntry ? (todayEntry.wins[1] || '') : '';
+        document.getElementById('win-3').value = todayEntry ? (todayEntry.wins[2] || '') : '';
+      }
+
+      if (!reflectionEditingWeek) {
+        document.getElementById('reflection-editing-banner').style.display = 'none';
+        document.getElementById('reflection-section-title').textContent = 'Weekly Reflection';
+        document.getElementById('reflection-save-btn').textContent = 'Save Reflection';
+
+        // Pre-fill this week's reflection
+        const reflections = getReflections();
+        const now = new Date();
+        const dayOfWeek = now.getDay();
+        const mondayOffset = dayOfWeek === 0 ? 6 : dayOfWeek - 1;
+        const monday = new Date(now);
+        monday.setDate(now.getDate() - mondayOffset);
+        const weekOf = monday.toISOString().split('T')[0];
+        const thisWeekReflection = reflections.find(r => r.weekOf === weekOf);
+        document.getElementById('reflect-well').value = thisWeekReflection ? (thisWeekReflection.well || '') : '';
+        document.getElementById('reflect-improve').value = thisWeekReflection ? (thisWeekReflection.improve || '') : '';
+        document.getElementById('reflect-focus').value = thisWeekReflection ? (thisWeekReflection.focus || '') : '';
+      }
+
+      // Journal history — ALL past entries with edit/delete
       const entries = getJournalEntries();
-      const todayEntry = entries.find(e => e.date === today);
-      if (todayEntry) {
-        document.getElementById('gratitude-1').value = todayEntry.gratitude[0] || '';
-        document.getElementById('gratitude-2').value = todayEntry.gratitude[1] || '';
-        document.getElementById('gratitude-3').value = todayEntry.gratitude[2] || '';
-        document.getElementById('win-1').value = todayEntry.wins[0] || '';
-        document.getElementById('win-2').value = todayEntry.wins[1] || '';
-        document.getElementById('win-3').value = todayEntry.wins[2] || '';
-      }
-
-      // Pre-fill this week's reflection
-      const reflections = getReflections();
-      const now = new Date();
-      const dayOfWeek = now.getDay();
-      const mondayOffset = dayOfWeek === 0 ? 6 : dayOfWeek - 1;
-      const monday = new Date(now);
-      monday.setDate(now.getDate() - mondayOffset);
-      const weekOf = monday.toISOString().split('T')[0];
-      const thisWeekReflection = reflections.find(r => r.weekOf === weekOf);
-      if (thisWeekReflection) {
-        document.getElementById('reflect-well').value = thisWeekReflection.well || '';
-        document.getElementById('reflect-improve').value = thisWeekReflection.improve || '';
-        document.getElementById('reflect-focus').value = thisWeekReflection.focus || '';
-      }
-
-      // Journal history (last 14 entries)
-      const recent = entries.filter(e => e.date !== today).slice(0, 14);
-      document.getElementById('journal-history').innerHTML = recent.length > 0
-        ? recent.map(e => {
+      const pastEntries = entries.filter(e => e.date !== today || journalEditingDate);
+      const displayEntries = journalEditingDate ? pastEntries : pastEntries.slice(0, 30);
+      document.getElementById('journal-history').innerHTML = displayEntries.length > 0
+        ? displayEntries.map(e => {
             const d = new Date(e.date);
             const dateStr = d.toLocaleDateString('en-GB', { weekday: 'short', day: 'numeric', month: 'short' });
+            const isEditing = journalEditingDate === e.date;
             return `
-              <div class="card mb-4" style="padding:14px">
-                <div style="font-weight:600;font-size:0.85rem;margin-bottom:8px">${dateStr}</div>
+              <div class="card mb-4" style="padding:14px;${isEditing ? 'border-color:var(--green-500);' : ''}">
+                <div style="display:flex;justify-content:space-between;align-items:center;margin-bottom:8px">
+                  <span style="font-weight:600;font-size:0.85rem">${dateStr}</span>
+                  ${isEditing ? '<span style="font-size:0.7rem;color:var(--green-400);font-weight:600">EDITING</span>' : ''}
+                </div>
                 ${e.gratitude.length > 0 ? `<div class="text-muted text-sm" style="margin-bottom:4px">Grateful for:</div>${e.gratitude.map((g, i) => `<div class="gratitude-item" style="margin-bottom:4px"><div class="gratitude-num">${i + 1}</div><span style="font-size:0.85rem">${g}</span></div>`).join('')}` : ''}
                 ${e.wins.length > 0 ? `<div class="text-muted text-sm" style="margin:8px 0 4px">Wins:</div>${e.wins.map(w => `<div class="win-item">${w}</div>`).join('')}` : ''}
+                <div class="journal-card-actions">
+                  <button class="btn-edit-journal" onclick="editJournalEntry('${e.date}')">✏️ Edit</button>
+                  <button class="btn-delete-journal" onclick="deleteJournalEntry('${e.date}')">🗑️ Delete</button>
+                </div>
               </div>
             `;
           }).join('')
         : '<div class="text-muted text-sm" style="padding:12px">No journal entries yet. Start writing above!</div>';
 
-      // Reflections history
-      const pastReflections = reflections.filter(r => r.weekOf !== weekOf).slice(0, 8);
-      document.getElementById('reflections-history').innerHTML = pastReflections.length > 0
-        ? pastReflections.map(r => {
+      // Reflections history — ALL past reflections with edit/delete
+      const reflections = getReflections();
+      const now2 = new Date();
+      const dow2 = now2.getDay();
+      const mOff2 = dow2 === 0 ? 6 : dow2 - 1;
+      const mon2 = new Date(now2);
+      mon2.setDate(now2.getDate() - mOff2);
+      const currentWeekOf = mon2.toISOString().split('T')[0];
+      const pastReflections = reflections.filter(r => r.weekOf !== currentWeekOf || reflectionEditingWeek);
+      const displayReflections = reflectionEditingWeek ? pastReflections : pastReflections.slice(0, 20);
+      document.getElementById('reflections-history').innerHTML = displayReflections.length > 0
+        ? displayReflections.map(r => {
             const wk = new Date(r.weekOf);
             const wkEnd = new Date(wk);
             wkEnd.setDate(wk.getDate() + 6);
             const label = `${wk.toLocaleDateString('en-GB', { day: 'numeric', month: 'short' })} — ${wkEnd.toLocaleDateString('en-GB', { day: 'numeric', month: 'short' })}`;
+            const isEditing = reflectionEditingWeek === r.weekOf;
             return `
-              <div class="reflection-card">
-                <div class="text-muted text-sm" style="margin-bottom:8px">Week of ${label}</div>
+              <div class="reflection-card" style="${isEditing ? 'border-color:var(--green-500);' : ''}">
+                <div style="display:flex;justify-content:space-between;align-items:center;margin-bottom:8px">
+                  <span class="text-muted text-sm">Week of ${label}</span>
+                  ${isEditing ? '<span style="font-size:0.7rem;color:var(--green-400);font-weight:600">EDITING</span>' : ''}
+                </div>
                 ${r.well ? `<h4>What went well</h4><p>${r.well}</p>` : ''}
                 ${r.improve ? `<h4 style="margin-top:8px">To improve</h4><p>${r.improve}</p>` : ''}
                 ${r.focus ? `<h4 style="margin-top:8px">Next week's focus</h4><p>${r.focus}</p>` : ''}
+                <div class="journal-card-actions">
+                  <button class="btn-edit-journal" onclick="editReflection('${r.weekOf}')">✏️ Edit</button>
+                  <button class="btn-delete-journal" onclick="deleteReflection('${r.weekOf}')">🗑️ Delete</button>
+                </div>
               </div>
             `;
           }).join('')
