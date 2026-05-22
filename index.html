@@ -1075,6 +1075,71 @@
     .meal-chip:hover { border-color: var(--green-600); color: var(--text-primary); }
     .meal-chip .del-meal { background: none; border: none; color: var(--text-muted); cursor: pointer; font-size: 0.7rem; padding: 0 0 0 4px; }
     .meal-chip .del-meal:hover { color: var(--danger); }
+
+    /* ===== REST TIMER ===== */
+    .rest-timer-bar {
+      position: fixed; bottom: 0; left: 0; right: 0; z-index: 200;
+      background: var(--bg-secondary); border-top: 2px solid var(--green-600);
+      padding: 12px 20px; display: flex; align-items: center; justify-content: space-between;
+      gap: 12px; transition: transform 0.3s ease;
+      padding-bottom: calc(env(safe-area-inset-bottom, 0px) + 12px);
+    }
+    .rest-timer-bar.hidden { transform: translateY(100%); pointer-events: none; }
+    .rest-timer-display { font-size: 1.8rem; font-weight: 900; font-variant-numeric: tabular-nums; letter-spacing: -1px; min-width: 70px; text-align: center; }
+    .rest-timer-display.warning { color: var(--warning); }
+    .rest-timer-display.done { color: var(--green-400); animation: pulse 0.5s ease infinite alternate; }
+    @keyframes pulse { from { opacity: 1; } to { opacity: 0.4; } }
+    .rest-timer-presets { display: flex; gap: 6px; flex-wrap: wrap; }
+    .rest-timer-presets button {
+      padding: 6px 12px; border-radius: 8px; border: 1px solid var(--border); background: var(--bg-card);
+      color: var(--text-secondary); font-family: inherit; font-size: 0.8rem; font-weight: 600; cursor: pointer;
+    }
+    .rest-timer-presets button:hover, .rest-timer-presets button.active { border-color: var(--green-600); color: var(--green-400); }
+
+    /* ===== WORKOUT DURATION ===== */
+    .duration-badge {
+      display: inline-flex; align-items: center; gap: 6px; padding: 4px 12px;
+      background: var(--bg-card); border: 1px solid var(--border); border-radius: 20px;
+      font-size: 0.8rem; font-weight: 600; color: var(--text-secondary); font-variant-numeric: tabular-nums;
+    }
+    .duration-badge .dur-dot { width: 8px; height: 8px; border-radius: 50%; background: var(--green-400); animation: pulse 1s ease infinite alternate; }
+
+    /* ===== SPLIT PLANNER ===== */
+    .split-grid { display: grid; grid-template-columns: repeat(7, 1fr); gap: 6px; }
+    @media (max-width: 600px) { .split-grid { grid-template-columns: repeat(4, 1fr); } }
+    .split-day {
+      background: var(--bg-card); border: 1px solid var(--border); border-radius: var(--radius-sm);
+      padding: 10px 6px; text-align: center; cursor: pointer; transition: all var(--transition);
+    }
+    .split-day:hover { border-color: var(--border-light); }
+    .split-day .day-label { font-size: 0.7rem; font-weight: 700; text-transform: uppercase; color: var(--text-muted); margin-bottom: 6px; }
+    .split-day .day-type { font-size: 0.75rem; font-weight: 600; color: var(--green-400); min-height: 18px; }
+    .split-day.rest .day-type { color: var(--text-muted); }
+    .split-day.today { border-color: var(--green-600); box-shadow: 0 0 8px rgba(34,197,94,0.2); }
+
+    /* ===== EXERCISE HISTORY POPUP ===== */
+    .ex-history-popup {
+      position: fixed; top: 50%; left: 50%; transform: translate(-50%, -50%); z-index: 300;
+      background: var(--bg-secondary); border: 1px solid var(--border); border-radius: var(--radius-lg);
+      padding: 20px; max-width: 400px; width: 90%; max-height: 70vh; overflow-y: auto;
+      box-shadow: 0 20px 60px rgba(0,0,0,0.6);
+    }
+    .ex-history-popup h4 { font-size: 1rem; font-weight: 700; margin-bottom: 12px; }
+    .ex-hist-session { padding: 10px 0; border-bottom: 1px solid var(--border); }
+    .ex-hist-session:last-child { border-bottom: none; }
+    .ex-hist-date { font-size: 0.75rem; color: var(--text-muted); margin-bottom: 4px; }
+    .ex-hist-sets { font-size: 0.85rem; }
+
+    /* ===== CHECKIN DIARY / EXPANDED VIEW ===== */
+    .checkin-detail-card {
+      background: var(--bg-card); border: 1px solid var(--border); border-radius: var(--radius);
+      padding: 16px; margin-bottom: 8px;
+    }
+    .checkin-metric-grid { display: grid; grid-template-columns: repeat(auto-fit, minmax(80px, 1fr)); gap: 8px; margin: 12px 0; }
+    .checkin-metric { text-align: center; }
+    .checkin-metric .cm-val { font-size: 1.1rem; font-weight: 700; }
+    .checkin-metric .cm-label { font-size: 0.65rem; color: var(--text-muted); text-transform: uppercase; }
+    .diary-entry { padding: 10px 14px; background: var(--bg-secondary); border-radius: var(--radius-sm); margin-top: 8px; font-size: 0.85rem; color: var(--text-secondary); font-style: italic; }
   </style>
 </head>
 <body>
@@ -1143,6 +1208,10 @@
       <button class="nav-item" data-page="bodyweight" onclick="showPage('bodyweight')">
         <svg fill="none" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M12 3v18M3 12h18M5.6 5.6l12.8 12.8M18.4 5.6L5.6 18.4"/></svg>
         Body Weight
+      </button>
+      <button class="nav-item" data-page="split" onclick="showPage('split')">
+        <svg fill="none" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><rect x="3" y="4" width="18" height="18" rx="2"/><path d="M3 10h18M10 4v18"/></svg>
+        Split Planner
       </button>
 
       <div class="sidebar-footer">
@@ -1258,8 +1327,24 @@
           </div>
 
           <div class="form-group">
-            <label class="form-label">Notes (optional)</label>
-            <input type="text" class="form-input" id="checkin-notes" placeholder="e.g. Feeling a bit run down, stressed at work...">
+            <label class="form-label">Stress Level</label>
+            <div class="slider-container">
+              <div class="slider-track">
+                <input type="range" id="checkin-stress" min="1" max="10" value="3" oninput="updateSlider(this)">
+                <div class="slider-labels"><span>Calm</span><span>Very stressed</span></div>
+              </div>
+              <div class="slider-value">3</div>
+            </div>
+          </div>
+
+          <div class="form-group">
+            <label class="form-label">Mindfulness (minutes)</label>
+            <input type="number" class="form-input" id="checkin-mindfulness" placeholder="e.g. 10 (meditation, breathing, yoga...)" min="0" step="1">
+          </div>
+
+          <div class="form-group">
+            <label class="form-label">Diary / Notes</label>
+            <textarea class="form-textarea" id="checkin-notes" placeholder="How was your day? What's on your mind? Anything you want to remember..." style="min-height:80px"></textarea>
           </div>
 
           <button class="btn btn-primary" onclick="saveCheckin()" style="margin-top:8px">Save Check-in</button>
@@ -1293,8 +1378,13 @@
       <!-- ==================== LOG WORKOUT ==================== -->
       <div id="page-log" class="page hidden">
         <div class="page-header">
-          <h2>Log Workout</h2>
-          <p>How did today go?</p>
+          <div style="display:flex;align-items:center;justify-content:space-between;flex-wrap:wrap;gap:8px">
+            <div><h2>Log Workout</h2><p>How did today go?</p></div>
+            <div class="duration-badge" id="workout-duration-badge" style="display:none">
+              <span class="dur-dot"></span>
+              <span id="workout-duration-display">0:00</span>
+            </div>
+          </div>
         </div>
 
         <!-- Templates -->
@@ -1351,14 +1441,18 @@
             <div id="weights-section">
               <div class="section-title">Exercises</div>
               <div id="exercises-list"></div>
-              <div class="flex gap-2 mt-4">
-                <button class="btn btn-secondary btn-sm" onclick="addExercise()" style="flex:1">
+              <div class="flex gap-2 mt-4" style="flex-wrap:wrap">
+                <button class="btn btn-secondary btn-sm" onclick="addExercise()" style="flex:1;min-width:120px">
                   <svg width="16" height="16" fill="none" stroke="currentColor" stroke-width="2"><path d="M8 2v12M2 8h12"/></svg>
                   Add Exercise
                 </button>
-                <button class="btn btn-secondary btn-sm" onclick="saveAsTemplate()" style="flex:1" title="Save current exercises as a reusable template">
+                <button class="btn btn-secondary btn-sm" onclick="saveAsTemplate()" style="flex:1;min-width:120px" title="Save current exercises as a reusable template">
                   <svg width="16" height="16" fill="none" stroke="currentColor" stroke-width="2"><path d="M13 2H6a2 2 0 00-2 2v12l5-3 5 3V4a2 2 0 00-2-2z"/></svg>
                   Save Template
+                </button>
+                <button class="btn btn-secondary btn-sm" onclick="toggleRestTimerBar()" style="flex:1;min-width:120px" title="Show rest timer between sets">
+                  <svg width="16" height="16" fill="none" stroke="currentColor" stroke-width="2"><circle cx="8" cy="8" r="7"/><path d="M8 4v4l2.5 2.5"/></svg>
+                  Rest Timer
                 </button>
               </div>
             </div>
@@ -1901,12 +1995,91 @@
         <div id="bw-history"></div>
       </div>
 
+      <!-- ==================== SPLIT PLANNER ==================== -->
+      <div id="page-split" class="page hidden">
+        <div class="page-header">
+          <h2>Split Planner</h2>
+          <p>Plan your weekly training schedule</p>
+        </div>
+
+        <div class="card mb-4">
+          <div class="card-header">
+            <span class="card-title">This Week</span>
+            <span class="text-muted text-sm" id="split-week-label"></span>
+          </div>
+          <div class="split-grid" id="split-grid" style="margin-top:12px"></div>
+        </div>
+
+        <div class="card mb-4">
+          <h3 style="margin-bottom:16px;font-size:1.1rem">Assign Workout Types</h3>
+          <div class="text-muted text-sm" style="margin-bottom:12px">Tap a day above then select what to train, or use the form below.</div>
+          <div class="form-row">
+            <div class="form-group">
+              <label class="form-label">Day</label>
+              <select class="form-select" id="split-day-select">
+                <option value="0">Monday</option>
+                <option value="1">Tuesday</option>
+                <option value="2">Wednesday</option>
+                <option value="3">Thursday</option>
+                <option value="4">Friday</option>
+                <option value="5">Saturday</option>
+                <option value="6">Sunday</option>
+              </select>
+            </div>
+            <div class="form-group">
+              <label class="form-label">Workout Type</label>
+              <select class="form-select" id="split-type-select">
+                <option value="">Rest Day</option>
+                <option value="Push">Push</option>
+                <option value="Pull">Pull</option>
+                <option value="Legs">Legs</option>
+                <option value="Upper">Upper Body</option>
+                <option value="Chest">Chest</option>
+                <option value="Back">Back</option>
+                <option value="Shoulders">Shoulders</option>
+                <option value="Arms">Arms</option>
+                <option value="Core">Core</option>
+                <option value="Full Body">Full Body</option>
+                <option value="Cycling">Cycling</option>
+                <option value="Cardio">Cardio</option>
+                <option value="Mixed">Mixed</option>
+              </select>
+            </div>
+          </div>
+          <button class="btn btn-primary" onclick="setSplitDay()" style="margin-top:8px">Set Day</button>
+        </div>
+
+        <div class="card mb-4">
+          <div class="card-header">
+            <span class="card-title">Schedule Summary</span>
+          </div>
+          <div id="split-summary" style="margin-top:12px"></div>
+        </div>
+      </div>
+
     </main>
   </div>
 
   <!-- Workout Detail Modal -->
   <div class="modal-overlay" id="modal-overlay" onclick="if(event.target===this)closeModal()">
     <div class="modal" id="workout-modal"></div>
+  </div>
+
+  <!-- Rest Timer -->
+  <div class="rest-timer-bar hidden" id="rest-timer-bar">
+    <div class="rest-timer-display" id="rest-timer-display">0:00</div>
+    <div class="rest-timer-presets">
+      <button onclick="startRestTimer(60)">1:00</button>
+      <button onclick="startRestTimer(90)">1:30</button>
+      <button onclick="startRestTimer(120)">2:00</button>
+      <button onclick="startRestTimer(180)">3:00</button>
+      <button onclick="stopRestTimer()" style="color:var(--danger)">✕</button>
+    </div>
+  </div>
+
+  <!-- Exercise History Popup -->
+  <div class="modal-overlay hidden" id="ex-history-overlay" onclick="if(event.target===this)closeExHistory()">
+    <div class="ex-history-popup" id="ex-history-popup"></div>
   </div>
 
   <!-- Toast -->
@@ -2063,6 +2236,7 @@
       if (page === 'macros') renderMacros();
       if (page === 'goals') renderGoals();
       if (page === 'bodyweight') renderBodyWeight();
+      if (page === 'split') renderSplitPlanner();
     }
 
     function toggleSidebar() {
@@ -2103,6 +2277,10 @@
       addExercise();
       toggleWorkoutFields();
       renderTemplateBar();
+      // Start workout duration timer
+      startWorkoutTimer();
+      // Hide rest timer bar
+      stopRestTimer();
     }
 
     function updateWizard() {
@@ -2232,32 +2410,52 @@
     let exerciseCounter = 0;
 
     function buildExerciseNameField(id) {
+      const favs = getFavExercises();
       const cat = document.getElementById('log-category').value;
-      if (cat && exercisePresets[cat]) {
-        const favs = getFavExercises();
-        const presetList = exercisePresets[cat];
-        // Split into favourites (that are in this category) and the rest
-        const favInCat = presetList.filter(e => favs.includes(e));
-        const nonFav = presetList.filter(e => !favs.includes(e));
 
-        let options = '';
-        if (favInCat.length > 0) {
-          options += '<optgroup label="★ Favourites">' + favInCat.map(e => `<option value="${e}">${e}</option>`).join('') + '</optgroup>';
-          options += '<optgroup label="All Exercises">' + nonFav.map(e => `<option value="${e}">${e}</option>`).join('') + '</optgroup>';
-        } else {
-          options = presetList.map(e => `<option value="${e}">${e}</option>`).join('');
-        }
+      // Build a merged list: favourites first, then either the selected category or all categories
+      let options = '';
 
-        return `
-          <select class="form-select exercise-name-select" data-exercise-id="${id}" style="flex:1;padding:6px 10px;font-size:0.95rem;font-weight:600">
-            <option value="">Select exercise...</option>
-            ${options}
-            <option value="__custom__">Custom...</option>
-          </select>
-          <input type="text" class="exercise-name-input hidden" placeholder="Custom exercise name" data-exercise-id="${id}" style="flex:1">
-        `;
+      // Favourites section (from all exercises the user has starred)
+      if (favs.length > 0) {
+        options += '<optgroup label="★ Favourites">' + favs.map(e => `<option value="${e}">${e}</option>`).join('') + '</optgroup>';
       }
-      return `<input type="text" class="exercise-name-input" placeholder="Exercise name (e.g. Bench Press)" data-exercise-id="${id}">`;
+
+      if (cat && exercisePresets[cat]) {
+        // Selected category: show its exercises (minus any already in favourites)
+        const catExercises = exercisePresets[cat].filter(e => !favs.includes(e));
+        const catLabel = cat.charAt(0).toUpperCase() + cat.slice(1);
+        options += `<optgroup label="${catLabel}">${catExercises.map(e => `<option value="${e}">${e}</option>`).join('')}</optgroup>`;
+
+        // Also show all other categories collapsed
+        Object.entries(exercisePresets).forEach(([key, exercises]) => {
+          if (key === cat) return;
+          const others = exercises.filter(e => !favs.includes(e));
+          if (others.length === 0) return;
+          const label = key.charAt(0).toUpperCase() + key.slice(1);
+          options += `<optgroup label="${label}">${others.map(e => `<option value="${e}">${e}</option>`).join('')}</optgroup>`;
+        });
+      } else {
+        // No category selected: show all categories
+        Object.entries(exercisePresets).forEach(([key, exercises]) => {
+          const others = exercises.filter(e => !favs.includes(e));
+          if (others.length === 0) return;
+          const label = key.charAt(0).toUpperCase() + key.slice(1);
+          options += `<optgroup label="${label}">${others.map(e => `<option value="${e}">${e}</option>`).join('')}</optgroup>`;
+        });
+      }
+
+      return `
+        <select class="form-select exercise-name-select" data-exercise-id="${id}" style="flex:1;padding:6px 10px;font-size:0.95rem;font-weight:600">
+          <option value="">Select exercise...</option>
+          ${options}
+          <option value="__custom__">Custom...</option>
+        </select>
+        <input type="text" class="exercise-name-input hidden" placeholder="Custom exercise name" data-exercise-id="${id}" style="flex:1">
+        <button class="btn-icon" onclick="showExHistory(${id})" title="View exercise history" style="margin-left:2px;width:28px;height:28px">
+          <svg width="14" height="14" fill="none" stroke="currentColor" stroke-width="2"><path d="M7 1v6l3 3"/><circle cx="7" cy="7" r="6"/></svg>
+        </button>
+      `;
     }
 
     function addExercise() {
@@ -2467,8 +2665,16 @@
       // Compute intensity score (normalized)
       workout.intensityScore = workout.postWorkout.rpe;
 
+      // Record workout duration
+      const durationSecs = stopWorkoutTimer();
+      workout.durationSeconds = durationSecs;
+      workout.durationMinutes = Math.round(durationSecs / 60);
+
       // Detect PRs before saving (so we compare against old records)
       const newPRs = detectPRs(workout);
+
+      // Stop rest timer
+      stopRestTimer();
 
       addWorkout(workout);
       showToast('Workout saved!');
@@ -2491,7 +2697,13 @@
       // Greeting
       const hour = now.getHours();
       const greeting = hour < 12 ? 'Good morning' : hour < 18 ? 'Good afternoon' : 'Good evening';
-      document.getElementById('dashboard-greeting').textContent = `${greeting}, Stephen. ${dayNames[now.getDay()]}, ${now.toLocaleDateString('en-GB', { day: 'numeric', month: 'long', year: 'numeric' })}.`;
+      // Check today's split plan
+      const split = getSplit();
+      const todayDow = now.getDay();
+      const todaySplitIdx = todayDow === 0 ? 6 : todayDow - 1;
+      const todayPlan = split[todaySplitIdx];
+      const planHint = todayPlan ? ` Today: ${todayPlan}.` : '';
+      document.getElementById('dashboard-greeting').textContent = `${greeting}, Stephen. ${dayNames[now.getDay()]}, ${now.toLocaleDateString('en-GB', { day: 'numeric', month: 'long', year: 'numeric' })}.${planHint}`;
 
       // Stats
       const thisWeek = workouts.filter(w => {
@@ -2613,6 +2825,7 @@
       if (w.cycling && w.cycling.distance > 0) {
         summary += (summary ? ' + ' : '') + `${w.cycling.distance}km ride`;
       }
+      const durStr = w.durationMinutes ? ` · ${w.durationMinutes}min` : '';
 
       return `
         <div class="history-item" onclick="openWorkoutDetail(${w.id})">
@@ -2622,7 +2835,7 @@
           </div>
           <div class="history-info">
             <h3>${w.name}</h3>
-            <p>${summary || 'No details'}</p>
+            <p>${summary || 'No details'}${durStr}</p>
           </div>
           <span class="history-badge ${badgeClass}">${w.type}</span>
           <div class="rpe-badge ${rpeClass}">${w.postWorkout.rpe}</div>
@@ -3103,6 +3316,10 @@
 
       // Sort by priority
       insights.sort((a, b) => (a.priority || 5) - (b.priority || 5));
+      // Deload / stress-recovery alerts
+      const deload = checkDeloadNeeded();
+      if (deload) insights.unshift(deload);
+
       return insights;
     }
 
@@ -3720,6 +3937,8 @@
         energy: parseInt(document.getElementById('checkin-energy').value),
         sleepQuality: parseInt(document.getElementById('checkin-sleep-quality').value),
         sleepHours: parseFloat(document.getElementById('checkin-sleep-hours').value) || null,
+        stress: parseInt(document.getElementById('checkin-stress').value),
+        mindfulness: parseInt(document.getElementById('checkin-mindfulness').value) || 0,
         notes: document.getElementById('checkin-notes').value,
         id: Date.now(),
         createdAt: new Date().toISOString()
@@ -3755,11 +3974,14 @@
       document.getElementById('checkin-energy').value = entry.energy;
       document.getElementById('checkin-sleep-quality').value = entry.sleepQuality;
       document.getElementById('checkin-sleep-hours').value = entry.sleepHours || '';
+      document.getElementById('checkin-stress').value = entry.stress || 3;
+      document.getElementById('checkin-mindfulness').value = entry.mindfulness || '';
       document.getElementById('checkin-notes').value = entry.notes || '';
       // Update slider displays
       document.getElementById('checkin-mood').closest('.slider-container').querySelector('.slider-value').textContent = entry.mood;
       document.getElementById('checkin-energy').closest('.slider-container').querySelector('.slider-value').textContent = entry.energy;
       document.getElementById('checkin-sleep-quality').closest('.slider-container').querySelector('.slider-value').textContent = entry.sleepQuality;
+      document.getElementById('checkin-stress').closest('.slider-container').querySelector('.slider-value').textContent = entry.stress || 3;
       window.scrollTo({ top: 0, behavior: 'smooth' });
     }
 
@@ -3789,10 +4011,13 @@
         document.getElementById('checkin-energy').value = existing.energy;
         document.getElementById('checkin-sleep-quality').value = existing.sleepQuality;
         document.getElementById('checkin-sleep-hours').value = existing.sleepHours || '';
+        document.getElementById('checkin-stress').value = existing.stress || 3;
+        document.getElementById('checkin-mindfulness').value = existing.mindfulness || '';
         document.getElementById('checkin-notes').value = existing.notes || '';
         document.getElementById('checkin-mood').closest('.slider-container').querySelector('.slider-value').textContent = existing.mood;
         document.getElementById('checkin-energy').closest('.slider-container').querySelector('.slider-value').textContent = existing.energy;
         document.getElementById('checkin-sleep-quality').closest('.slider-container').querySelector('.slider-value').textContent = existing.sleepQuality;
+        document.getElementById('checkin-stress').closest('.slider-container').querySelector('.slider-value').textContent = existing.stress || 3;
       }
 
       const checkins = getCheckins();
@@ -3811,6 +4036,10 @@
       const avgHours = last7.filter(c => c.sleepHours).length > 0
         ? (last7.filter(c => c.sleepHours).reduce((s, c) => s + c.sleepHours, 0) / last7.filter(c => c.sleepHours).length).toFixed(1)
         : '-';
+      const avgStress = last7.filter(c => c.stress).length > 0
+        ? (last7.filter(c => c.stress).reduce((s, c) => s + c.stress, 0) / last7.filter(c => c.stress).length).toFixed(1)
+        : '-';
+      const totalMindfulness = last7.reduce((s, c) => s + (c.mindfulness || 0), 0);
 
       document.getElementById('checkin-stats').innerHTML = `
         <div class="card">
@@ -3824,14 +4053,24 @@
           <div class="card-sub">7-day average</div>
         </div>
         <div class="card">
-          <div class="card-header"><span class="card-title">Avg Sleep Quality</span></div>
+          <div class="card-header"><span class="card-title">Avg Sleep</span></div>
           <div class="card-value">${avgSleep}<span style="font-size:0.9rem;font-weight:400">/10</span></div>
+          <div class="card-sub">quality (7-day avg)</div>
+        </div>
+        <div class="card">
+          <div class="card-header"><span class="card-title">Sleep Hours</span></div>
+          <div class="card-value">${avgHours}<span style="font-size:0.9rem;font-weight:400">h</span></div>
           <div class="card-sub">7-day average</div>
         </div>
         <div class="card">
-          <div class="card-header"><span class="card-title">Avg Sleep Hours</span></div>
-          <div class="card-value">${avgHours}<span style="font-size:0.9rem;font-weight:400">h</span></div>
+          <div class="card-header"><span class="card-title">Avg Stress</span></div>
+          <div class="card-value">${avgStress}<span style="font-size:0.9rem;font-weight:400">/10</span></div>
           <div class="card-sub">7-day average</div>
+        </div>
+        <div class="card">
+          <div class="card-header"><span class="card-title">Mindfulness</span></div>
+          <div class="card-value">${totalMindfulness}<span style="font-size:0.9rem;font-weight:400">min</span></div>
+          <div class="card-sub">this week</div>
         </div>
       `;
     }
@@ -3864,7 +4103,8 @@
           datasets: [
             { label: 'Mood', data: filtered.map(c => c.mood), borderColor: '#22c55e', backgroundColor: 'rgba(34,197,94,0.05)', tension: 0.3, fill: true, pointRadius: 5, pointBackgroundColor: '#22c55e' },
             { label: 'Energy', data: filtered.map(c => c.energy), borderColor: '#f59e0b', tension: 0.3, pointRadius: 4, pointBackgroundColor: '#f59e0b' },
-            { label: 'Sleep Quality', data: filtered.map(c => c.sleepQuality), borderColor: '#60a5fa', tension: 0.3, pointRadius: 4, pointBackgroundColor: '#60a5fa' },
+            { label: 'Sleep', data: filtered.map(c => c.sleepQuality), borderColor: '#60a5fa', tension: 0.3, pointRadius: 4, pointBackgroundColor: '#60a5fa' },
+            { label: 'Stress', data: filtered.map(c => c.stress || 0), borderColor: '#ef4444', borderDash: [4, 4], tension: 0.3, pointRadius: 3, pointBackgroundColor: '#ef4444' },
           ]
         },
         options: {
@@ -3889,22 +4129,35 @@
         const d = new Date(c.date);
         const day = d.getDate();
         const month = d.toLocaleString('en', { month: 'short' }).toUpperCase();
-        const dayName = d.toLocaleDateString('en', { weekday: 'short' });
+        const dayName = d.toLocaleDateString('en', { weekday: 'long' });
         const moodColor = c.mood >= 7 ? 'rpe-low' : c.mood >= 4 ? 'rpe-med' : 'rpe-high';
+        const stressColor = (c.stress || 0) >= 7 ? 'color:var(--danger)' : (c.stress || 0) >= 4 ? 'color:var(--warning)' : 'color:var(--green-400)';
         return `
-          <div class="history-item" onclick="editCheckin('${c.date}')" style="grid-template-columns:60px 1fr auto auto">
-            <div class="history-date">
-              <div class="day">${day}</div>
-              <div class="month">${month}</div>
+          <div class="checkin-detail-card">
+            <div style="display:flex;justify-content:space-between;align-items:start">
+              <div>
+                <div style="font-weight:700;font-size:0.95rem">${dayName}</div>
+                <div class="text-muted text-sm">${day} ${month} ${d.getFullYear()}</div>
+              </div>
+              <div style="display:flex;gap:6px;align-items:center">
+                <div class="rpe-badge ${moodColor}" style="margin:0">${c.mood}</div>
+                <button class="btn-icon" onclick="editCheckin('${c.date}')" title="Edit" style="color:var(--text-muted);width:28px;height:28px">
+                  <svg width="14" height="14" fill="none" stroke="currentColor" stroke-width="2"><path d="M11 2l1 1-7 7H4v-1l7-7z"/></svg>
+                </button>
+                <button class="btn-icon" onclick="deleteCheckin('${c.date}')" title="Delete" style="color:var(--danger);width:28px;height:28px">
+                  <svg width="14" height="14" fill="none" stroke="currentColor" stroke-width="2"><path d="M3 5h8M4.5 5V4a1 1 0 011-1h3a1 1 0 011 1v1M6 7v3M8 7v3"/><path d="M4 5l.5 6.3a1 1 0 001 .7h3a1 1 0 001-.7L10 5"/></svg>
+                </button>
+              </div>
             </div>
-            <div class="history-info">
-              <h3>${dayName}</h3>
-              <p>Mood: ${c.mood} &nbsp; Energy: ${c.energy} &nbsp; Sleep: ${c.sleepQuality}${c.sleepHours ? ' (' + c.sleepHours + 'h)' : ''}${c.notes ? ' — ' + c.notes : ''}</p>
+            <div class="checkin-metric-grid">
+              <div class="checkin-metric"><div class="cm-val">${c.mood}/10</div><div class="cm-label">Mood</div></div>
+              <div class="checkin-metric"><div class="cm-val">${c.energy}/10</div><div class="cm-label">Energy</div></div>
+              <div class="checkin-metric"><div class="cm-val">${c.sleepQuality}/10</div><div class="cm-label">Sleep</div></div>
+              <div class="checkin-metric"><div class="cm-val">${c.sleepHours || '-'}h</div><div class="cm-label">Hours</div></div>
+              <div class="checkin-metric"><div class="cm-val" style="${stressColor}">${c.stress || '-'}/10</div><div class="cm-label">Stress</div></div>
+              <div class="checkin-metric"><div class="cm-val">${c.mindfulness || 0}m</div><div class="cm-label">Mindful</div></div>
             </div>
-            <div class="rpe-badge ${moodColor}">${c.mood}</div>
-            <button class="btn-icon" onclick="event.stopPropagation();deleteCheckin('${c.date}')" title="Delete check-in" style="color:var(--danger)">
-              <svg width="16" height="16" fill="none" stroke="currentColor" stroke-width="2"><path d="M3 6h10M5 6V4a1 1 0 011-1h4a1 1 0 011 1v2M7 9v4M9 9v4"/><path d="M4 6l.7 8.4a1 1 0 001 .6h4.6a1 1 0 001-.6L12 6"/></svg>
-            </button>
+            ${c.notes ? `<div class="diary-entry">${c.notes}</div>` : ''}
           </div>
         `;
       }).join('');
@@ -5366,9 +5619,12 @@
 
       // Calculate factors (each 0-100)
       // Sleep factor: scale 1-10 to 0-100
-      const sleepScore = recentCheckin ? (recentCheckin.sleep || 5) * 10 : 50;
+      const sleepScore = recentCheckin ? (recentCheckin.sleepQuality || 5) * 10 : 50;
       // Mood factor
       const moodScore = recentCheckin ? (recentCheckin.mood || 5) * 10 : 50;
+      // Stress factor (inverse: higher stress = lower recovery)
+      const stressRaw = recentCheckin ? (recentCheckin.stress || 3) : 3;
+      const stressFactor = Math.max(0, 100 - (stressRaw * 10));
       // Training load factor (inverse: more recent training = lower recovery)
       const loadFactor = recentWorkouts.length === 0 ? 100
         : recentWorkouts.length === 1 ? 70
@@ -5383,9 +5639,10 @@
 
       // Weighted average
       const score = Math.round(
-        (sleepScore * 0.25) +
-        (moodScore * 0.15) +
-        (loadFactor * 0.25) +
+        (sleepScore * 0.20) +
+        (moodScore * 0.10) +
+        (stressFactor * 0.15) +
+        (loadFactor * 0.20) +
         (rpeFactor * 0.15) +
         (restFactor * 0.20)
       );
@@ -5403,6 +5660,7 @@
           <div class="recovery-factors">
             <div class="recovery-factor"><div class="val">${Math.round(sleepScore / 10)}/10</div>Sleep</div>
             <div class="recovery-factor"><div class="val">${Math.round(moodScore / 10)}/10</div>Mood</div>
+            <div class="recovery-factor"><div class="val">${stressRaw}/10</div>Stress</div>
             <div class="recovery-factor"><div class="val">${recentWorkouts.length}</div>Sessions (3d)</div>
             <div class="recovery-factor"><div class="val">${lastRPE}/10</div>Last RPE</div>
             <div class="recovery-factor"><div class="val">${daysSinceLast}d</div>Rest</div>
@@ -5722,6 +5980,310 @@
     }
 
     // =====================================================================
+    // REST TIMER
+    // =====================================================================
+    let restTimerInterval = null;
+    let restTimerRemaining = 0;
+
+    function toggleRestTimerBar() {
+      const bar = document.getElementById('rest-timer-bar');
+      bar.classList.toggle('hidden');
+    }
+
+    function startRestTimer(seconds) {
+      if (restTimerInterval) clearInterval(restTimerInterval);
+      restTimerRemaining = seconds;
+      const display = document.getElementById('rest-timer-display');
+      display.className = 'rest-timer-display';
+
+      // Show the bar if hidden
+      document.getElementById('rest-timer-bar').classList.remove('hidden');
+
+      // Highlight active button
+      document.querySelectorAll('.rest-timer-presets button').forEach(b => b.classList.remove('active'));
+      const btns = document.querySelectorAll('.rest-timer-presets button');
+      btns.forEach(b => { if (b.textContent.trim() === formatTimer(seconds)) b.classList.add('active'); });
+
+      updateTimerDisplay();
+
+      restTimerInterval = setInterval(() => {
+        restTimerRemaining--;
+        if (restTimerRemaining <= 0) {
+          clearInterval(restTimerInterval);
+          restTimerInterval = null;
+          restTimerRemaining = 0;
+          display.className = 'rest-timer-display done';
+          display.textContent = 'GO!';
+          // Vibrate if supported
+          if (navigator.vibrate) navigator.vibrate([200, 100, 200]);
+          // Auto-hide after 5s
+          setTimeout(() => {
+            if (display.textContent === 'GO!') {
+              display.textContent = '0:00';
+              display.className = 'rest-timer-display';
+            }
+          }, 5000);
+          return;
+        }
+        if (restTimerRemaining <= 5) display.className = 'rest-timer-display warning';
+        updateTimerDisplay();
+      }, 1000);
+    }
+
+    function stopRestTimer() {
+      if (restTimerInterval) clearInterval(restTimerInterval);
+      restTimerInterval = null;
+      restTimerRemaining = 0;
+      const display = document.getElementById('rest-timer-display');
+      display.textContent = '0:00';
+      display.className = 'rest-timer-display';
+      document.getElementById('rest-timer-bar').classList.add('hidden');
+      document.querySelectorAll('.rest-timer-presets button').forEach(b => b.classList.remove('active'));
+    }
+
+    function updateTimerDisplay() {
+      const m = Math.floor(restTimerRemaining / 60);
+      const s = restTimerRemaining % 60;
+      document.getElementById('rest-timer-display').textContent = `${m}:${String(s).padStart(2, '0')}`;
+    }
+
+    function formatTimer(totalSecs) {
+      const m = Math.floor(totalSecs / 60);
+      const s = totalSecs % 60;
+      return `${m}:${String(s).padStart(2, '0')}`;
+    }
+
+    // =====================================================================
+    // WORKOUT DURATION TRACKER
+    // =====================================================================
+    let workoutStartTime = null;
+    let workoutDurationInterval = null;
+
+    function startWorkoutTimer() {
+      workoutStartTime = Date.now();
+      const badge = document.getElementById('workout-duration-badge');
+      badge.style.display = '';
+      if (workoutDurationInterval) clearInterval(workoutDurationInterval);
+      workoutDurationInterval = setInterval(updateWorkoutDuration, 1000);
+      updateWorkoutDuration();
+    }
+
+    function stopWorkoutTimer() {
+      if (workoutDurationInterval) clearInterval(workoutDurationInterval);
+      workoutDurationInterval = null;
+      const elapsed = workoutStartTime ? Math.round((Date.now() - workoutStartTime) / 1000) : 0;
+      workoutStartTime = null;
+      document.getElementById('workout-duration-badge').style.display = 'none';
+      return elapsed;
+    }
+
+    function updateWorkoutDuration() {
+      if (!workoutStartTime) return;
+      const elapsed = Math.round((Date.now() - workoutStartTime) / 1000);
+      const m = Math.floor(elapsed / 60);
+      const s = elapsed % 60;
+      document.getElementById('workout-duration-display').textContent = `${m}:${String(s).padStart(2, '0')}`;
+    }
+
+    // =====================================================================
+    // EXERCISE HISTORY QUICK-VIEW
+    // =====================================================================
+    function showExHistory(exerciseId) {
+      const block = document.getElementById(`exercise-${exerciseId}`);
+      if (!block) return;
+      const sel = block.querySelector('.exercise-name-select');
+      const inp = block.querySelector('.exercise-name-input');
+      let name = '';
+      if (sel && !sel.classList.contains('hidden') && sel.value && sel.value !== '__custom__') {
+        name = sel.value.trim();
+      } else if (inp) {
+        name = inp.value.trim();
+      }
+      if (!name) { showToast('Select an exercise first'); return; }
+
+      const workouts = getWorkouts();
+      // Find last 5 sessions that include this exercise
+      const sessions = [];
+      for (const w of workouts) {
+        if (!w.exercises) continue;
+        const ex = w.exercises.find(e => e.name === name);
+        if (ex) {
+          sessions.push({ date: w.date, name: w.name, exercise: ex });
+          if (sessions.length >= 5) break;
+        }
+      }
+
+      const popup = document.getElementById('ex-history-popup');
+      if (sessions.length === 0) {
+        popup.innerHTML = `
+          <div style="display:flex;justify-content:space-between;align-items:center;margin-bottom:12px">
+            <h4>${name}</h4>
+            <button class="btn-icon" onclick="closeExHistory()" style="width:28px;height:28px">
+              <svg width="14" height="14" fill="none" stroke="currentColor" stroke-width="2"><path d="M3 3l8 8M11 3l-8 8"/></svg>
+            </button>
+          </div>
+          <div class="text-muted text-sm">No previous sessions found for this exercise.</div>
+        `;
+      } else {
+        popup.innerHTML = `
+          <div style="display:flex;justify-content:space-between;align-items:center;margin-bottom:12px">
+            <h4>${name}</h4>
+            <button class="btn-icon" onclick="closeExHistory()" style="width:28px;height:28px">
+              <svg width="14" height="14" fill="none" stroke="currentColor" stroke-width="2"><path d="M3 3l8 8M11 3l-8 8"/></svg>
+            </button>
+          </div>
+          ${sessions.map(s => {
+            const d = new Date(s.date);
+            const dateStr = d.toLocaleDateString('en-GB', { day: 'numeric', month: 'short', year: 'numeric' });
+            const workingSets = s.exercise.sets.filter(set => !set.warmup);
+            const maxWeight = Math.max(...s.exercise.sets.map(set => set.weight));
+            return `
+              <div class="ex-hist-session">
+                <div class="ex-hist-date">${dateStr} — ${s.name}</div>
+                <div class="ex-hist-sets">
+                  ${s.exercise.sets.map((set, i) => `<span${set.warmup ? ' style="opacity:0.5"' : ''}>${displayWeight(set.weight)} x ${set.reps}${set.warmup ? ' (w)' : ''}</span>`).join(', ')}
+                </div>
+                <div class="text-muted text-sm" style="margin-top:2px">Max: ${displayWeight(maxWeight)} ${unitLabelShort()} · ${workingSets.length} working sets</div>
+              </div>
+            `;
+          }).join('')}
+        `;
+      }
+
+      document.getElementById('ex-history-overlay').classList.remove('hidden');
+    }
+
+    function closeExHistory() {
+      document.getElementById('ex-history-overlay').classList.add('hidden');
+    }
+
+    // =====================================================================
+    // SPLIT PLANNER
+    // =====================================================================
+    const SPLIT_KEY = 'ironpulse_split';
+
+    function getSplit() {
+      try { return JSON.parse(localStorage.getItem(SPLIT_KEY)) || ['', '', '', '', '', '', '']; }
+      catch { return ['', '', '', '', '', '', '']; }
+    }
+
+    function saveSplit(split) {
+      localStorage.setItem(SPLIT_KEY, JSON.stringify(split));
+    }
+
+    function setSplitDay() {
+      const dayIdx = parseInt(document.getElementById('split-day-select').value);
+      const type = document.getElementById('split-type-select').value;
+      const split = getSplit();
+      split[dayIdx] = type;
+      saveSplit(split);
+      renderSplitPlanner();
+      showToast('Schedule updated');
+    }
+
+    function setSplitDayDirect(dayIdx) {
+      document.getElementById('split-day-select').value = dayIdx;
+      document.getElementById('split-type-select').focus();
+    }
+
+    function renderSplitPlanner() {
+      const split = getSplit();
+      const dayNames = ['Mon', 'Tue', 'Wed', 'Thu', 'Fri', 'Sat', 'Sun'];
+      const now = new Date();
+      const todayDow = now.getDay(); // 0=Sun
+      const todayIdx = todayDow === 0 ? 6 : todayDow - 1; // Mon=0
+
+      // Week label
+      const monday = new Date(now);
+      monday.setDate(now.getDate() - todayIdx);
+      const sunday = new Date(monday);
+      sunday.setDate(monday.getDate() + 6);
+      document.getElementById('split-week-label').textContent =
+        `${monday.toLocaleDateString('en-GB', { day: 'numeric', month: 'short' })} — ${sunday.toLocaleDateString('en-GB', { day: 'numeric', month: 'short' })}`;
+
+      document.getElementById('split-grid').innerHTML = dayNames.map((name, i) => {
+        const type = split[i] || '';
+        const isToday = i === todayIdx;
+        const isRest = !type;
+        return `
+          <div class="split-day${isToday ? ' today' : ''}${isRest ? ' rest' : ''}" onclick="setSplitDayDirect(${i})">
+            <div class="day-label">${name}</div>
+            <div class="day-type">${type || 'Rest'}</div>
+          </div>
+        `;
+      }).join('');
+
+      // Summary
+      const trainingDays = split.filter(s => s).length;
+      const restDays = 7 - trainingDays;
+      const types = {};
+      split.forEach(s => { if (s) types[s] = (types[s] || 0) + 1; });
+
+      document.getElementById('split-summary').innerHTML = `
+        <div style="display:flex;gap:16px;flex-wrap:wrap">
+          <div class="text-sm"><strong>${trainingDays}</strong> training days</div>
+          <div class="text-sm"><strong>${restDays}</strong> rest days</div>
+        </div>
+        ${Object.keys(types).length > 0 ? `
+          <div style="margin-top:8px;display:flex;gap:6px;flex-wrap:wrap">
+            ${Object.entries(types).map(([t, count]) => `<span style="padding:3px 10px;border-radius:12px;font-size:0.75rem;background:var(--bg-card);border:1px solid var(--border)">${t} ×${count}</span>`).join('')}
+          </div>
+        ` : '<div class="text-muted text-sm" style="margin-top:8px">No workouts scheduled yet. Use the form above to plan your week.</div>'}
+      `;
+    }
+
+    // =====================================================================
+    // DELOAD ALERTS (integrated into Insights)
+    // =====================================================================
+    function checkDeloadNeeded() {
+      const workouts = getWorkouts();
+      if (workouts.length < 8) return null; // Need enough data
+
+      // Check RPE over the last 3 weeks
+      const now = new Date();
+      const threeWeeksAgo = new Date(now - 21 * 86400000);
+      const recentWorkouts = workouts.filter(w => new Date(w.date) >= threeWeeksAgo);
+
+      if (recentWorkouts.length < 6) return null; // Not training enough to need a deload
+
+      const avgRPE = recentWorkouts.reduce((s, w) => s + w.postWorkout.rpe, 0) / recentWorkouts.length;
+      const highRPECount = recentWorkouts.filter(w => w.postWorkout.rpe >= 8).length;
+      const highRPEPct = highRPECount / recentWorkouts.length;
+
+      // Check if checkins show declining mood/energy
+      const checkins = getCheckins();
+      const recentCheckins = checkins.filter(c => new Date(c.date) >= threeWeeksAgo);
+      const avgMood = recentCheckins.length > 0
+        ? recentCheckins.reduce((s, c) => s + c.mood, 0) / recentCheckins.length
+        : 5;
+      const avgStress = recentCheckins.filter(c => c.stress).length > 0
+        ? recentCheckins.filter(c => c.stress).reduce((s, c) => s + c.stress, 0) / recentCheckins.filter(c => c.stress).length
+        : 3;
+
+      if (avgRPE >= 7.5 && highRPEPct >= 0.5) {
+        return {
+          type: 'deload',
+          icon: '⚠️',
+          title: 'Consider a Deload Week',
+          body: `Your average RPE over the last 3 weeks is ${avgRPE.toFixed(1)}, with ${Math.round(highRPEPct * 100)}% of sessions at RPE 8+.${avgMood < 5 ? ' Your mood has also been lower than usual.' : ''}${avgStress > 6 ? ' Stress levels are elevated.' : ''} A lighter week (reduce weights by 40-50%, drop volume) could help you recover and come back stronger.`,
+          priority: 10
+        };
+      }
+
+      if (avgRPE >= 7 && avgStress > 6) {
+        return {
+          type: 'stress-recovery',
+          icon: '🧘',
+          title: 'High Stress + High Training Load',
+          body: `Your stress levels have been elevated (avg ${avgStress.toFixed(1)}/10) while training hard (avg RPE ${avgRPE.toFixed(1)}). Consider adding more mindfulness or recovery work, or reducing training intensity until stress settles.`,
+          priority: 9
+        };
+      }
+
+      return null;
+    }
+
+    // =====================================================================
     // EXPORT / IMPORT (updated to include all new data)
     // =====================================================================
     function exportData() {
@@ -5736,7 +6298,8 @@
         favourites: getFavExercises(),
         supplements: getSupplements(),
         supplementsLog: getSuppsLog(),
-        mealPresets: getMealPresets()
+        mealPresets: getMealPresets(),
+        split: getSplit()
       }, null, 2);
       const blob = new Blob([data], { type: 'application/json' });
       const url = URL.createObjectURL(blob);
@@ -5833,6 +6396,9 @@
               const existingIds = new Set(existing.map(p => p.id));
               const newPresets = data.mealPresets.filter(p => !existingIds.has(p.id));
               saveMealPresets([...existing, ...newPresets]);
+            }
+            if (data.split && Array.isArray(data.split)) {
+              saveSplit(data.split);
             }
             showToast('Data imported!');
           }
