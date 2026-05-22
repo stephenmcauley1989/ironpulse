@@ -1185,6 +1185,54 @@
     .life-score-item { text-align: center; }
     .life-score-item .ls-val { font-size: 0.9rem; font-weight: 700; }
     .life-score-item .ls-label { font-size: 0.6rem; color: var(--text-muted); text-transform: uppercase; }
+
+    /* ===== CUSTOM EXERCISES ===== */
+    .custom-ex-item { display: flex; align-items: center; gap: 8px; padding: 8px 12px; background: var(--bg-secondary); border-radius: var(--radius-sm); margin-bottom: 6px; }
+    .custom-ex-item span { flex: 1; font-size: 0.85rem; }
+    .custom-ex-cat { font-size: 0.65rem; padding: 2px 8px; border-radius: 10px; background: var(--green-900); color: var(--green-300); text-transform: capitalize; }
+
+    /* ===== HEATMAP ===== */
+    .heatmap-grid { display: grid; grid-template-columns: repeat(53, 1fr); gap: 2px; }
+    .heatmap-cell { width: 100%; aspect-ratio: 1; border-radius: 2px; background: var(--bg-secondary); cursor: pointer; position: relative; }
+    .heatmap-cell.l1 { background: var(--green-900); }
+    .heatmap-cell.l2 { background: var(--green-700); }
+    .heatmap-cell.l3 { background: var(--green-500); }
+    .heatmap-cell.l4 { background: var(--green-400); }
+    .heatmap-month-labels { display: grid; grid-template-columns: repeat(53, 1fr); gap: 2px; margin-bottom: 4px; }
+    .heatmap-month-labels span { font-size: 0.55rem; color: var(--text-muted); text-align: center; }
+    .heatmap-day-labels { display: flex; flex-direction: column; gap: 2px; font-size: 0.55rem; color: var(--text-muted); margin-right: 4px; justify-content: space-between; padding: 0 2px; }
+    .heatmap-legend { display: flex; align-items: center; gap: 4px; font-size: 0.65rem; color: var(--text-muted); margin-top: 8px; }
+    .heatmap-legend-cell { width: 12px; height: 12px; border-radius: 2px; }
+    .heatmap-tooltip { position: fixed; background: var(--bg-card); border: 1px solid var(--border); border-radius: var(--radius-sm); padding: 6px 10px; font-size: 0.75rem; pointer-events: none; z-index: 9999; box-shadow: 0 4px 12px rgba(0,0,0,.4); }
+
+    /* ===== SLEEP TRENDS ===== */
+    .sleep-stat-card { text-align: center; padding: 16px; }
+    .sleep-stat-val { font-size: 1.5rem; font-weight: 800; }
+    .sleep-stat-label { font-size: 0.7rem; color: var(--text-muted); margin-top: 2px; }
+    .sleep-bar { height: 6px; border-radius: 3px; background: var(--bg-secondary); overflow: hidden; margin-top: 4px; }
+    .sleep-bar-fill { height: 100%; border-radius: 3px; transition: width 0.3s; }
+
+    /* ===== REVIEWS ===== */
+    .review-hero { text-align: center; padding: 24px; background: linear-gradient(135deg, var(--bg-card), var(--green-900)); border: 1px solid var(--green-800); border-radius: var(--radius); margin-bottom: 16px; }
+    .review-hero-val { font-size: 2.5rem; font-weight: 900; letter-spacing: -1px; }
+    .review-hero-label { font-size: 0.8rem; color: var(--text-muted); margin-top: 4px; }
+    .review-grid { display: grid; grid-template-columns: repeat(auto-fit, minmax(130px, 1fr)); gap: 8px; margin-bottom: 16px; }
+    .review-stat { background: var(--bg-card); border: 1px solid var(--border); border-radius: var(--radius-sm); padding: 14px; text-align: center; }
+    .review-stat-val { font-size: 1.4rem; font-weight: 800; color: var(--green-400); }
+    .review-stat-label { font-size: 0.7rem; color: var(--text-muted); margin-top: 2px; }
+
+    /* ===== PROGRAMME PLANNER ===== */
+    .programme-card { background: var(--bg-card); border: 1px solid var(--border); border-radius: var(--radius); padding: 16px; margin-bottom: 10px; }
+    .programme-card.active { border-color: var(--green-500); }
+    .programme-week-grid { display: grid; grid-template-columns: repeat(auto-fill, minmax(40px, 1fr)); gap: 4px; margin-top: 8px; }
+    .programme-week { text-align: center; padding: 6px 4px; border-radius: var(--radius-sm); font-size: 0.7rem; font-weight: 600; background: var(--bg-secondary); }
+    .programme-week.done { background: var(--green-800); color: var(--green-300); }
+    .programme-week.current { background: var(--green-600); color: white; }
+    .programme-progress { height: 8px; background: var(--bg-secondary); border-radius: 4px; overflow: hidden; margin-top: 10px; }
+    .programme-progress-fill { height: 100%; background: linear-gradient(90deg, var(--green-600), var(--green-400)); border-radius: 4px; transition: width 0.3s; }
+
+    /* ===== DATA VIZ ===== */
+    .dataviz-section { margin-bottom: 20px; }
   </style>
 </head>
 <body>
@@ -1244,6 +1292,14 @@
         <svg fill="none" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><rect x="3" y="4" width="18" height="18" rx="2"/><path d="M3 10h18M10 4v18"/></svg>
         Split Planner
       </button>
+      <button class="nav-item" data-page="programme" onclick="showPage('programme')">
+        <svg fill="none" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M14 2H6a2 2 0 00-2 2v16a2 2 0 002 2h12a2 2 0 002-2V8z"/><path d="M14 2v6h6M16 13H8M16 17H8M10 9H8"/></svg>
+        Programme
+      </button>
+      <button class="nav-item" data-page="customex" onclick="showPage('customex')">
+        <svg fill="none" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M11 4H4a2 2 0 00-2 2v14a2 2 0 002 2h14a2 2 0 002-2v-7"/><path d="M18.5 2.5a2.121 2.121 0 013 3L12 15l-4 1 1-4 9.5-9.5z"/></svg>
+        Custom Exercises
+      </button>
 
       <div class="nav-section">Wellness</div>
       <button class="nav-item" data-page="macros" onclick="showPage('macros')">
@@ -1257,6 +1313,10 @@
       <button class="nav-item" data-page="goals" onclick="showPage('goals')">
         <svg fill="none" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M12 22c5.523 0 10-4.477 10-10S17.523 2 12 2 2 6.477 2 12s4.477 10 10 10z"/><circle cx="12" cy="12" r="6"/><circle cx="12" cy="12" r="2"/></svg>
         Goals
+      </button>
+      <button class="nav-item" data-page="sleep" onclick="showPage('sleep')">
+        <svg fill="none" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M21 12.79A9 9 0 1111.21 3 7 7 0 0021 12.79z"/></svg>
+        Sleep Trends
       </button>
       <button class="nav-item" data-page="insights" onclick="showPage('insights')">
         <svg fill="none" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><circle cx="12" cy="12" r="10"/><path d="M12 16v-4M12 8h.01"/></svg>
@@ -1277,6 +1337,20 @@
         Focus
       </button>
 
+      <div class="nav-section">Analytics</div>
+      <button class="nav-item" data-page="reviews" onclick="showPage('reviews')">
+        <svg fill="none" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M2 3h6a4 4 0 014 4v14a3 3 0 00-3-3H2z"/><path d="M22 3h-6a4 4 0 00-4 4v14a3 3 0 013-3h7z"/></svg>
+        Reviews
+      </button>
+      <button class="nav-item" data-page="heatmap" onclick="showPage('heatmap')">
+        <svg fill="none" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><rect x="3" y="3" width="18" height="18" rx="2"/><rect x="7" y="7" width="3" height="3"/><rect x="14" y="7" width="3" height="3"/><rect x="7" y="14" width="3" height="3"/><rect x="14" y="14" width="3" height="3"/></svg>
+        Heatmap
+      </button>
+      <button class="nav-item" data-page="dataviz" onclick="showPage('dataviz')">
+        <svg fill="none" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><line x1="18" y1="20" x2="18" y2="10"/><line x1="12" y1="20" x2="12" y2="4"/><line x1="6" y1="20" x2="6" y2="14"/></svg>
+        Data Viz
+      </button>
+
       <div class="sidebar-footer">
         <div class="unit-selector">
           <label>Weight</label>
@@ -1286,6 +1360,10 @@
             <option value="st">Stone &amp; Pounds</option>
           </select>
         </div>
+        <button class="nav-item" onclick="toggleNotifications()">
+          <svg fill="none" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M18 8A6 6 0 006 8c0 7-3 9-3 9h18s-3-2-3-9"/><path d="M13.73 21a2 2 0 01-3.46 0"/></svg>
+          <span id="notif-status">Notifications</span>
+        </button>
         <button class="nav-item" onclick="exportData()">
           <svg fill="none" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M21 15v4a2 2 0 01-2 2H5a2 2 0 01-2-2v-4M7 10l5 5 5-5M12 15V3"/></svg>
           Export Data
@@ -2314,6 +2392,225 @@
         </div>
       </div>
 
+      <!-- ==================== CUSTOM EXERCISES ==================== -->
+      <div id="page-customex" class="page hidden">
+        <div class="page-header">
+          <h2>Custom Exercises</h2>
+          <p>Add your own exercises to the dropdown</p>
+        </div>
+
+        <div class="card mb-4">
+          <div class="card-header"><span class="card-title">Add Exercise</span></div>
+          <div style="margin-top:12px">
+            <div class="form-group">
+              <label class="form-label">Exercise Name</label>
+              <input type="text" class="form-input" id="custom-ex-name" placeholder="e.g. Zercher Squat">
+            </div>
+            <div class="form-group">
+              <label class="form-label">Category</label>
+              <select class="form-select" id="custom-ex-category">
+                <option value="legs">Legs</option>
+                <option value="push">Push</option>
+                <option value="pull">Pull</option>
+                <option value="chest">Chest</option>
+                <option value="back">Back</option>
+                <option value="shoulders">Shoulders</option>
+                <option value="arms">Arms</option>
+                <option value="core">Core</option>
+                <option value="fullbody">Full Body</option>
+                <option value="custom">Custom</option>
+              </select>
+            </div>
+            <button class="btn btn-primary" onclick="addCustomExercise()">Add Exercise</button>
+          </div>
+        </div>
+
+        <div class="section-title">Your Custom Exercises</div>
+        <div id="custom-ex-list"></div>
+      </div>
+
+      <!-- ==================== SLEEP TRENDS ==================== -->
+      <div id="page-sleep" class="page hidden">
+        <div class="page-header">
+          <h2>Sleep Trends</h2>
+          <p>Track your sleep patterns and quality</p>
+        </div>
+
+        <div class="stat-grid" id="sleep-stats"></div>
+
+        <div class="section-title">Sleep Duration (Last 30 Days)</div>
+        <div class="card mb-4">
+          <div class="chart-container">
+            <canvas id="sleepHoursChart"></canvas>
+          </div>
+        </div>
+
+        <div class="section-title">Sleep Quality (Last 30 Days)</div>
+        <div class="card mb-4">
+          <div class="chart-container">
+            <canvas id="sleepQualityChart"></canvas>
+          </div>
+        </div>
+
+        <div class="section-title">Sleep vs Performance</div>
+        <div class="card mb-4">
+          <div id="sleep-correlations"></div>
+        </div>
+
+        <div class="section-title">Recent Sleep Log</div>
+        <div id="sleep-history"></div>
+      </div>
+
+      <!-- ==================== REVIEWS ==================== -->
+      <div id="page-reviews" class="page hidden">
+        <div class="page-header">
+          <h2>Reviews</h2>
+          <p>Monthly and yearly summaries of your journey</p>
+        </div>
+
+        <div class="form-row" style="margin-bottom:16px">
+          <button class="btn btn-primary" id="btn-review-month" onclick="showReviewTab('month')" style="flex:1">This Month</button>
+          <button class="btn btn-secondary" id="btn-review-year" onclick="showReviewTab('year')" style="flex:1">This Year</button>
+        </div>
+
+        <div id="review-content"></div>
+      </div>
+
+      <!-- ==================== HEATMAP ==================== -->
+      <div id="page-heatmap" class="page hidden">
+        <div class="page-header">
+          <h2>Activity Heatmap</h2>
+          <p>Your year at a glance</p>
+        </div>
+
+        <div class="card mb-4" style="padding:16px;overflow-x:auto">
+          <div class="form-row" style="margin-bottom:12px">
+            <select class="form-select" id="heatmap-metric" onchange="renderHeatmap()" style="flex:1">
+              <option value="workouts">Workouts</option>
+              <option value="volume">Volume</option>
+              <option value="checkins">Check-ins</option>
+              <option value="habits">Habit Completion</option>
+            </select>
+            <select class="form-select" id="heatmap-year" onchange="renderHeatmap()" style="width:90px"></select>
+          </div>
+          <div id="heatmap-container" style="min-width:680px"></div>
+          <div class="heatmap-legend" id="heatmap-legend"></div>
+        </div>
+
+        <div id="heatmap-summary"></div>
+      </div>
+
+      <!-- ==================== PROGRAMME PLANNER ==================== -->
+      <div id="page-programme" class="page hidden">
+        <div class="page-header">
+          <h2>Programme Planner</h2>
+          <p>Plan training blocks with progressive overload</p>
+        </div>
+
+        <div class="card mb-4">
+          <div class="card-header"><span class="card-title">Create Programme</span></div>
+          <div style="margin-top:12px">
+            <div class="form-group">
+              <label class="form-label">Programme Name</label>
+              <input type="text" class="form-input" id="prog-name" placeholder="e.g. Strength Block 1">
+            </div>
+            <div class="form-row">
+              <div class="form-group">
+                <label class="form-label">Duration (weeks)</label>
+                <select class="form-select" id="prog-weeks">
+                  <option value="4">4 weeks</option>
+                  <option value="6">6 weeks</option>
+                  <option value="8" selected>8 weeks</option>
+                  <option value="10">10 weeks</option>
+                  <option value="12">12 weeks</option>
+                </select>
+              </div>
+              <div class="form-group">
+                <label class="form-label">Goal</label>
+                <select class="form-select" id="prog-goal">
+                  <option value="strength">Strength</option>
+                  <option value="hypertrophy">Hypertrophy</option>
+                  <option value="endurance">Endurance</option>
+                  <option value="recomp">Recomposition</option>
+                  <option value="general">General Fitness</option>
+                </select>
+              </div>
+            </div>
+            <div class="form-row">
+              <div class="form-group">
+                <label class="form-label">Sessions/Week Target</label>
+                <input type="number" class="form-input" id="prog-sessions" value="4" min="1" max="7">
+              </div>
+              <div class="form-group">
+                <label class="form-label">Deload Week?</label>
+                <select class="form-select" id="prog-deload">
+                  <option value="last">Last week</option>
+                  <option value="none">No deload</option>
+                  <option value="every4">Every 4th week</option>
+                </select>
+              </div>
+            </div>
+            <div class="form-group">
+              <label class="form-label">Notes (optional)</label>
+              <input type="text" class="form-input" id="prog-notes" placeholder="Focus areas, key lifts, etc.">
+            </div>
+            <button class="btn btn-primary" onclick="createProgramme()">Create Programme</button>
+          </div>
+        </div>
+
+        <div class="section-title">Your Programmes</div>
+        <div id="programme-list"></div>
+      </div>
+
+      <!-- ==================== DATA VIZ ==================== -->
+      <div id="page-dataviz" class="page hidden">
+        <div class="page-header">
+          <h2>Data Visualisation</h2>
+          <p>Deep dive into your data</p>
+        </div>
+
+        <div class="dataviz-section">
+          <div class="section-title">Volume by Muscle Group</div>
+          <div class="card mb-4">
+            <div class="chart-container">
+              <canvas id="vizMuscleChart"></canvas>
+            </div>
+          </div>
+        </div>
+
+        <div class="dataviz-section">
+          <div class="section-title">Mood vs Volume (Scatter)</div>
+          <div class="card mb-4">
+            <div class="chart-container">
+              <canvas id="vizMoodVolChart"></canvas>
+            </div>
+          </div>
+        </div>
+
+        <div class="dataviz-section">
+          <div class="section-title">Habit Completion Calendar</div>
+          <div class="card mb-4" id="viz-habit-calendar" style="padding:16px;overflow-x:auto"></div>
+        </div>
+
+        <div class="dataviz-section">
+          <div class="section-title">Macro Adherence Trend</div>
+          <div class="card mb-4">
+            <div class="chart-container">
+              <canvas id="vizMacroChart"></canvas>
+            </div>
+          </div>
+        </div>
+
+        <div class="dataviz-section">
+          <div class="section-title">Training Frequency by Day</div>
+          <div class="card mb-4">
+            <div class="chart-container">
+              <canvas id="vizDayChart"></canvas>
+            </div>
+          </div>
+        </div>
+      </div>
+
     </main>
   </div>
 
@@ -2485,6 +2782,12 @@
       if (page === 'habits') renderHabits();
       if (page === 'journal') renderJournal();
       if (page === 'focus') renderFocus();
+      if (page === 'customex') renderCustomExercises();
+      if (page === 'sleep') renderSleepTrends();
+      if (page === 'reviews') renderReviews();
+      if (page === 'heatmap') renderHeatmap();
+      if (page === 'programme') renderProgrammes();
+      if (page === 'dataviz') renderDataViz();
     }
 
     function toggleSidebar() {
@@ -2658,6 +2961,7 @@
     function buildExerciseNameField(id) {
       const favs = getFavExercises();
       const cat = document.getElementById('log-category').value;
+      const allPresets = getFullExercisePresets();
 
       // Build a merged list: favourites first, then either the selected category or all categories
       let options = '';
@@ -2667,14 +2971,14 @@
         options += '<optgroup label="★ Favourites">' + favs.map(e => `<option value="${e}">${e}</option>`).join('') + '</optgroup>';
       }
 
-      if (cat && exercisePresets[cat]) {
+      if (cat && allPresets[cat]) {
         // Selected category: show its exercises (minus any already in favourites)
-        const catExercises = exercisePresets[cat].filter(e => !favs.includes(e));
+        const catExercises = allPresets[cat].filter(e => !favs.includes(e));
         const catLabel = cat.charAt(0).toUpperCase() + cat.slice(1);
         options += `<optgroup label="${catLabel}">${catExercises.map(e => `<option value="${e}">${e}</option>`).join('')}</optgroup>`;
 
         // Also show all other categories collapsed
-        Object.entries(exercisePresets).forEach(([key, exercises]) => {
+        Object.entries(allPresets).forEach(([key, exercises]) => {
           if (key === cat) return;
           const others = exercises.filter(e => !favs.includes(e));
           if (others.length === 0) return;
@@ -2683,7 +2987,7 @@
         });
       } else {
         // No category selected: show all categories
-        Object.entries(exercisePresets).forEach(([key, exercises]) => {
+        Object.entries(allPresets).forEach(([key, exercises]) => {
           const others = exercises.filter(e => !favs.includes(e));
           if (others.length === 0) return;
           const label = key.charAt(0).toUpperCase() + key.slice(1);
@@ -7216,6 +7520,794 @@
     }
 
     // =====================================================================
+    // CUSTOM EXERCISES
+    // =====================================================================
+    const CUSTOM_EX_KEY = 'ironpulse_custom_exercises';
+    function getCustomExercises() { try { return JSON.parse(localStorage.getItem(CUSTOM_EX_KEY)) || []; } catch { return []; } }
+    function saveCustomExercises(list) { localStorage.setItem(CUSTOM_EX_KEY, JSON.stringify(list)); }
+
+    function addCustomExercise() {
+      const name = document.getElementById('custom-ex-name').value.trim();
+      const category = document.getElementById('custom-ex-category').value;
+      if (!name) { showToast('Enter an exercise name'); return; }
+      const customs = getCustomExercises();
+      if (customs.some(c => c.name.toLowerCase() === name.toLowerCase())) { showToast('Exercise already exists'); return; }
+      customs.push({ id: Date.now(), name, category });
+      saveCustomExercises(customs);
+      document.getElementById('custom-ex-name').value = '';
+      showToast(`Added: ${name}`);
+      renderCustomExercises();
+    }
+
+    function removeCustomExercise(id) {
+      const customs = getCustomExercises();
+      const ex = customs.find(c => c.id === id);
+      if (!ex || !confirm(`Remove "${ex.name}"?`)) return;
+      saveCustomExercises(customs.filter(c => c.id !== id));
+      showToast('Exercise removed');
+      renderCustomExercises();
+    }
+
+    function renderCustomExercises() {
+      const customs = getCustomExercises();
+      document.getElementById('custom-ex-list').innerHTML = customs.length > 0
+        ? customs.map(c => `
+            <div class="custom-ex-item">
+              <span>${c.name}</span>
+              <span class="custom-ex-cat">${c.category}</span>
+              <button class="btn-icon" onclick="removeCustomExercise(${c.id})" title="Remove">
+                <svg width="14" height="14" fill="none" stroke="#f87171" stroke-width="2"><path d="M3 3l8 8M11 3l-8 8"/></svg>
+              </button>
+            </div>
+          `).join('')
+        : '<div class="text-muted text-sm" style="padding:12px">No custom exercises yet. Add some above!</div>';
+    }
+
+    // Inject custom exercises into the exercisePresets object when building dropdowns
+    function getFullExercisePresets() {
+      const base = {};
+      Object.entries(exercisePresets).forEach(([k, v]) => { base[k] = [...v]; });
+      const customs = getCustomExercises();
+      customs.forEach(c => {
+        if (!base[c.category]) base[c.category] = [];
+        if (!base[c.category].includes(c.name)) base[c.category].push(c.name);
+      });
+      return base;
+    }
+
+    // =====================================================================
+    // SLEEP TRENDS
+    // =====================================================================
+    let sleepHoursChartInstance = null;
+    let sleepQualityChartInstance = null;
+
+    function renderSleepTrends() {
+      const checkins = getCheckins();
+      const workouts = getWorkouts();
+      const withSleep = checkins.filter(c => c.sleepHours || c.sleepQuality).slice(0, 90);
+
+      // Stats
+      const last7 = withSleep.filter(c => {
+        const d = new Date(c.date);
+        return (new Date() - d) / (1000*60*60*24) <= 7;
+      });
+      const last30 = withSleep.filter(c => {
+        const d = new Date(c.date);
+        return (new Date() - d) / (1000*60*60*24) <= 30;
+      });
+
+      const avgHours7 = last7.length > 0 ? (last7.reduce((s, c) => s + (c.sleepHours || 0), 0) / last7.length).toFixed(1) : '-';
+      const avgQual7 = last7.length > 0 ? (last7.reduce((s, c) => s + (c.sleepQuality || 0), 0) / last7.length).toFixed(1) : '-';
+      const avgHours30 = last30.length > 0 ? (last30.reduce((s, c) => s + (c.sleepHours || 0), 0) / last30.length).toFixed(1) : '-';
+
+      // Sleep debt (target 8h)
+      const debtDays = last7.filter(c => c.sleepHours && c.sleepHours < 7);
+      const debtHours = debtDays.reduce((s, c) => s + (7 - c.sleepHours), 0).toFixed(1);
+
+      // Best/worst night
+      const bestNight = last30.length > 0 ? last30.reduce((b, c) => (c.sleepHours || 0) > (b.sleepHours || 0) ? c : b, last30[0]) : null;
+      const worstNight = last30.length > 0 ? last30.reduce((w, c) => (c.sleepHours || 99) < (w.sleepHours || 99) ? c : w, last30[0]) : null;
+
+      document.getElementById('sleep-stats').innerHTML = `
+        <div class="card sleep-stat-card">
+          <div class="sleep-stat-val">${avgHours7}h</div>
+          <div class="sleep-stat-label">Avg Hours (7d)</div>
+        </div>
+        <div class="card sleep-stat-card">
+          <div class="sleep-stat-val">${avgQual7}/10</div>
+          <div class="sleep-stat-label">Avg Quality (7d)</div>
+        </div>
+        <div class="card sleep-stat-card">
+          <div class="sleep-stat-val">${avgHours30}h</div>
+          <div class="sleep-stat-label">Avg Hours (30d)</div>
+        </div>
+        <div class="card sleep-stat-card">
+          <div class="sleep-stat-val" style="color:${parseFloat(debtHours) > 5 ? '#f87171' : parseFloat(debtHours) > 2 ? '#fbbf24' : 'var(--green-400)'}">${debtHours}h</div>
+          <div class="sleep-stat-label">Sleep Debt (7d)</div>
+        </div>
+      `;
+
+      // Hours chart
+      const chartData = last30.slice().reverse();
+      if (sleepHoursChartInstance) sleepHoursChartInstance.destroy();
+      const hCtx = document.getElementById('sleepHoursChart').getContext('2d');
+      sleepHoursChartInstance = new Chart(hCtx, {
+        type: 'bar',
+        data: {
+          labels: chartData.map(c => { const d = new Date(c.date); return d.toLocaleDateString('en-GB', { day: 'numeric', month: 'short' }); }),
+          datasets: [{
+            label: 'Hours',
+            data: chartData.map(c => c.sleepHours || 0),
+            backgroundColor: chartData.map(c => (c.sleepHours || 0) >= 7 ? 'rgba(34,197,94,0.6)' : (c.sleepHours || 0) >= 6 ? 'rgba(251,191,36,0.6)' : 'rgba(248,113,113,0.6)'),
+            borderRadius: 4
+          }]
+        },
+        options: { responsive: true, maintainAspectRatio: false, plugins: { legend: { display: false } }, scales: { y: { beginAtZero: true, max: 12, ticks: { color: '#9ca3af' }, grid: { color: 'rgba(255,255,255,0.05)' } }, x: { ticks: { color: '#9ca3af', maxRotation: 45 }, grid: { display: false } } } }
+      });
+
+      // Quality chart
+      if (sleepQualityChartInstance) sleepQualityChartInstance.destroy();
+      const qCtx = document.getElementById('sleepQualityChart').getContext('2d');
+      sleepQualityChartInstance = new Chart(qCtx, {
+        type: 'line',
+        data: {
+          labels: chartData.map(c => { const d = new Date(c.date); return d.toLocaleDateString('en-GB', { day: 'numeric', month: 'short' }); }),
+          datasets: [{
+            label: 'Quality',
+            data: chartData.map(c => c.sleepQuality || 0),
+            borderColor: '#22c55e', backgroundColor: 'rgba(34,197,94,0.1)', fill: true, tension: 0.3, pointRadius: 3
+          }]
+        },
+        options: { responsive: true, maintainAspectRatio: false, plugins: { legend: { display: false } }, scales: { y: { min: 0, max: 10, ticks: { color: '#9ca3af' }, grid: { color: 'rgba(255,255,255,0.05)' } }, x: { ticks: { color: '#9ca3af', maxRotation: 45 }, grid: { display: false } } } }
+      });
+
+      // Correlations
+      let corrHtml = '';
+      const workoutDates = new Set(workouts.map(w => new Date(w.date).toISOString().split('T')[0]));
+      const sleepBeforeWorkout = last30.filter(c => {
+        const next = new Date(c.date); next.setDate(next.getDate() + 1);
+        return workoutDates.has(next.toISOString().split('T')[0]);
+      });
+      if (sleepBeforeWorkout.length >= 3) {
+        const goodSleep = sleepBeforeWorkout.filter(c => (c.sleepHours || 0) >= 7);
+        const poorSleep = sleepBeforeWorkout.filter(c => (c.sleepHours || 0) < 6);
+        if (goodSleep.length >= 1 && poorSleep.length >= 1) {
+          corrHtml += `<div style="padding:10px;font-size:0.85rem">
+            <strong>Sleep before workout days:</strong> ${goodSleep.length} nights with 7+ hours, ${poorSleep.length} nights under 6 hours.
+            ${goodSleep.length > poorSleep.length ? ' You generally sleep well before training days.' : ' You may want to prioritise sleep before workouts.'}
+          </div>`;
+        }
+      }
+      if (bestNight) corrHtml += `<div style="padding:10px;font-size:0.85rem"><strong>Best night (30d):</strong> ${bestNight.sleepHours}h on ${new Date(bestNight.date).toLocaleDateString('en-GB', { weekday: 'short', day: 'numeric', month: 'short' })}</div>`;
+      if (worstNight) corrHtml += `<div style="padding:10px;font-size:0.85rem"><strong>Shortest night (30d):</strong> ${worstNight.sleepHours}h on ${new Date(worstNight.date).toLocaleDateString('en-GB', { weekday: 'short', day: 'numeric', month: 'short' })}</div>`;
+      document.getElementById('sleep-correlations').innerHTML = corrHtml || '<div class="text-muted text-sm" style="padding:12px">Log more check-ins with sleep data to see correlations.</div>';
+
+      // History
+      document.getElementById('sleep-history').innerHTML = last30.slice(0, 14).map(c => {
+        const d = new Date(c.date);
+        const hrs = c.sleepHours || '-';
+        const qual = c.sleepQuality || '-';
+        return `<div class="card mb-4" style="padding:12px;display:flex;justify-content:space-between;align-items:center">
+          <span style="font-size:0.85rem;font-weight:600">${d.toLocaleDateString('en-GB', { weekday: 'short', day: 'numeric', month: 'short' })}</span>
+          <span style="font-size:0.85rem">${hrs}h &bull; Quality: ${qual}/10</span>
+        </div>`;
+      }).join('') || '<div class="text-muted text-sm" style="padding:12px">No sleep data yet. Log check-ins with sleep info.</div>';
+    }
+
+    // =====================================================================
+    // REVIEWS (Monthly + Yearly)
+    // =====================================================================
+    let currentReviewTab = 'month';
+
+    function showReviewTab(tab) {
+      currentReviewTab = tab;
+      document.getElementById('btn-review-month').className = tab === 'month' ? 'btn btn-primary' : 'btn btn-secondary';
+      document.getElementById('btn-review-year').className = tab === 'year' ? 'btn btn-primary' : 'btn btn-secondary';
+      renderReviews();
+    }
+
+    function renderReviews() {
+      const workouts = getWorkouts();
+      const checkins = getCheckins();
+      const habits = getHabitDefs();
+      const habitsLog = getHabitsLog();
+      const focusSessions = getFocusSessions();
+      const journalEntries = getJournalEntries();
+      const prs = getPRs();
+      const now = new Date();
+
+      let filtered, periodLabel;
+      if (currentReviewTab === 'month') {
+        filtered = {
+          workouts: workouts.filter(w => { const d = new Date(w.date); return d.getMonth() === now.getMonth() && d.getFullYear() === now.getFullYear(); }),
+          checkins: checkins.filter(c => c.date.startsWith(now.toISOString().slice(0, 7))),
+          focus: focusSessions.filter(f => f.date.startsWith(now.toISOString().slice(0, 7))),
+          journal: journalEntries.filter(j => j.date.startsWith(now.toISOString().slice(0, 7)))
+        };
+        periodLabel = now.toLocaleDateString('en-GB', { month: 'long', year: 'numeric' });
+      } else {
+        const yr = now.getFullYear().toString();
+        filtered = {
+          workouts: workouts.filter(w => w.date.startsWith(yr)),
+          checkins: checkins.filter(c => c.date.startsWith(yr)),
+          focus: focusSessions.filter(f => f.date.startsWith(yr)),
+          journal: journalEntries.filter(j => j.date.startsWith(yr))
+        };
+        periodLabel = yr;
+      }
+
+      const totalW = filtered.workouts.length;
+      const totalVol = filtered.workouts.reduce((s, w) => s + (w.totalVolume || 0), 0);
+      const avgRPE = totalW > 0 ? (filtered.workouts.reduce((s, w) => s + w.postWorkout.rpe, 0) / totalW).toFixed(1) : '-';
+      const avgMood = filtered.checkins.length > 0 ? (filtered.checkins.reduce((s, c) => s + c.mood, 0) / filtered.checkins.length).toFixed(1) : '-';
+      const avgEnergy = filtered.checkins.length > 0 ? (filtered.checkins.reduce((s, c) => s + c.energy, 0) / filtered.checkins.length).toFixed(1) : '-';
+      const avgSleep = filtered.checkins.filter(c => c.sleepHours).length > 0
+        ? (filtered.checkins.filter(c => c.sleepHours).reduce((s, c) => s + c.sleepHours, 0) / filtered.checkins.filter(c => c.sleepHours).length).toFixed(1) : '-';
+      const totalFocus = filtered.focus.reduce((s, f) => s + f.minutes, 0);
+      const totalJournal = filtered.journal.length;
+      const totalCalsBurned = filtered.workouts.reduce((s, w) => s + (w.postWorkout.caloriesBurned || 0), 0);
+
+      // PRs this period
+      let prCount = 0;
+      Object.values(prs).forEach(pr => {
+        if (pr.date && pr.date >= (currentReviewTab === 'month' ? now.toISOString().slice(0, 7) : now.getFullYear().toString())) prCount++;
+      });
+
+      // Habit completion
+      let avgHabitPct = '-';
+      if (habits.length > 0) {
+        const relevantDays = Object.entries(habitsLog).filter(([date]) => currentReviewTab === 'month' ? date.startsWith(now.toISOString().slice(0, 7)) : date.startsWith(now.getFullYear().toString()));
+        if (relevantDays.length > 0) {
+          const totalPct = relevantDays.reduce((s, [, ids]) => s + (ids.filter(id => habits.some(h => h.id === id)).length / habits.length), 0);
+          avgHabitPct = Math.round((totalPct / relevantDays.length) * 100) + '%';
+        }
+      }
+
+      // Best week by workouts
+      const weekCounts = {};
+      filtered.workouts.forEach(w => {
+        const d = new Date(w.date);
+        const weekStart = new Date(d);
+        weekStart.setDate(d.getDate() - d.getDay());
+        const key = weekStart.toISOString().split('T')[0];
+        weekCounts[key] = (weekCounts[key] || 0) + 1;
+      });
+      const bestWeekKey = Object.entries(weekCounts).sort((a, b) => b[1] - a[1])[0];
+      const bestWeek = bestWeekKey ? `${bestWeekKey[1]} workouts (w/c ${new Date(bestWeekKey[0]).toLocaleDateString('en-GB', { day: 'numeric', month: 'short' })})` : '-';
+
+      document.getElementById('review-content').innerHTML = `
+        <div class="review-hero">
+          <div class="text-muted text-sm">${periodLabel}</div>
+          <div class="review-hero-val">${totalW}</div>
+          <div class="review-hero-label">Total Workouts</div>
+        </div>
+        <div class="review-grid">
+          <div class="review-stat"><div class="review-stat-val">${totalVol > 0 ? (fromKg(totalVol)/1000).toFixed(1) + 'k' : '-'}</div><div class="review-stat-label">${unitLabelShort()} Volume</div></div>
+          <div class="review-stat"><div class="review-stat-val">${avgRPE}</div><div class="review-stat-label">Avg RPE</div></div>
+          <div class="review-stat"><div class="review-stat-val">${totalCalsBurned > 0 ? totalCalsBurned.toLocaleString() : '-'}</div><div class="review-stat-label">Calories Burned</div></div>
+          <div class="review-stat"><div class="review-stat-val">${avgMood}</div><div class="review-stat-label">Avg Mood</div></div>
+          <div class="review-stat"><div class="review-stat-val">${avgEnergy}</div><div class="review-stat-label">Avg Energy</div></div>
+          <div class="review-stat"><div class="review-stat-val">${avgSleep}h</div><div class="review-stat-label">Avg Sleep</div></div>
+          <div class="review-stat"><div class="review-stat-val">${prCount}</div><div class="review-stat-label">PRs Hit</div></div>
+          <div class="review-stat"><div class="review-stat-val">${avgHabitPct}</div><div class="review-stat-label">Habit Completion</div></div>
+          <div class="review-stat"><div class="review-stat-val">${Math.round(totalFocus / 60)}h ${totalFocus % 60}m</div><div class="review-stat-label">Focus Time</div></div>
+          <div class="review-stat"><div class="review-stat-val">${totalJournal}</div><div class="review-stat-label">Journal Entries</div></div>
+        </div>
+        <div class="card mb-4" style="padding:14px">
+          <div style="font-weight:600;font-size:0.85rem;margin-bottom:6px">Highlights</div>
+          <div class="text-sm" style="color:var(--text-secondary)">Best week: ${bestWeek}</div>
+          ${totalW > 0 ? `<div class="text-sm" style="color:var(--text-secondary);margin-top:4px">Avg ${(totalW / (currentReviewTab === 'month' ? 4.3 : 52)).toFixed(1)} workouts/week</div>` : ''}
+        </div>
+      `;
+    }
+
+    // =====================================================================
+    // WORKOUT HEATMAP
+    // =====================================================================
+    function renderHeatmap() {
+      const metric = document.getElementById('heatmap-metric').value;
+      const yearSelect = document.getElementById('heatmap-year');
+      const currentYear = new Date().getFullYear();
+
+      // Populate year dropdown if empty
+      if (yearSelect.options.length === 0) {
+        for (let y = currentYear; y >= currentYear - 2; y--) {
+          yearSelect.add(new Option(y, y));
+        }
+      }
+      const year = parseInt(yearSelect.value) || currentYear;
+
+      // Build data map: date -> value
+      const dataMap = {};
+      if (metric === 'workouts') {
+        getWorkouts().forEach(w => { const d = new Date(w.date).toISOString().split('T')[0]; dataMap[d] = (dataMap[d] || 0) + 1; });
+      } else if (metric === 'volume') {
+        getWorkouts().forEach(w => { const d = new Date(w.date).toISOString().split('T')[0]; dataMap[d] = (dataMap[d] || 0) + (w.totalVolume || 0); });
+      } else if (metric === 'checkins') {
+        getCheckins().forEach(c => { dataMap[c.date] = 1; });
+      } else if (metric === 'habits') {
+        const habits = getHabitDefs();
+        const log = getHabitsLog();
+        if (habits.length > 0) {
+          Object.entries(log).forEach(([date, ids]) => {
+            dataMap[date] = Math.round((ids.filter(id => habits.some(h => h.id === id)).length / habits.length) * 100);
+          });
+        }
+      }
+
+      // Determine thresholds
+      const values = Object.values(dataMap).filter(v => v > 0);
+      let t1, t2, t3;
+      if (metric === 'habits') {
+        t1 = 25; t2 = 50; t3 = 75;
+      } else if (values.length > 0) {
+        const maxVal = Math.max(...values);
+        t1 = maxVal * 0.25; t2 = maxVal * 0.5; t3 = maxVal * 0.75;
+      } else {
+        t1 = 1; t2 = 2; t3 = 3;
+      }
+
+      // Build grid: 7 rows (Mon-Sun) x 53 columns (weeks)
+      const jan1 = new Date(year, 0, 1);
+      const dayOfWeek = jan1.getDay(); // 0=Sun
+      const startOffset = dayOfWeek === 0 ? 6 : dayOfWeek - 1; // Mon-based
+      const startDate = new Date(jan1);
+      startDate.setDate(startDate.getDate() - startOffset);
+
+      let cells = '';
+      const today = new Date().toISOString().split('T')[0];
+      for (let row = 0; row < 7; row++) {
+        for (let col = 0; col < 53; col++) {
+          const cellDate = new Date(startDate);
+          cellDate.setDate(startDate.getDate() + col * 7 + row);
+          const dateStr = cellDate.toISOString().split('T')[0];
+          const val = dataMap[dateStr] || 0;
+          let level = '';
+          if (val > 0) {
+            if (val >= t3) level = 'l4';
+            else if (val >= t2) level = 'l3';
+            else if (val >= t1) level = 'l2';
+            else level = 'l1';
+          }
+          const inYear = cellDate.getFullYear() === year;
+          const isFuture = dateStr > today;
+          cells += `<div class="heatmap-cell ${inYear && !isFuture ? level : ''}" data-date="${dateStr}" data-val="${val}" style="${!inYear || isFuture ? 'opacity:0.2' : ''}" onmouseenter="showHeatmapTip(event)" onmouseleave="hideHeatmapTip()"></div>`;
+        }
+      }
+
+      // Month labels
+      let monthLabels = '';
+      let prevMonth = -1;
+      for (let col = 0; col < 53; col++) {
+        const cellDate = new Date(startDate);
+        cellDate.setDate(startDate.getDate() + col * 7);
+        const month = cellDate.getMonth();
+        if (month !== prevMonth && cellDate.getFullYear() === year) {
+          monthLabels += `<span>${cellDate.toLocaleDateString('en-GB', { month: 'short' })}</span>`;
+          prevMonth = month;
+        } else {
+          monthLabels += '<span></span>';
+        }
+      }
+
+      document.getElementById('heatmap-container').innerHTML = `
+        <div class="heatmap-month-labels">${monthLabels}</div>
+        <div style="display:flex">
+          <div class="heatmap-day-labels"><span>Mon</span><span>Wed</span><span>Fri</span><span>Sun</span></div>
+          <div class="heatmap-grid" style="flex:1">${cells}</div>
+        </div>
+      `;
+
+      document.getElementById('heatmap-legend').innerHTML = `
+        <span>Less</span>
+        <div class="heatmap-legend-cell" style="background:var(--bg-secondary)"></div>
+        <div class="heatmap-legend-cell" style="background:var(--green-900)"></div>
+        <div class="heatmap-legend-cell" style="background:var(--green-700)"></div>
+        <div class="heatmap-legend-cell" style="background:var(--green-500)"></div>
+        <div class="heatmap-legend-cell" style="background:var(--green-400)"></div>
+        <span>More</span>
+      `;
+
+      // Summary stats
+      const yearDates = Object.keys(dataMap).filter(d => d.startsWith(year.toString()));
+      const activeDays = yearDates.filter(d => dataMap[d] > 0).length;
+      const totalVal = yearDates.reduce((s, d) => s + dataMap[d], 0);
+      const labels = { workouts: 'workouts', volume: unitLabelShort() + ' total volume', checkins: 'check-ins', habits: 'days tracked' };
+      document.getElementById('heatmap-summary').innerHTML = `
+        <div class="stat-grid">
+          <div class="card sleep-stat-card">
+            <div class="sleep-stat-val">${activeDays}</div>
+            <div class="sleep-stat-label">Active Days in ${year}</div>
+          </div>
+          <div class="card sleep-stat-card">
+            <div class="sleep-stat-val">${metric === 'volume' ? (fromKg(totalVal)/1000).toFixed(1) + 'k' : totalVal}</div>
+            <div class="sleep-stat-label">Total ${labels[metric]}</div>
+          </div>
+        </div>
+      `;
+    }
+
+    let heatmapTipEl = null;
+    function showHeatmapTip(e) {
+      const cell = e.target;
+      const date = cell.dataset.date;
+      const val = cell.dataset.val;
+      const metric = document.getElementById('heatmap-metric').value;
+      const d = new Date(date);
+      const label = d.toLocaleDateString('en-GB', { weekday: 'short', day: 'numeric', month: 'short', year: 'numeric' });
+      let valLabel = val;
+      if (metric === 'volume') valLabel = val > 0 ? displayWeight(parseFloat(val)) : '0';
+      if (metric === 'habits') valLabel = val + '%';
+
+      if (!heatmapTipEl) { heatmapTipEl = document.createElement('div'); heatmapTipEl.className = 'heatmap-tooltip'; document.body.appendChild(heatmapTipEl); }
+      heatmapTipEl.innerHTML = `<strong>${label}</strong><br>${valLabel} ${metric === 'habits' ? 'completion' : metric}`;
+      heatmapTipEl.style.display = 'block';
+      const rect = cell.getBoundingClientRect();
+      heatmapTipEl.style.left = rect.left + 'px';
+      heatmapTipEl.style.top = (rect.top - 50) + 'px';
+    }
+    function hideHeatmapTip() { if (heatmapTipEl) heatmapTipEl.style.display = 'none'; }
+
+    // =====================================================================
+    // PROGRAMME PLANNER
+    // =====================================================================
+    const PROGRAMMES_KEY = 'ironpulse_programmes';
+    function getProgrammes() { try { return JSON.parse(localStorage.getItem(PROGRAMMES_KEY)) || []; } catch { return []; } }
+    function saveProgrammes(p) { localStorage.setItem(PROGRAMMES_KEY, JSON.stringify(p)); }
+
+    function createProgramme() {
+      const name = document.getElementById('prog-name').value.trim();
+      if (!name) { showToast('Enter a programme name'); return; }
+      const weeks = parseInt(document.getElementById('prog-weeks').value);
+      const goal = document.getElementById('prog-goal').value;
+      const sessionsPerWeek = parseInt(document.getElementById('prog-sessions').value) || 4;
+      const deload = document.getElementById('prog-deload').value;
+      const notes = document.getElementById('prog-notes').value.trim();
+
+      const startDate = new Date().toISOString().split('T')[0];
+      const programme = {
+        id: Date.now(),
+        name, weeks, goal, sessionsPerWeek, deload, notes,
+        startDate,
+        active: true,
+        weekLog: {} // weekNumber -> { sessions: count, notes: '' }
+      };
+
+      const programmes = getProgrammes();
+      // Deactivate others
+      programmes.forEach(p => p.active = false);
+      programmes.unshift(programme);
+      saveProgrammes(programmes);
+      document.getElementById('prog-name').value = '';
+      document.getElementById('prog-notes').value = '';
+      showToast('Programme created!');
+      renderProgrammes();
+    }
+
+    function getCurrentWeek(prog) {
+      const start = new Date(prog.startDate);
+      const now = new Date();
+      const diff = Math.floor((now - start) / (1000 * 60 * 60 * 24 * 7));
+      return Math.min(diff + 1, prog.weeks);
+    }
+
+    function getWeekActualSessions(prog, weekNum) {
+      const start = new Date(prog.startDate);
+      const weekStart = new Date(start);
+      weekStart.setDate(start.getDate() + (weekNum - 1) * 7);
+      const weekEnd = new Date(weekStart);
+      weekEnd.setDate(weekStart.getDate() + 7);
+      const workouts = getWorkouts();
+      return workouts.filter(w => {
+        const d = new Date(w.date);
+        return d >= weekStart && d < weekEnd;
+      }).length;
+    }
+
+    function toggleProgrammeActive(id) {
+      const programmes = getProgrammes();
+      const prog = programmes.find(p => p.id === id);
+      if (!prog) return;
+      if (!prog.active) {
+        programmes.forEach(p => p.active = false);
+        prog.active = true;
+      } else {
+        prog.active = false;
+      }
+      saveProgrammes(programmes);
+      renderProgrammes();
+    }
+
+    function deleteProgramme(id) {
+      if (!confirm('Delete this programme?')) return;
+      saveProgrammes(getProgrammes().filter(p => p.id !== id));
+      showToast('Programme deleted');
+      renderProgrammes();
+    }
+
+    function renderProgrammes() {
+      const programmes = getProgrammes();
+      document.getElementById('programme-list').innerHTML = programmes.length > 0
+        ? programmes.map(prog => {
+            const currentWeek = getCurrentWeek(prog);
+            const isActive = prog.active;
+            const totalSessions = prog.weeks * prog.sessionsPerWeek;
+            let actualTotal = 0;
+            let weekCells = '';
+            for (let w = 1; w <= prog.weeks; w++) {
+              const sessions = getWeekActualSessions(prog, w);
+              actualTotal += sessions;
+              const isDeload = (prog.deload === 'last' && w === prog.weeks) || (prog.deload === 'every4' && w % 4 === 0);
+              const isCurrent = w === currentWeek && isActive;
+              const isDone = w < currentWeek;
+              const met = sessions >= prog.sessionsPerWeek;
+              weekCells += `<div class="programme-week ${isCurrent ? 'current' : isDone ? 'done' : ''}" title="Week ${w}: ${sessions}/${prog.sessionsPerWeek} sessions${isDeload ? ' (Deload)' : ''}">
+                ${isDeload ? 'D' : w}
+                ${isDone ? (met ? '✓' : `<span style="font-size:0.6rem">${sessions}</span>`) : ''}
+              </div>`;
+            }
+            const adherence = totalSessions > 0 ? Math.round((actualTotal / (Math.min(currentWeek, prog.weeks) * prog.sessionsPerWeek)) * 100) : 0;
+            const progressPct = Math.round((currentWeek / prog.weeks) * 100);
+
+            return `
+              <div class="programme-card ${isActive ? 'active' : ''}">
+                <div style="display:flex;justify-content:space-between;align-items:center">
+                  <div>
+                    <div style="font-weight:700;font-size:1rem">${prog.name}</div>
+                    <div class="text-muted text-sm">${prog.goal.charAt(0).toUpperCase() + prog.goal.slice(1)} &bull; ${prog.weeks} weeks &bull; ${prog.sessionsPerWeek}x/week</div>
+                  </div>
+                  <div style="display:flex;gap:4px">
+                    <button class="btn btn-sm ${isActive ? 'btn-primary' : 'btn-secondary'}" onclick="toggleProgrammeActive(${prog.id})" style="font-size:0.7rem">${isActive ? 'Active' : 'Start'}</button>
+                    <button class="btn btn-sm btn-secondary" onclick="deleteProgramme(${prog.id})" style="font-size:0.7rem;color:#f87171">Delete</button>
+                  </div>
+                </div>
+                ${prog.notes ? `<div class="text-sm" style="color:var(--text-secondary);margin-top:6px">${prog.notes}</div>` : ''}
+                <div class="programme-week-grid">${weekCells}</div>
+                <div class="programme-progress"><div class="programme-progress-fill" style="width:${progressPct}%"></div></div>
+                <div style="display:flex;justify-content:space-between;margin-top:8px;font-size:0.75rem;color:var(--text-muted)">
+                  <span>Week ${currentWeek} of ${prog.weeks}</span>
+                  <span>Adherence: ${adherence}%</span>
+                  <span>${actualTotal} / ${Math.min(currentWeek, prog.weeks) * prog.sessionsPerWeek} sessions</span>
+                </div>
+              </div>
+            `;
+          }).join('')
+        : '<div class="text-muted text-sm" style="padding:12px">No programmes yet. Create one above to start tracking a training block.</div>';
+    }
+
+    // =====================================================================
+    // NOTIFICATIONS & REMINDERS
+    // =====================================================================
+    const REMINDERS_KEY = 'ironpulse_reminders';
+    function getReminders() { try { return JSON.parse(localStorage.getItem(REMINDERS_KEY)) || { checkin: true, habits: true, workout: false, times: { checkin: '08:00', habits: '20:00', workout: '17:00' } }; } catch { return { checkin: true, habits: true, workout: false, times: { checkin: '08:00', habits: '20:00', workout: '17:00' } }; } }
+    function saveReminders(r) { localStorage.setItem(REMINDERS_KEY, JSON.stringify(r)); }
+
+    async function requestNotificationPermission() {
+      if (!('Notification' in window)) { showToast('Notifications not supported in this browser'); return false; }
+      if (Notification.permission === 'granted') return true;
+      if (Notification.permission === 'denied') { showToast('Notifications blocked. Enable them in browser settings.'); return false; }
+      const result = await Notification.requestPermission();
+      return result === 'granted';
+    }
+
+    function scheduleReminders() {
+      const config = getReminders();
+      // Clear existing scheduled notifications
+      if (window._reminderIntervals) window._reminderIntervals.forEach(id => clearInterval(id));
+      window._reminderIntervals = [];
+
+      if (!('Notification' in window) || Notification.permission !== 'granted') return;
+
+      // Check every minute if it's time for a reminder
+      const checkInterval = setInterval(() => {
+        const now = new Date();
+        const timeStr = now.getHours().toString().padStart(2, '0') + ':' + now.getMinutes().toString().padStart(2, '0');
+        const today = now.toISOString().split('T')[0];
+
+        if (config.checkin && timeStr === config.times.checkin) {
+          const checkins = getCheckins();
+          if (!checkins.some(c => c.date === today)) {
+            new Notification('IronPulse', { body: 'Time for your daily check-in! How are you feeling today?', icon: './icon-192.png' });
+          }
+        }
+        if (config.habits && timeStr === config.times.habits) {
+          const habits = getHabitDefs();
+          const log = getHabitsLog();
+          const todayDone = (log[today] || []).length;
+          if (habits.length > 0 && todayDone < habits.length) {
+            new Notification('IronPulse', { body: `You've completed ${todayDone}/${habits.length} habits today. Keep going!`, icon: './icon-192.png' });
+          }
+        }
+        if (config.workout && timeStr === config.times.workout) {
+          const workouts = getWorkouts();
+          if (!workouts.some(w => new Date(w.date).toISOString().split('T')[0] === today)) {
+            const split = getSplit();
+            const dow = now.getDay();
+            const idx = dow === 0 ? 6 : dow - 1;
+            const plan = split[idx];
+            if (plan) new Notification('IronPulse', { body: `Today's plan: ${plan}. Time to get after it!`, icon: './icon-192.png' });
+          }
+        }
+      }, 60000);
+      window._reminderIntervals.push(checkInterval);
+    }
+
+    async function toggleNotifications() {
+      if (!('Notification' in window)) { showToast('Notifications not supported'); return; }
+      if (Notification.permission === 'granted') {
+        // Toggle off
+        const config = getReminders();
+        config.checkin = !config.checkin;
+        config.habits = !config.habits;
+        config.workout = !config.workout;
+        saveReminders(config);
+        if (!config.checkin && !config.habits && !config.workout) {
+          if (window._reminderIntervals) window._reminderIntervals.forEach(id => clearInterval(id));
+          showToast('Notifications disabled');
+        } else {
+          scheduleReminders();
+          showToast('Notifications enabled');
+        }
+      } else {
+        const granted = await requestNotificationPermission();
+        if (granted) {
+          const config = getReminders();
+          config.checkin = true;
+          config.habits = true;
+          saveReminders(config);
+          scheduleReminders();
+          showToast('Notifications enabled! Check-in at 8am, habits at 8pm.');
+        }
+      }
+    }
+
+    // =====================================================================
+    // DATA VISUALISATION DASHBOARD
+    // =====================================================================
+    let vizMuscleChart = null, vizMoodVolChart = null, vizMacroChart = null, vizDayChart = null;
+
+    function renderDataViz() {
+      renderVizMuscleGroup();
+      renderVizMoodVol();
+      renderVizHabitCalendar();
+      renderVizMacroTrend();
+      renderVizTrainingDays();
+    }
+
+    function renderVizMuscleGroup() {
+      const workouts = getWorkouts().slice(0, 100);
+      const volByGroup = {};
+      workouts.forEach(w => {
+        if (!w.exercises) return;
+        const cat = w.category || 'other';
+        w.exercises.forEach(ex => {
+          if (!ex.sets) return;
+          const vol = ex.sets.reduce((s, set) => s + ((set.weight || 0) * (set.reps || 0)), 0);
+          volByGroup[cat] = (volByGroup[cat] || 0) + vol;
+        });
+      });
+
+      if (vizMuscleChart) vizMuscleChart.destroy();
+      const ctx = document.getElementById('vizMuscleChart').getContext('2d');
+      const labels = Object.keys(volByGroup).map(k => k.charAt(0).toUpperCase() + k.slice(1));
+      const data = Object.values(volByGroup).map(v => Math.round(fromKg(v)));
+      const colors = ['#22c55e', '#16a34a', '#15803d', '#166534', '#14532d', '#fbbf24', '#f97316', '#ef4444', '#a855f7', '#3b82f6'];
+      vizMuscleChart = new Chart(ctx, {
+        type: 'doughnut',
+        data: { labels, datasets: [{ data, backgroundColor: colors.slice(0, labels.length), borderWidth: 0 }] },
+        options: { responsive: true, maintainAspectRatio: false, plugins: { legend: { position: 'bottom', labels: { color: '#9ca3af', padding: 12, font: { size: 11 } } } } }
+      });
+    }
+
+    function renderVizMoodVol() {
+      const workouts = getWorkouts().filter(w => w.preWorkout.mood && w.totalVolume > 0).slice(0, 60);
+      if (vizMoodVolChart) vizMoodVolChart.destroy();
+      const ctx = document.getElementById('vizMoodVolChart').getContext('2d');
+      vizMoodVolChart = new Chart(ctx, {
+        type: 'scatter',
+        data: {
+          datasets: [{
+            label: 'Mood vs Volume',
+            data: workouts.map(w => ({ x: w.preWorkout.mood, y: Math.round(fromKg(w.totalVolume)) })),
+            backgroundColor: 'rgba(34,197,94,0.6)',
+            pointRadius: 5
+          }]
+        },
+        options: {
+          responsive: true, maintainAspectRatio: false,
+          scales: {
+            x: { title: { display: true, text: 'Pre-Workout Mood', color: '#9ca3af' }, min: 0, max: 10, ticks: { color: '#9ca3af' }, grid: { color: 'rgba(255,255,255,0.05)' } },
+            y: { title: { display: true, text: `Volume (${unitLabelShort()})`, color: '#9ca3af' }, ticks: { color: '#9ca3af' }, grid: { color: 'rgba(255,255,255,0.05)' } }
+          },
+          plugins: { legend: { display: false } }
+        }
+      });
+    }
+
+    function renderVizHabitCalendar() {
+      const habits = getHabitDefs();
+      const log = getHabitsLog();
+      if (habits.length === 0) {
+        document.getElementById('viz-habit-calendar').innerHTML = '<div class="text-muted text-sm">Add habits to see completion calendar.</div>';
+        return;
+      }
+
+      const today = new Date();
+      const days = 90;
+      let html = '<div style="display:grid;grid-template-columns:repeat(30,1fr);gap:2px">';
+      for (let i = days - 1; i >= 0; i--) {
+        const d = new Date(today);
+        d.setDate(today.getDate() - i);
+        const dateStr = d.toISOString().split('T')[0];
+        const done = (log[dateStr] || []).filter(id => habits.some(h => h.id === id)).length;
+        const pct = Math.round((done / habits.length) * 100);
+        let bg = 'var(--bg-secondary)';
+        if (pct >= 80) bg = 'var(--green-400)';
+        else if (pct >= 50) bg = 'var(--green-700)';
+        else if (pct > 0) bg = 'var(--green-900)';
+        html += `<div style="aspect-ratio:1;border-radius:2px;background:${bg}" title="${d.toLocaleDateString('en-GB', { day: 'numeric', month: 'short' })}: ${pct}%"></div>`;
+      }
+      html += '</div>';
+      html += '<div style="display:flex;gap:8px;margin-top:8px;font-size:0.65rem;color:var(--text-muted)"><span>Last 90 days</span><span style="margin-left:auto">0%</span><div style="width:12px;height:12px;border-radius:2px;background:var(--bg-secondary)"></div><div style="width:12px;height:12px;border-radius:2px;background:var(--green-900)"></div><div style="width:12px;height:12px;border-radius:2px;background:var(--green-700)"></div><div style="width:12px;height:12px;border-radius:2px;background:var(--green-400)"></div><span>100%</span></div>';
+      document.getElementById('viz-habit-calendar').innerHTML = html;
+    }
+
+    function renderVizMacroTrend() {
+      const macros = getMacros().slice(0, 30).reverse();
+      if (vizMacroChart) vizMacroChart.destroy();
+      const ctx = document.getElementById('vizMacroChart').getContext('2d');
+      vizMacroChart = new Chart(ctx, {
+        type: 'line',
+        data: {
+          labels: macros.map(m => { const d = new Date(m.date); return d.toLocaleDateString('en-GB', { day: 'numeric', month: 'short' }); }),
+          datasets: [
+            { label: 'Protein', data: macros.map(m => m.protein || 0), borderColor: '#22c55e', tension: 0.3, pointRadius: 2 },
+            { label: 'Carbs', data: macros.map(m => m.carbs || 0), borderColor: '#3b82f6', tension: 0.3, pointRadius: 2 },
+            { label: 'Fat', data: macros.map(m => m.fat || 0), borderColor: '#f97316', tension: 0.3, pointRadius: 2 },
+            { label: 'Calories', data: macros.map(m => m.calories || 0), borderColor: '#a855f7', tension: 0.3, pointRadius: 2, yAxisID: 'y1' }
+          ]
+        },
+        options: {
+          responsive: true, maintainAspectRatio: false,
+          scales: {
+            y: { title: { display: true, text: 'Grams', color: '#9ca3af' }, ticks: { color: '#9ca3af' }, grid: { color: 'rgba(255,255,255,0.05)' } },
+            y1: { position: 'right', title: { display: true, text: 'Calories', color: '#9ca3af' }, ticks: { color: '#9ca3af' }, grid: { display: false } },
+            x: { ticks: { color: '#9ca3af', maxRotation: 45 }, grid: { display: false } }
+          },
+          plugins: { legend: { labels: { color: '#9ca3af', padding: 12, font: { size: 11 } } } }
+        }
+      });
+    }
+
+    function renderVizTrainingDays() {
+      const workouts = getWorkouts();
+      const dayCounts = [0, 0, 0, 0, 0, 0, 0]; // Mon-Sun
+      workouts.forEach(w => {
+        const d = new Date(w.date);
+        const dow = d.getDay();
+        const idx = dow === 0 ? 6 : dow - 1;
+        dayCounts[idx]++;
+      });
+      if (vizDayChart) vizDayChart.destroy();
+      const ctx = document.getElementById('vizDayChart').getContext('2d');
+      vizDayChart = new Chart(ctx, {
+        type: 'bar',
+        data: {
+          labels: ['Mon', 'Tue', 'Wed', 'Thu', 'Fri', 'Sat', 'Sun'],
+          datasets: [{ data: dayCounts, backgroundColor: dayCounts.map((v, i) => v === Math.max(...dayCounts) ? '#22c55e' : 'rgba(34,197,94,0.3)'), borderRadius: 6 }]
+        },
+        options: {
+          responsive: true, maintainAspectRatio: false,
+          plugins: { legend: { display: false } },
+          scales: {
+            y: { beginAtZero: true, ticks: { color: '#9ca3af', stepSize: 1 }, grid: { color: 'rgba(255,255,255,0.05)' } },
+            x: { ticks: { color: '#9ca3af' }, grid: { display: false } }
+          }
+        }
+      });
+    }
+
+    // =====================================================================
     // EXPORT / IMPORT (updated to include all new data)
     // =====================================================================
     function exportData() {
@@ -7237,7 +8329,9 @@
         journal: getJournalEntries(),
         reflections: getReflections(),
         focus: getFocusSessions(),
-        priorities: getPriorities()
+        priorities: getPriorities(),
+        customExercises: getCustomExercises(),
+        programmes: getProgrammes()
       }, null, 2);
       const blob = new Blob([data], { type: 'application/json' });
       const url = URL.createObjectURL(blob);
@@ -7376,6 +8470,18 @@
               });
               savePriorities(existing);
             }
+            if (data.customExercises && Array.isArray(data.customExercises)) {
+              const existing = getCustomExercises();
+              const existingIds = new Set(existing.map(c => c.id));
+              const newEx = data.customExercises.filter(c => !existingIds.has(c.id));
+              saveCustomExercises([...existing, ...newEx]);
+            }
+            if (data.programmes && Array.isArray(data.programmes)) {
+              const existing = getProgrammes();
+              const existingIds = new Set(existing.map(p => p.id));
+              const newP = data.programmes.filter(p => !existingIds.has(p.id));
+              saveProgrammes([...existing, ...newP]);
+            }
             showToast('Data imported!');
           }
           renderDashboard();
@@ -7420,6 +8526,9 @@
       }
 
       renderDashboard();
+
+      // Start notification reminders
+      scheduleReminders();
 
       // Register Service Worker for PWA
       if ('serviceWorker' in navigator) {
